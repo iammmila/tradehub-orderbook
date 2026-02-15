@@ -6,24 +6,22 @@ import com.ab.orderservice.common.exception.NotFoundException;
 import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
 import com.ab.orderservice.orders.dto.order.OrderResponse;
 import com.ab.orderservice.orders.model.Order;
-import com.ab.orderservice.orders.model.User;
+import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.orders.model.enums.OrderSide;
 import com.ab.orderservice.orders.model.enums.OrderStatus;
 import com.ab.orderservice.orders.repository.OrderRepository;
-import com.ab.orderservice.orders.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ab.orderservice.auth.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
 
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
         User user = userRepository.findById(userId)

@@ -1,6 +1,7 @@
 package com.ab.orderservice.orders.model;
 
 
+import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.orders.model.enums.OrderSide;
 import com.ab.orderservice.orders.model.enums.OrderStatus;
 import jakarta.persistence.*;
