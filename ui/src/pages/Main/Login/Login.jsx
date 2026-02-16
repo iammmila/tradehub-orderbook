@@ -1,11 +1,17 @@
-import React, { useState } from 'react'
+import React, { useContext } from 'react'
 import './Login.scss'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../../../api/auth';
+import { VscEye, VscEyeClosed } from "react-icons/vsc";
+import { MainContext } from '../../../context/ContextProvider';
+
 function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const { username, setUsername,
+    password, setPassword,
+    showPassword, setShowPassword,
+    error, setError
+  } = useContext(MainContext);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -15,7 +21,7 @@ function Login() {
     try {
       const data = await login({ username, password });
 
-      const token = data.token ?? data; // supports both response styles
+      const token = data.token ?? data;
       localStorage.setItem("token", token);
 
       navigate("/", { replace: true });
@@ -38,18 +44,29 @@ function Login() {
             placeholder="Username" required />
         </div>
 
-        <div className="input-group">
+        <div className="input-group password-group">
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            placeholder="Password" required />
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            required
+          />
+
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(prev => !prev)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <VscEyeClosed /> : <VscEye />}
+          </button>
         </div>
 
         <button type="submit" className="auth-btn">Sign In</button>
         {error && <p style={{ color: "red" }}>{error}</p>}
         <div className="auth-footer">
-          <span>Don't have an account? <a href="/register">Sign up</a></span>
+          <span>Don't have an account? <Link to="/register">Sign up</Link></span>
         </div>
       </form>
     </div>

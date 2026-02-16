@@ -48,6 +48,31 @@
             }
         }
 
+        .password-group {
+            position: relative;
+
+            input {
+                padding-right: 44px;
+            }
+
+            .password-toggle {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: transparent;
+                border: none;
+                padding: 0;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+
+                svg {
+                    font-size: 20px;
+                }
+            }
+        }
+
         .auth-btn {
             margin-top: 1rem;
             padding: 12px;
@@ -60,7 +85,7 @@
             transition: background 0.3s ease;
 
             &:hover {
-                background: #333;
+                background: #6c5ce792;
             }
         }
 

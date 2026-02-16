@@ -1,10 +1,16 @@
-import React, { useState } from 'react'
+import React, { useContext} from 'react'
 import './Register.scss'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../../../api/auth';
+import { VscEye, VscEyeClosed } from "react-icons/vsc";
+import { MainContext } from '../../../context/ContextProvider';
 function Register() {
-  const [form, setForm] = useState({ username: "", password: "", email: "" });
-  const [error, setError] = useState("");
+  const {
+    form, setForm,
+    showPassword, setShowPassword,
+    error, setError
+  } = useContext(MainContext);
+
   const navigate = useNavigate();
 
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -63,20 +69,30 @@ function Register() {
             required />
         </div>
 
-        <div className="input-group">
+        <div className="input-group password-group">
           <input
             value={form.password}
             onChange={onChange}
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Password"
-            required />
+            required
+          />
+
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(prev => !prev)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <VscEyeClosed /> : <VscEye />}
+          </button>
         </div>
 
         <button type="submit" className="auth-btn">Register</button>
         {error && <p style={{ color: "red" }}>{error}</p>}
         <div className="auth-footer">
-          <span>Already have an account? <a href="/login">Log in</a></span>
+          <span>Already have an account? <Link to="/login">Log in</Link></span>
         </div>
       </form>
     </div>
