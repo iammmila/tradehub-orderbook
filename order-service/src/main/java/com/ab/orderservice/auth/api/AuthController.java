@@ -6,6 +6,7 @@ import com.ab.orderservice.auth.dto.RegisterRequest;
 import com.ab.orderservice.auth.jwt.JwtService;
 import com.ab.orderservice.auth.service.AuthService;
 import com.ab.orderservice.auth.userdetails.CustomUserDetailsService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,7 +47,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(
-            @RequestBody RegisterRequest request) {
+            @Valid @RequestBody RegisterRequest request) {
 
         authService.register(request);
         return ResponseEntity.ok("User registered successfully");

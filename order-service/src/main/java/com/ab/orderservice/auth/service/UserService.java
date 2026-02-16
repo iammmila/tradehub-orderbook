@@ -1,6 +1,6 @@
 package com.ab.orderservice.auth.service;
 
-import com.ab.orderservice.common.exception.ErrorCode;
+import com.ab.orderservice.common.exception.enums.ErrorCode;
 import com.ab.orderservice.common.exception.NotFoundException;
 import com.ab.orderservice.auth.dto.user.UserResponse;
 import com.ab.orderservice.auth.model.User;

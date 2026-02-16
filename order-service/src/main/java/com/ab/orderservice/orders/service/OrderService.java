@@ -1,7 +1,7 @@
 package com.ab.orderservice.orders.service;
 
 import com.ab.orderservice.common.exception.BadRequestException;
-import com.ab.orderservice.common.exception.ErrorCode;
+import com.ab.orderservice.common.exception.enums.ErrorCode;
 import com.ab.orderservice.common.exception.NotFoundException;
 import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
 import com.ab.orderservice.orders.dto.order.OrderResponse;

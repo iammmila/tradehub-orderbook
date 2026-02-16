@@ -25,6 +25,8 @@ function Login() {
       localStorage.setItem("token", token);
 
       navigate("/", { replace: true });
+      setUsername("");
+      setPassword("");
     } catch (err) {
       setError(err?.response?.data?.message || "Login failed");
     }

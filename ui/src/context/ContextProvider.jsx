@@ -16,6 +16,7 @@ function ContextProvider({ children }) {
         firstName: "",
         lastName: ""
     });
+    const [fieldErrors, setFieldErrors] = useState({});
 
     const values = {
         username, setUsername,
@@ -23,7 +24,7 @@ function ContextProvider({ children }) {
         showPassword, setShowPassword,
         error, setError,
         form, setForm,
-
+        fieldErrors, setFieldErrors
     }
     return (
         <MainContext.Provider value={values}>

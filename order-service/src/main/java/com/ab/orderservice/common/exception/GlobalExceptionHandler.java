@@ -1,5 +1,6 @@
 package com.ab.orderservice.common.exception;
 
+import com.ab.orderservice.common.exception.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;

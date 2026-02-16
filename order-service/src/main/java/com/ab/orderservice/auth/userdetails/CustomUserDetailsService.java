@@ -3,7 +3,7 @@ package com.ab.orderservice.auth.userdetails;
 
 import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.auth.repository.UserRepository;
-import com.ab.orderservice.common.exception.ErrorCode;
+import com.ab.orderservice.common.exception.enums.ErrorCode;
 import com.ab.orderservice.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

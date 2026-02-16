@@ -5,6 +5,9 @@ import com.ab.orderservice.auth.model.Role;
 import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.auth.repository.RoleRepository;
 import com.ab.orderservice.auth.repository.UserRepository;
+import com.ab.orderservice.common.exception.BadRequestException;
+import com.ab.orderservice.common.exception.NotFoundException;
+import com.ab.orderservice.common.exception.enums.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,15 +24,15 @@ public class AuthService {
     public void register(RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new BadRequestException(ErrorCode.USER_USERNAME_ALREADY_EXISTS);
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new BadRequestException(ErrorCode.USER_EMAIL_ALREADY_EXISTS);
         }
 
         Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ROLE_NOT_FOUND));
 
         User user = User.builder()
                 .username(request.getUsername().trim())

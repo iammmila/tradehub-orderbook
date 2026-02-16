@@ -1,5 +1,6 @@
 package com.ab.orderservice.common.exception;
 
+import com.ab.orderservice.common.exception.enums.ErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

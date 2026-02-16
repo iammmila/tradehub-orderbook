@@ -7,7 +7,8 @@ import com.ab.orderservice.auth.model.Role;
 import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.auth.repository.RoleRepository;
 import com.ab.orderservice.auth.repository.UserRepository;
-import com.ab.orderservice.common.exception.ErrorCode;
+import com.ab.orderservice.common.exception.BadRequestException;
+import com.ab.orderservice.common.exception.enums.ErrorCode;
 import com.ab.orderservice.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class RoleService {
         String formatted = normalizeRoleName(request.getName()); // ROLE_ADMIN etc.
 
         if (roleRepository.findByName(formatted).isPresent()) {
-            throw new RuntimeException("Role already exists");
+            throw new BadRequestException(ErrorCode.ROLE_ALREADY_EXISTS);
         }
 
         roleRepository.save(Role.builder()
@@ -51,7 +52,7 @@ public class RoleService {
         String formattedRole = normalizeRoleName(request.getRoleName());
 
         Role role = roleRepository.findByName(formattedRole)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ROLE_NOT_FOUND));
 
         user.setRole(role);
         userRepository.save(user);
