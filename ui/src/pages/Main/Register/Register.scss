@@ -1,0 +1,86 @@
+// Importing the base styles or duplicating for isolation
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+
+    .auth-card {
+        display: flex;
+        flex-direction: column;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 450px; // Slightly wider for name row
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+
+        h2 {
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        p {
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #555;
+        }
+
+        .name-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+
+            input {
+                width: 50%;
+            }
+
+            // Split row
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-sizing: border-box;
+
+            &:focus {
+                outline: none;
+                border-color: #8ec5fc;
+            }
+        }
+
+        .auth-btn {
+            background: #6c5ce7;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+
+            &:hover {
+                opacity: 0.9;
+            }
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+
+            a {
+                color: #6c5ce7;
+                text-decoration: none;
+            }
+        }
+    }
+}

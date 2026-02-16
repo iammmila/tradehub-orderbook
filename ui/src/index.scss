@@ -1,0 +1,31 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style-type: none;
+  text-decoration: none;
+  font-family: "Poppins", sans-serif !important;
+}
+
+html,
+body {
+  scrollbar-width: none;
+  font-family: "Poppins", sans-serif !important;
+}
+
+button {
+  font-family: "Poppins", sans-serif !important;
+}
+
+input {
+  font-family: "Poppins", sans-serif;
+  outline: none;
+
+  &:focus {
+    // box-shadow: 0 0 0 3px rgba(122, 90, 248, 0.15)
+  }
+}
+
+a {
+  color: #464255;
+}

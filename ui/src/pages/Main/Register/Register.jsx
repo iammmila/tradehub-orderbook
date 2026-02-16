@@ -1,0 +1,86 @@
+import React, { useState } from 'react'
+import './Register.scss'
+import { useNavigate } from 'react-router-dom';
+import { register } from '../../../api/auth';
+function Register() {
+  const [form, setForm] = useState({ username: "", password: "", email: "" });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      await register(form);
+      navigate("/login", { replace: true });
+    } catch (err) {
+      setError(err?.response?.data?.message || "Register failed");
+    }
+  };
+  return (
+    <div className="auth-container">
+      <form className="auth-card" onSubmit={handleSubmit}>
+        <h2>Create Account</h2>
+        <p>Join us today!</p>
+
+        <div className="name-row">
+          <input
+            value={form.firstName}
+            onChange={onChange}
+            name="firstName"
+            type="text"
+            placeholder="First Name"
+            required />
+          <input
+            value={form.lastName}
+            onChange={onChange}
+            name="lastName"
+            type="text"
+            placeholder="Last Name"
+            required />
+        </div>
+
+        <div className="input-group">
+          <input
+            value={form.username}
+            onChange={onChange}
+            name="username"
+            type="text"
+            placeholder="Username"
+            required />
+        </div>
+
+        <div className="input-group">
+          <input
+            value={form.email}
+            onChange={onChange}
+            name="email"
+            type="email"
+            placeholder="Email"
+            required />
+        </div>
+
+        <div className="input-group">
+          <input
+            value={form.password}
+            onChange={onChange}
+            name="password"
+            type="password"
+            placeholder="Password"
+            required />
+        </div>
+
+        <button type="submit" className="auth-btn">Register</button>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <div className="auth-footer">
+          <span>Already have an account? <a href="/login">Log in</a></span>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+export default Register
