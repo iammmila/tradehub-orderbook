@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../../../api/auth';
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { MainContext } from '../../../context/ContextProvider';
+import { Helmet } from 'react-helmet';
 
 function Login() {
   const { username, setUsername,
@@ -24,7 +25,7 @@ function Login() {
       const token = data.token ?? data;
       localStorage.setItem("token", token);
 
-      navigate("/", { replace: true });
+      navigate("/app", { replace: true });
       setUsername("");
       setPassword("");
     } catch (err) {
@@ -34,6 +35,10 @@ function Login() {
 
   return (
     <div className="auth-container">
+      <Helmet>
+        <title>Login | Trading</title>
+        <meta name='description' content='It is Login page of Trading Application' />
+      </Helmet>
       <form className="auth-card" onSubmit={handleSubmit}>
         <h2>Welcome Back</h2>
         <p>Please enter your details</p>

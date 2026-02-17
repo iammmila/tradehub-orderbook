@@ -1,12 +1,16 @@
 import React from 'react'
-import './Home.scss'
-import { Helmet } from 'react-helmet-async'
-function Home() {
+import './Landing.scss'
+import { Helmet } from 'react-helmet'
+import { isAuthenticated } from '../../../api/auth';
+import { Navigate } from 'react-router-dom';
+
+function Landing() {
+  if (isAuthenticated()) return <Navigate to="/app" replace />;
   return (
     <section className="hero-section">
       <Helmet>
-        <title>Home | Trading</title>
-        <meta name='description' content='It is Home page of Trading Application' />
+        <title>Landing | Trading</title>
+        <meta name='description' content='It is Landing page of Trading Application' />
       </Helmet>
 
       <div className="hero-content">
@@ -20,4 +24,4 @@ function Home() {
   )
 }
 
-export default Home
+export default Landing

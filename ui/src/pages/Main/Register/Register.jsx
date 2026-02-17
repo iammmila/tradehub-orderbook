@@ -5,16 +5,16 @@ import { register } from '../../../api/auth';
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { MainContext } from '../../../context/ContextProvider';
 import { registerSchema } from "../../../schema/registerSchema";
+import { Helmet } from 'react-helmet';
 
 function Register() {
   const {
     form, setForm,
     showPassword, setShowPassword,
-    error, setError,
     fieldErrors, setFieldErrors
   } = useContext(MainContext);
   const navigate = useNavigate();
-
+  const [error, setError] = React.useState("");
   const validateOneField = async (name, value) => {
     try {
       await registerSchema.validateAt(name, { ...form, [name]: value });
@@ -86,6 +86,10 @@ function Register() {
   };
   return (
     <div className="auth-container">
+      <Helmet>
+        <title>Register | Trading</title>
+        <meta name='description' content='It is Register page of Trading Application' />
+      </Helmet>
       <form className="auth-card" onSubmit={handleSubmit}>
         <h2>Create Account</h2>
         <p>Join us today!</p>
