@@ -1,0 +1,49 @@
+.features-section {
+    padding: 100px 20px;
+    background: #0b0e14;
+    text-align: center;
+
+    h2 {
+        font-size: 3rem;
+        color: #fff;
+        margin-bottom: 50px;
+
+        span {
+            background: linear-gradient(90deg, #00ff88 0%, #00e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 40px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: transform 0.3s ease;
+
+        &:hover {
+            transform: translateY(-10px);
+            border-color: #00ff88;
+        }
+
+        h3 {
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+    }
+}

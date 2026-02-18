@@ -1,8 +1,8 @@
 .footer {
-    background: #0a0a0a;
     padding: 2rem 0;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     margin-top: auto;
+    background: #0b0e14;
 
     .footer-content {
         width: 90%;
@@ -11,7 +11,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        color: #666;
+        color: white;
         font-size: 0.9rem;
     }
 
@@ -20,7 +20,7 @@
         cursor: pointer;
 
         &:hover {
-            color: #fff;
+            color: #00ff88;
         }
     }
 }

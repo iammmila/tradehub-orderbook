@@ -6,6 +6,7 @@ import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { MainContext } from '../../../context/ContextProvider';
 import { registerSchema } from "../../../schema/registerSchema";
 import { Helmet } from 'react-helmet';
+import { FiArrowLeft } from 'react-icons/fi';
 
 function Register() {
   const {
@@ -91,6 +92,14 @@ function Register() {
         <meta name='description' content='It is Register page of Trading Application' />
       </Helmet>
       <form className="auth-card" onSubmit={handleSubmit}>
+        <button
+          type="button"
+          className="back-btn"
+          onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
+          aria-label="Back to landing"
+        >
+          <FiArrowLeft />
+        </button>
         <h2>Create Account</h2>
         <p>Join us today!</p>
 
@@ -112,8 +121,8 @@ function Register() {
             placeholder="Last Name"
             required />
         </div>
-        {fieldErrors.firstName && <small className="error">{fieldErrors.firstName}</small>}
-        {fieldErrors.lastName && <small className="error">{fieldErrors.lastName}</small>}
+        {fieldErrors.firstName && <small style={{ color: "red" }} className="error">{fieldErrors.firstName}</small>}
+        {fieldErrors.lastName && <small style={{ color: "red" }} className="error">{fieldErrors.lastName}</small>}
 
         <div className="input-group">
           <input
@@ -124,7 +133,7 @@ function Register() {
             type="text"
             placeholder="Username"
             required />
-          {fieldErrors.username && <small className="error">{fieldErrors.username}</small>}
+          {fieldErrors.username && <small style={{ color: "red" }} className="error">{fieldErrors.username}</small>}
         </div>
 
         <div className="input-group">
@@ -136,7 +145,7 @@ function Register() {
             type="email"
             placeholder="Email"
             required />
-          {fieldErrors.email && <small className="error">{fieldErrors.email}</small>}
+          {fieldErrors.email && <small style={{ color: "red" }} className="error">{fieldErrors.email}</small>}
         </div>
 
         <div className="input-group password-group">
@@ -159,7 +168,7 @@ function Register() {
             {showPassword ? <VscEyeClosed /> : <VscEye />}
           </button>
         </div>
-        {fieldErrors.password && <small className="error">{fieldErrors.password}</small>}
+        {fieldErrors.password && <small style={{ color: "red" }} className="error">{fieldErrors.password}</small>}
         <button
           type="submit"
           className="auth-btn"

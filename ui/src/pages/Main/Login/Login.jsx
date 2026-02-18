@@ -5,6 +5,7 @@ import { login } from '../../../api/auth';
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { MainContext } from '../../../context/ContextProvider';
 import { Helmet } from 'react-helmet';
+import { FiArrowLeft } from "react-icons/fi";
 
 function Login() {
   const { username, setUsername,
@@ -39,7 +40,16 @@ function Login() {
         <title>Login | Trading</title>
         <meta name='description' content='It is Login page of Trading Application' />
       </Helmet>
+     
       <form className="auth-card" onSubmit={handleSubmit}>
+        <button
+          type="button"
+          className="back-btn"
+          onClick={() => navigate("/", { replace: true })}
+          aria-label="Back to landing"
+        >
+          <FiArrowLeft />
+        </button>
         <h2>Welcome Back</h2>
         <p>Please enter your details</p>
 

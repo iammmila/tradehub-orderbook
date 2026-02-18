@@ -5,14 +5,14 @@ import Login from "../pages/Main/Login/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import { Navigate } from "react-router-dom";
 import PublicRoot from "../pages/Main/PublicRoot/PublicRoot";
-import Landing from "../pages/Main/Landing/Landing";
+import LandingPage from "../pages/Main/LandingPage/LandingPage";
 
 export const ROUTES = [
   // PUBLIC
   {
     path: "/",
     element: <PublicRoot />,
-    children: [{ index: true, element: <Landing /> }],
+    children: [{ index: true, element: <LandingPage /> }],
   },
 
   // PROTECTED USER APP

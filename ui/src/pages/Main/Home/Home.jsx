@@ -12,9 +12,9 @@ function Home() {
       <div className="hero-content">
         <h1>Trade the Future <br /> <span>with Precision.</span></h1>
         <p>Real-time analytics, lightning-fast execution, and institutional-grade security for the modern trader.</p>
-        <div className="hero-btns">
+        {/* <div className="hero-btns">
           <button className="get-started">Open Free Account</button>
-        </div>
+        </div> */}
       </div>
     </section>
   )
