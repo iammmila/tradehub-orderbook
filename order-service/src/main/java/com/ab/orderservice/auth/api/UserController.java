@@ -1,5 +1,7 @@
 package com.ab.orderservice.auth.api;
 
+import com.ab.orderservice.auth.dto.UpdateMeRequest;
+import com.ab.orderservice.auth.dto.user.ChangePasswordRequest;
 import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
 import com.ab.orderservice.orders.dto.order.OrderResponse;
 import com.ab.orderservice.auth.dto.user.UserResponse;
@@ -11,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,10 +22,30 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-@PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('USER','ADMIN')")
 public class UserController {
     private final UserService userService;
     private final OrderService orderService;
+
+    //GET /api/v1/users/me -> 200 ok
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> me(Authentication authentication) {
+        String username = authentication.getName(); // comes from JWT subject
+        return ResponseEntity.ok(userService.getMe(username));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateMe(Authentication auth,
+                                                 @Valid @RequestBody UpdateMeRequest req) {
+        return ResponseEntity.ok(userService.updateMe(auth.getName(), req));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> changePassword(Authentication auth,
+                                               @Valid @RequestBody ChangePasswordRequest req) {
+        userService.changePassword(auth.getName(), req);
+        return ResponseEntity.noContent().build();
+    }
 
     // GET /api/v1/users -> 200 OK
     @GetMapping

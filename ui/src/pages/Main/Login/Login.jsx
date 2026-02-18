@@ -11,7 +11,7 @@ function Login() {
   const { username, setUsername,
     password, setPassword,
     showPassword, setShowPassword,
-    error, setError
+    error, setError, fetchMe
   } = useContext(MainContext);
 
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ function Login() {
 
       const token = data.token ?? data;
       localStorage.setItem("token", token);
-
+      await fetchMe();
       navigate("/app", { replace: true });
       setUsername("");
       setPassword("");

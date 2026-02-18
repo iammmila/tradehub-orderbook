@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import './Navbar.scss'
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FiMoon, FiSun } from "react-icons/fi";
+import UserMenu from '../UserMenu/UserMenu';
+import { MainContext } from '../../context/ContextProvider';
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { user } = useContext(MainContext);
   const sections = useMemo(
     () => [
       { id: "home", label: "Home" },
@@ -17,18 +18,7 @@ function Navbar() {
     []
   );
   const [activeSection, setActiveSection] = useState("home");
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "dark";
-  });
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
   useEffect(() => {
     if (location.pathname !== "/") return;
 
@@ -96,9 +86,6 @@ function Navbar() {
         </ul>
 
         <div className="nav-actions">
-          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === "dark" ? <FiSun /> : <FiMoon />}
-          </button>
           {!isLoggedIn ? (
             <>
               <button className="btn-secondary" onClick={() => navigate("/login")}>
@@ -109,14 +96,7 @@ function Navbar() {
               </button>
             </>
           ) : (
-            <>
-              <button className="btn-secondary" onClick={() => navigate("/app")}>
-                Dashboard
-              </button>
-              <button className="btn-primary" onClick={handleLogout}>
-                Logout
-              </button>
-            </>
+            user ? <UserMenu /> : null
           )}
         </div>
       </div>

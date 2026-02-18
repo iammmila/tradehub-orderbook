@@ -6,7 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import { Navigate } from "react-router-dom";
 import PublicRoot from "../pages/Main/PublicRoot/PublicRoot";
 import LandingPage from "../pages/Main/LandingPage/LandingPage";
-
+import Settings from "../pages/Main/Settings/Settings";
 export const ROUTES = [
   // PUBLIC
   {
@@ -22,7 +22,10 @@ export const ROUTES = [
       {
         path: "/app",
         element: <MainRoot />,
-        children: [{ index: true, element: <Home /> }],
+        children: [
+          { index: true, element: <Home /> },
+          { path: "settings", element: <Settings /> },
+        ],
       },
     ],
   },

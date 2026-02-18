@@ -75,29 +75,6 @@
         display: flex;
         gap: 1rem;
 
-        .theme-toggle {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            border: none;
-            background: rgba(255, 255, 255, 0.06);
-            display: grid;
-            place-items: center;
-            cursor: pointer;
-            transition: 0.25s;
-
-            svg {
-                font-size: 18px;
-                color: white;
-            }
-
-            &:hover {
-                background: rgba(255, 255, 255, 0.12);
-                box-shadow: 0 0 18px rgba(0, 255, 136, 0.25);
-                transform: translateY(-1px);
-            }
-        }
-
         .btn-secondary {
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
