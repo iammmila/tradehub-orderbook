@@ -9,10 +9,10 @@ const UserMenu = () => {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
     const wrapperRef = useRef(null);
-  const cap = (s = "") => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
+    const cap = (s = "") => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 
     const name = user ? `${cap(user.firstName)} ${cap(user.lastName)}` : "User";
-    const role = user?.role?.name || user?.role || "Trader"; // depends on backend response
+    const role = user?.role?.name || user?.role || "Trader";
     const initials = user ? `${user.firstName.slice(0, 1).toUpperCase()}${user.lastName.slice(0, 1).toUpperCase()}` : user.username;
     // close on outside click + ESC
     useEffect(() => {

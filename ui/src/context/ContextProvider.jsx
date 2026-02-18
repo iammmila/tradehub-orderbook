@@ -41,6 +41,7 @@ function ContextProvider({ children }) {
             setLoadingUser(false);
         }
     };
+    
     // load user on first app load if token exists
     useEffect(() => {
         fetchMe();

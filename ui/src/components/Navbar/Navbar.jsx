@@ -46,6 +46,7 @@ function Navbar() {
     elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [sections, location.pathname]);
+  
   const scrollTo = (id) => {
     if (location.pathname !== "/") {
       navigate("/", { replace: false });
@@ -58,10 +59,6 @@ function Navbar() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login", { replace: true });
-  };
   const isLoggedIn = !!localStorage.getItem("token");
 
   return (
