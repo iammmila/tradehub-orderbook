@@ -1,6 +1,7 @@
 package com.ab.orderservice.orders.service;
 
 import com.ab.orderservice.common.exception.BadRequestException;
+import com.ab.orderservice.common.exception.ForbiddenException;
 import com.ab.orderservice.common.exception.enums.ErrorCode;
 import com.ab.orderservice.common.exception.NotFoundException;
 import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
@@ -98,9 +99,15 @@ public class OrderService {
         return orders.stream().map(this::toResponse).toList();
     }
 
-    public OrderResponse cancelOrder(Long orderId) {
+    public OrderResponse cancelOrder(Long orderId, Long currentUserId, boolean isAdmin) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Ownership check (unless ADMIN)
+        Long ownerId = order.getUser().getId();
+        if (!isAdmin && !ownerId.equals(currentUserId)) {
+            throw new ForbiddenException(ErrorCode.ACCESS_DENIED);
+        }
 
         // For MVP: only NEW can be cancelled
         if (order.getStatus() != OrderStatus.NEW) {
@@ -109,14 +116,13 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
         Order saved = orderRepository.save(order);
-
         return toResponse(saved);
     }
 
     private OrderResponse toResponse(Order order) {
         return OrderResponse.builder()
                 .id(order.getId())
-                .instrument(order.getInstrument())
+                .instrument(order.getInstrument().trim().toUpperCase())
                 .side(order.getSide())
                 .price(order.getPrice())
                 .quantity(order.getQuantity())
