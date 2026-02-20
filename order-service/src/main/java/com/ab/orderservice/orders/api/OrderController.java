@@ -3,6 +3,7 @@ package com.ab.orderservice.orders.api;
 import com.ab.orderservice.auth.userdetails.CustomUserDetails;
 import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
 import com.ab.orderservice.orders.dto.order.OrderResponse;
+import com.ab.orderservice.orders.dto.order.ReplaceOrderRequest;
 import com.ab.orderservice.orders.model.enums.OrderSide;
 import com.ab.orderservice.orders.model.enums.OrderStatus;
 import com.ab.orderservice.orders.service.OrderService;
@@ -56,6 +57,22 @@ public class OrderController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         return ResponseEntity.ok(orderService.cancelOrder(orderId, currentUserId, isAdmin));
+    }
+
+    // PATCH /api/v1/orders/{orderId} -> 200 OK
+    @PatchMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> replaceOrder(
+            @PathVariable Long orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody ReplaceOrderRequest request
+    ) {
+        Long currentUserId = userDetails.getUser().getId();
+        boolean isAdmin = userDetails
+                .getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        return ResponseEntity.ok(orderService.replaceOrder(orderId, currentUserId, isAdmin, request));
     }
 
     // post /api/v1/orders -> 201

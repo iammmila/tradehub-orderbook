@@ -6,6 +6,7 @@ import com.ab.orderservice.common.exception.enums.ErrorCode;
 import com.ab.orderservice.common.exception.NotFoundException;
 import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
 import com.ab.orderservice.orders.dto.order.OrderResponse;
+import com.ab.orderservice.orders.dto.order.ReplaceOrderRequest;
 import com.ab.orderservice.orders.model.Order;
 import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.orders.model.enums.OrderSide;
@@ -115,6 +116,51 @@ public class OrderService {
         }
 
         order.setStatus(OrderStatus.CANCELLED);
+        Order saved = orderRepository.save(order);
+        return toResponse(saved);
+    }
+
+    public OrderResponse replaceOrder(
+            Long orderId,
+            Long currentUserId,
+            boolean isAdmin,
+            ReplaceOrderRequest request
+    ) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Ownership check (unless ADMIN)
+        Long ownerId = order.getUser().getId();
+        if (!isAdmin && !ownerId.equals(currentUserId)) {
+            throw new ForbiddenException(ErrorCode.ACCESS_DENIED);
+        }
+
+        // Only NEW orders can be replaced
+        if (order.getStatus() != OrderStatus.NEW) {
+            throw new BadRequestException(ErrorCode.ORDER_CANNOT_REPLACE);
+        }
+
+        // Decide new values
+        if (request.getPrice() != null) {
+            order.setPrice(request.getPrice());
+        }
+
+        if (request.getQuantity() != null) {
+            long newQty = request.getQuantity();
+            long oldQty = order.getQuantity();
+            long oldRemaining = order.getRemainingQuantity();
+
+            long filled = oldQty - oldRemaining;
+
+            // cannot reduce quantity below already filled amount
+            if (newQty < filled) {
+                throw new BadRequestException(ErrorCode.ORDER_REPLACE_INVALID_QUANTITY);
+            }
+
+            order.setQuantity(newQty);
+            order.setRemainingQuantity(newQty - filled);
+        }
+
         Order saved = orderRepository.save(order);
         return toResponse(saved);
     }

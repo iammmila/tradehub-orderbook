@@ -14,6 +14,8 @@ public enum ErrorCode {
     ORDER_NOT_FOUND("ORDER_NOT_FOUND", "Order not found"),
     ORDER_CANNOT_CANCEL("ORDER_CANNOT_CANCEL", "Only orders with status NEW can be cancelled"),
     ACCESS_DENIED("ACCESS_DENIED", "You are not allowed to perform this action."),
+    ORDER_CANNOT_REPLACE("ORDER_CANNOT_REPLACE", "This order cannot be replaced in its current status."),
+    ORDER_REPLACE_INVALID_QUANTITY("ORDER_REPLACE_INVALID_QUANTITY", "New quantity cannot be less than already filled quantity."),
     // USER
     USER_NOT_FOUND("USER_NOT_FOUND", "User not found"),
     USER_EMAIL_ALREADY_EXISTS("USER_EMAIL_ALREADY_EXISTS", "Email already exists"),
