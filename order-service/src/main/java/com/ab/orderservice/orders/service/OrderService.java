@@ -24,6 +24,7 @@ import java.util.List;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final MatchingService matchingService;
 
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
         User user = userRepository.findById(userId)
@@ -41,7 +42,13 @@ public class OrderService {
                 .build();
 
         Order saved = orderRepository.save(order);
-        return toResponse(saved);
+
+        //run matching after create
+        matchingService.match(saved);
+
+        // reload saved state (because matching may update it)
+        Order updated = orderRepository.findById(saved.getId()).orElse(saved);
+        return toResponse(updated);
     }
 
     public List<OrderResponse> getOrders(OrderSide side, String instrument, OrderStatus status) {
