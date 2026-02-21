@@ -9,6 +9,8 @@ import com.ab.orderservice.orders.model.enums.OrderStatus;
 import com.ab.orderservice.orders.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,17 +36,22 @@ public class OrderController {
     }
 
     // GET /api/v1/orders/my -> 200 OK
+    // e.g. api/v1/orders/my?page=0&size=10&sort=createdAt,desc
+    //    desc = descending = newest first
+    //    asc = ascending = oldest first
     @GetMapping("/my")
-    public ResponseEntity<List<OrderResponse>> getOrdersByUser(
+    public ResponseEntity<Page<OrderResponse>> getOrdersByUser(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) OrderSide side,
             @RequestParam(required = false) String instrument,
-            @RequestParam(required = false) OrderStatus status
+            @RequestParam(required = false) OrderStatus status,
+            Pageable pageable
     ) {
         Long userId = userDetails.getUser().getId();
-        return ResponseEntity.ok(orderService.getOrdersByUser(userId, side, instrument, status));
+        return ResponseEntity.ok(orderService.getOrdersByUserPaged(userId, side, instrument, status, pageable));
     }
 
+    // delete /api/v1/orders/orderid -> 200 OK
     @DeleteMapping("/{orderId}")
     public ResponseEntity<OrderResponse> cancelOrder(
             @PathVariable Long orderId,

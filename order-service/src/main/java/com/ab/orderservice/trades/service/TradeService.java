@@ -3,7 +3,10 @@ package com.ab.orderservice.trades.service;
 import com.ab.orderservice.trades.dto.TradeResponse;
 import com.ab.orderservice.trades.model.Trade;
 import com.ab.orderservice.trades.repository.TradeRepository;
+import com.ab.orderservice.trades.repository.TradeSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,23 +16,15 @@ import java.util.List;
 public class TradeService {
     private final TradeRepository tradeRepository;
 
-    public List<TradeResponse> getMyTrades(Long userId, String instrument) {
-        List<Trade> trades;
-        String inst = (instrument == null || instrument.isBlank())
-                ? null
-                : instrument.trim();
-
-
-        if (inst == null) {
-            trades = tradeRepository.findByBuyOrder_User_IdOrSellOrder_User_Id(userId, userId);
-        } else {
-            trades = tradeRepository
-                    .findByInstrumentAndBuyOrder_User_IdOrInstrumentAndSellOrder_User_Id(
-                            inst, userId, inst, userId
-                    );
-        }
-
-        return trades.stream().map(this::toResponse).toList();
+    public Page<TradeResponse> getMyTradesPaged(
+            Long userId,
+            String instrument,
+            Pageable pageable
+    ) {
+        var specification = TradeSpecifications.myTrades(userId, instrument);
+        return tradeRepository
+                .findAll(specification, pageable)
+                .map(this::toResponse);
     }
 
     public List<TradeResponse> getTrades(String instrument) {
