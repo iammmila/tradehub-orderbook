@@ -39,4 +39,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUser_IdAndInstrumentAndStatus(Long userId, String instrument, OrderStatus status);
 
     List<Order> findByUser_IdAndSideAndInstrumentAndStatus(Long userId, OrderSide side, String instrument, OrderStatus status);
+
+    List<Order> findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+            String instrument,
+            OrderSide side,
+            List<OrderStatus> statuses,
+            Long remainingQuantity
+    );
+
+    List<Order> findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+            String instrument,
+            OrderSide side,
+            List<OrderStatus> statuses,
+            Long remainingQuantity
+    );
 }

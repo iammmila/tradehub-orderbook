@@ -4,9 +4,9 @@ import com.ab.orderservice.common.exception.BadRequestException;
 import com.ab.orderservice.common.exception.ForbiddenException;
 import com.ab.orderservice.common.exception.enums.ErrorCode;
 import com.ab.orderservice.common.exception.NotFoundException;
-import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
-import com.ab.orderservice.orders.dto.order.OrderResponse;
-import com.ab.orderservice.orders.dto.order.ReplaceOrderRequest;
+import com.ab.orderservice.orders.dto.CreateOrderRequest;
+import com.ab.orderservice.orders.dto.OrderResponse;
+import com.ab.orderservice.orders.dto.ReplaceOrderRequest;
 import com.ab.orderservice.orders.model.Order;
 import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.orders.model.enums.OrderSide;
@@ -30,7 +30,7 @@ public class OrderService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         Order order = Order.builder()
-                .instrument(request.getInstrument().trim())
+                .instrument(request.getInstrument().trim().toUpperCase())
                 .side(request.getSide())
                 .price(request.getPrice())
                 .quantity(request.getQuantity())

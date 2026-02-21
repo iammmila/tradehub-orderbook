@@ -1,9 +1,9 @@
 package com.ab.orderservice.orders.api;
 
 import com.ab.orderservice.auth.userdetails.CustomUserDetails;
-import com.ab.orderservice.orders.dto.order.CreateOrderRequest;
-import com.ab.orderservice.orders.dto.order.OrderResponse;
-import com.ab.orderservice.orders.dto.order.ReplaceOrderRequest;
+import com.ab.orderservice.orders.dto.CreateOrderRequest;
+import com.ab.orderservice.orders.dto.OrderResponse;
+import com.ab.orderservice.orders.dto.ReplaceOrderRequest;
 import com.ab.orderservice.orders.model.enums.OrderSide;
 import com.ab.orderservice.orders.model.enums.OrderStatus;
 import com.ab.orderservice.orders.service.OrderService;

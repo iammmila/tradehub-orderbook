@@ -1,33 +1,27 @@
-package com.ab.orderservice.orders.dto.order;
+package com.ab.orderservice.orders.dto;
 
 import com.ab.orderservice.orders.model.enums.OrderSide;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import com.ab.orderservice.orders.model.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderRequest {
-
-    @NotBlank
+public class OrderResponse {
+    private Long id;
     private String instrument;
-
-    @NotNull
     private OrderSide side;
-
-    @Positive
-    @NotNull
     private BigDecimal price;
-
-    @NotNull
-    @Positive
     private Long quantity;
+    private Long remainingQuantity;
+    private OrderStatus status;
+    private LocalDateTime createdAt;
+    private Long userId;
 }

@@ -1,7 +1,5 @@
-package com.ab.orderservice.orders.dto.order;
+package com.ab.orderservice.trades.dto;
 
-import com.ab.orderservice.orders.model.enums.OrderSide;
-import com.ab.orderservice.orders.model.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,14 +12,14 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderResponse {
+public class TradeResponse {
     private Long id;
     private String instrument;
-    private OrderSide side;
     private BigDecimal price;
     private Long quantity;
-    private Long remainingQuantity;
-    private OrderStatus status;
+    private Long buyOrderId;
+    private Long sellOrderId;
+    private Long buyerUserId;
+    private Long sellerUserId;
     private LocalDateTime createdAt;
-    private Long userId;
 }

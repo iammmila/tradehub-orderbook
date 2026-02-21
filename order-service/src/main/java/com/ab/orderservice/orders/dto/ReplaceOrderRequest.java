@@ -1,4 +1,4 @@
-package com.ab.orderservice.orders.dto.order;
+package com.ab.orderservice.orders.dto;
 
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
