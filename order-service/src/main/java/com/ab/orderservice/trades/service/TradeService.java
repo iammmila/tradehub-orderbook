@@ -1,7 +1,7 @@
 package com.ab.orderservice.trades.service;
 
 import com.ab.orderservice.trades.dto.TradeResponse;
-import com.ab.orderservice.trades.model.Trade;
+import com.ab.orderservice.trades.mapper.TradeMapper;
 import com.ab.orderservice.trades.repository.TradeRepository;
 import com.ab.orderservice.trades.repository.TradeSpecifications;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class TradeService {
         var specification = TradeSpecifications.myTrades(userId, instrument);
         return tradeRepository
                 .findAll(specification, pageable)
-                .map(this::toResponse);
+                .map(TradeMapper::toResponse);
     }
 
     public List<TradeResponse> getTrades(String instrument) {
@@ -36,28 +36,14 @@ public class TradeService {
             return tradeRepository
                     .findAll()
                     .stream()
-                    .map(this::toResponse)
+                    .map(TradeMapper::toResponse)
                     .toList();
         }
 
         return tradeRepository
                 .findByInstrument(inst)
                 .stream()
-                .map(this::toResponse)
+                .map(TradeMapper::toResponse)
                 .toList();
-    }
-
-    private TradeResponse toResponse(Trade t) {
-        return TradeResponse.builder()
-                .id(t.getId())
-                .instrument(t.getInstrument())
-                .price(t.getPrice())
-                .quantity(t.getQuantity())
-                .buyOrderId(t.getBuyOrder().getId())
-                .sellOrderId(t.getSellOrder().getId())
-                .buyerUserId(t.getBuyOrder().getUser().getId())
-                .sellerUserId(t.getSellOrder().getUser().getId())
-                .createdAt(t.getCreatedAt())
-                .build();
     }
 }

@@ -7,6 +7,7 @@ import com.ab.orderservice.common.exception.NotFoundException;
 import com.ab.orderservice.orders.dto.CreateOrderRequest;
 import com.ab.orderservice.orders.dto.OrderResponse;
 import com.ab.orderservice.orders.dto.ReplaceOrderRequest;
+import com.ab.orderservice.orders.mapper.OrderMapper;
 import com.ab.orderservice.orders.model.Order;
 import com.ab.orderservice.auth.model.User;
 import com.ab.orderservice.orders.model.enums.OrderSide;
@@ -52,7 +53,7 @@ public class OrderService {
 
         // reload saved state (because matching may update it)
         Order updated = orderRepository.findById(saved.getId()).orElse(saved);
-        return toResponse(updated);
+        return OrderMapper.toResponse(updated);
     }
 
     public List<OrderResponse> getOrders(OrderSide side, String instrument, OrderStatus status) {
@@ -60,7 +61,7 @@ public class OrderService {
 
         return orderRepository.findAll(specification)
                 .stream()
-                .map(this::toResponse)
+                .map(OrderMapper::toResponse)
                 .toList();
     }
 
@@ -74,7 +75,7 @@ public class OrderService {
         var specification = OrderSpecifications.byUserAndFilters(userId, side, instrument, status);
         return orderRepository
                 .findAll(specification, pageable)
-                .map(this::toResponse);
+                .map(OrderMapper::toResponse);
     }
 
     public OrderResponse cancelOrder(Long orderId, Long currentUserId, boolean isAdmin) {
@@ -94,7 +95,7 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
         Order saved = orderRepository.save(order);
-        return toResponse(saved);
+        return OrderMapper.toResponse(saved);
     }
 
     public OrderResponse replaceOrder(
@@ -139,20 +140,6 @@ public class OrderService {
         }
 
         Order saved = orderRepository.save(order);
-        return toResponse(saved);
-    }
-
-    private OrderResponse toResponse(Order order) {
-        return OrderResponse.builder()
-                .id(order.getId())
-                .instrument(order.getInstrument().trim().toUpperCase())
-                .side(order.getSide())
-                .price(order.getPrice())
-                .quantity(order.getQuantity())
-                .remainingQuantity(order.getRemainingQuantity())
-                .status(order.getStatus())
-                .createdAt(order.getCreatedAt())
-                .userId(order.getUser() != null ? order.getUser().getId() : null)
-                .build();
+        return OrderMapper.toResponse(saved);
     }
 }
