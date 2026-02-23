@@ -1,0 +1,10 @@
+package com.ab.authservice.exception;
+
+import com.ab.authservice.exception.enums.ErrorCode;
+import org.springframework.http.HttpStatus;
+
+public class NotFoundException extends ApiException {
+    public NotFoundException(ErrorCode errorCode) {
+        super(errorCode, HttpStatus.NOT_FOUND);
+    }
+}
