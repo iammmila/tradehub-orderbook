@@ -1,6 +1,6 @@
 package com.ab.orderservice.kafka;
 
-import com.ab.orderservice.kafka.event.OrderCreatedEvent;
+import com.ab.orderservice.kafka.event.OrderEventEnvelope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -11,28 +11,25 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OrderEventsProducer {
 
-    private final KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void publishOrderCreated(OrderCreatedEvent event) {
-        String key = String.valueOf(event.orderId()); // orderId is Long -> key must be String
-
+    public void publish(String key, Object event) {
         kafkaTemplate.send(OrderKafkaTopics.ORDERS_EVENTS, key, event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
-                        log.error("Kafka send FAILED. eventId={}, orderId={}",
-                                event.eventId(), event.orderId(), ex);
+                        log.error("Kafka send FAILED. key={}, eventClass={}", key, event.getClass().getSimpleName(), ex);
                         return;
                     }
                     if (result == null || result.getRecordMetadata() == null) {
-                        log.info("Kafka send success (no metadata). eventId={}", event.eventId());
+                        log.info("Kafka send success (no metadata). key={}, eventClass={}", key, event.getClass().getSimpleName());
                         return;
                     }
-                    log.info("Kafka send success. topic={}, partition={}, offset={}, eventId={}, orderId={}",
+                    log.info("Kafka send success. topic={}, partition={}, offset={}, key={}, eventClass={}",
                             result.getRecordMetadata().topic(),
                             result.getRecordMetadata().partition(),
                             result.getRecordMetadata().offset(),
-                            event.eventId(),
-                            event.orderId());
+                            key,
+                            event.getClass().getSimpleName());
                 });
     }
 }

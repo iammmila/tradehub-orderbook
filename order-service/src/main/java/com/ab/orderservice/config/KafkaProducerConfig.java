@@ -1,6 +1,5 @@
 package com.ab.orderservice.config;
 
-import com.ab.orderservice.kafka.event.OrderCreatedEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
@@ -21,23 +20,19 @@ public class KafkaProducerConfig {
     private String bootstrapServers;
 
     @Bean
-    public ProducerFactory<String, OrderCreatedEvent> orderCreatedProducerFactory() {
+    public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
-
-        // good default for dev; safe for type mapping
         props.put(JacksonJsonSerializer.ADD_TYPE_INFO_HEADERS, true);
 
         return new DefaultKafkaProducerFactory<>(props);
     }
 
     @Bean
-    public KafkaTemplate<String, OrderCreatedEvent> orderCreatedKafkaTemplate(
-            ProducerFactory<String, OrderCreatedEvent> orderCreatedProducerFactory
-    ) {
-        return new KafkaTemplate<>(orderCreatedProducerFactory);
+    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
     }
 }

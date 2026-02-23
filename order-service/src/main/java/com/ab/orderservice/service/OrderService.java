@@ -7,8 +7,11 @@ import com.ab.orderservice.exception.enums.ErrorCode;
 import com.ab.orderservice.dto.CreateOrderRequest;
 import com.ab.orderservice.dto.OrderResponse;
 import com.ab.orderservice.dto.ReplaceOrderRequest;
+import com.ab.orderservice.kafka.OrderEventFactory;
 import com.ab.orderservice.kafka.OrderEventsProducer;
+import com.ab.orderservice.kafka.event.OrderCancelledEvent;
 import com.ab.orderservice.kafka.event.OrderCreatedEvent;
+import com.ab.orderservice.kafka.event.OrderReplacedEvent;
 import com.ab.orderservice.mapper.OrderMapper;
 import com.ab.orderservice.model.Order;
 import com.ab.orderservice.model.enums.OrderSide;
@@ -21,10 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MatchingService matchingService;
     private final OrderEventsProducer orderEventsProducer;
+    private final OrderEventFactory orderEventFactory;
 
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
         Order order = Order.builder()
@@ -47,19 +49,9 @@ public class OrderService {
 
         Order saved = orderRepository.save(order);
 
-        OrderCreatedEvent event = new OrderCreatedEvent(
-                UUID.randomUUID().toString(),
-                Instant.now(),
-                saved.getId(),
-                saved.getUserId(),
-                saved.getInstrument(),
-                saved.getSide().name(),     // assuming enum
-                saved.getPrice(),
-                saved.getQuantity(),
-                saved.getRemainingQuantity(),
-                saved.getStatus().name()
-        );
-        orderEventsProducer.publishOrderCreated(event);
+        // Kafka: ORDER_CREATED
+        OrderCreatedEvent event = orderEventFactory.created(saved);
+        orderEventsProducer.publish(String.valueOf(saved.getId()), event);
 
         //run matching after create
         matchingService.match(saved);
@@ -108,6 +100,11 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
         Order saved = orderRepository.save(order);
+
+        // Kafka: ORDER_CANCELLED (via factory)
+        OrderCancelledEvent event = orderEventFactory.cancelled(saved, "USER_REQUEST");
+        orderEventsProducer.publish(String.valueOf(saved.getId()), event);
+
         return OrderMapper.toResponse(saved);
     }
 
@@ -131,6 +128,9 @@ public class OrderService {
             throw new BadRequestException(ErrorCode.ORDER_CANNOT_REPLACE);
         }
 
+        // Create "before" snapshot for event
+        Order before = copyForEvent(order);
+
         // Decide new values
         if (request.getPrice() != null) {
             order.setPrice(request.getPrice());
@@ -153,6 +153,25 @@ public class OrderService {
         }
 
         Order saved = orderRepository.save(order);
+
+        // Kafka: ORDER_REPLACED (via factory)
+        OrderReplacedEvent event = orderEventFactory.replaced(before, saved);
+        orderEventsProducer.publish(String.valueOf(saved.getId()), event);
+
         return OrderMapper.toResponse(saved);
+    }
+
+    private Order copyForEvent(Order order) {
+        return Order.builder()
+                .id(order.getId())
+                .userId(order.getUserId())
+                .instrument(order.getInstrument())
+                .side(order.getSide())
+                .price(order.getPrice())
+                .quantity(order.getQuantity())
+                .remainingQuantity(order.getRemainingQuantity())
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt())
+                .build();
     }
 }
