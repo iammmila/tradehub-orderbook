@@ -1,7 +1,8 @@
 package com.ab.orderservice.service;
 
-import com.ab.orderservice.client.TradeClient;
-import com.ab.orderservice.client.dto.CreateTradeRequest;
+import com.ab.orderservice.kafka.TradeEventFactory;
+import com.ab.orderservice.kafka.TradeEventsProducer;
+import com.ab.orderservice.kafka.event.TradeCreatedEvent;
 import com.ab.orderservice.model.Order;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
@@ -13,12 +14,14 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MatchingService {
     private final OrderRepository orderRepository;
-    private final TradeClient tradeClient;
+    private final TradeEventFactory tradeEventFactory;
+    private final TradeEventsProducer tradeEventsProducer;
 
     private static final List<OrderStatus> ACTIVE_STATUSES =
             List.of(OrderStatus.NEW, OrderStatus.PARTIALLY_FILLED);
@@ -76,17 +79,9 @@ public class MatchingService {
             BigDecimal tradePrice = sell.getPrice();
             LocalDateTime now = LocalDateTime.now();
 
-            // Create trade
-            tradeClient.createTrade(CreateTradeRequest.builder()
-                    .instrument(buy.getInstrument())
-                    .price(tradePrice)
-                    .quantity(tradeQty)
-                    .buyOrderId(buy.getId())
-                    .sellOrderId(sell.getId())
-                    .buyerUserId(buy.getUserId())
-                    .sellerUserId(sell.getUserId())
-                    .createdAt(now)
-                    .build());
+            // Publish trade event to Kafka
+            TradeCreatedEvent event = tradeEventFactory.created(buy, sell, tradePrice, tradeQty, now);
+            tradeEventsProducer.publish(String.valueOf(buy.getId()), event);
 
             // Update quantities
             buy.setRemainingQuantity(buy.getRemainingQuantity() - tradeQty);
@@ -131,17 +126,9 @@ public class MatchingService {
 
             LocalDateTime now = LocalDateTime.now();
 
-            // Create trade
-            tradeClient.createTrade(CreateTradeRequest.builder()
-                    .instrument(buy.getInstrument())
-                    .price(tradePrice)
-                    .quantity(tradeQty)
-                    .buyOrderId(buy.getId())
-                    .sellOrderId(sell.getId())
-                    .buyerUserId(buy.getUserId())
-                    .sellerUserId(sell.getUserId())
-                    .createdAt(now)
-                    .build());
+            // Publish trade event to Kafka
+            TradeCreatedEvent event = tradeEventFactory.created(buy, sell, tradePrice, tradeQty, now);
+            tradeEventsProducer.publish(String.valueOf(buy.getId()), event);
 
             // Update quantities
             sell.setRemainingQuantity(sell.getRemainingQuantity() - tradeQty);

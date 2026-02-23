@@ -28,6 +28,9 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
         props.put(JacksonJsonSerializer.ADD_TYPE_INFO_HEADERS, true);
 
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
         return new DefaultKafkaProducerFactory<>(props);
     }
 
