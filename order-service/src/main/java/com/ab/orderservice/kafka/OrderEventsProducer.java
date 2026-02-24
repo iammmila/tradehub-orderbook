@@ -17,14 +17,14 @@ public class OrderEventsProducer {
         kafkaTemplate.send(OrderKafkaTopics.ORDERS_EVENTS, key, event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
-                        log.error("Kafka send FAILED. key={}, eventClass={}", key, event.getClass().getSimpleName(), ex);
+                        log.error("KAFKA SENT FAILED. key={}, eventClass={}", key, event.getClass().getSimpleName(), ex);
                         return;
                     }
                     if (result == null || result.getRecordMetadata() == null) {
-                        log.info("Kafka send success (no metadata). key={}, eventClass={}", key, event.getClass().getSimpleName());
+                        log.info("KAFKA SENT success (no metadata). key={}, eventClass={}", key, event.getClass().getSimpleName());
                         return;
                     }
-                    log.info("Kafka send success. topic={}, partition={}, offset={}, key={}, eventClass={}",
+                    log.info("KAFKA SENT success. topic={}, partition={}, offset={}, key={}, eventClass={}",
                             result.getRecordMetadata().topic(),
                             result.getRecordMetadata().partition(),
                             result.getRecordMetadata().offset(),
