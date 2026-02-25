@@ -24,6 +24,11 @@ public class RoutesConfig {
                         .uri("lb://ORDER-SERVICE"))
                 .route("trades-all", r -> r.path("/api/v1/trades/**")
                         .uri("lb://TRADE-SERVICE"))
+                .route("notifications-all", r -> r.path("/api/v1/notifications/**")
+                        .filters(f -> f.rewritePath(
+                                "/api/v1/notifications/(?<segment>.*)",
+                                "/notifications/${segment}"))
+                        .uri("lb://NOTIFICATION-SERVICE"))
                 .build();
     }
 }

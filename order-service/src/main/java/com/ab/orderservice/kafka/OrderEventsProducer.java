@@ -1,6 +1,5 @@
 package com.ab.orderservice.kafka;
 
-import com.ab.orderservice.kafka.event.OrderEventEnvelope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

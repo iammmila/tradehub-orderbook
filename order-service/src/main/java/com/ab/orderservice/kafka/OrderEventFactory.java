@@ -42,6 +42,31 @@ public class OrderEventFactory {
         );
     }
 
+    public OrderPartiallyFilledEvent partiallyFilled(Order o, long filledNow) {
+        return new OrderPartiallyFilledEvent(
+                newId(), Instant.now(),
+                o.getId(), o.getUserId(), o.getInstrument(),
+                o.getSide().name(),
+                o.getPrice(),
+                filledNow,
+                o.getRemainingQuantity(),
+                o.getStatus().name()
+        );
+    }
+
+    public OrderFilledEvent filled(Order o) {
+        long totalFilled = o.getQuantity(); // because remaining is 0 when filled
+        return new OrderFilledEvent(
+                newId(), Instant.now(),
+                o.getId(), o.getUserId(), o.getInstrument(),
+                o.getSide().name(),
+                o.getPrice(),
+                totalFilled,
+                o.getRemainingQuantity(),
+                o.getStatus().name()
+        );
+    }
+
     private String newId() {
         return UUID.randomUUID().toString();
     }

@@ -73,7 +73,7 @@ public class DataSeeder implements CommandLineRunner {
                             .username("user123")
                             .firstName("firstname")
                             .lastName("lastname")
-                            .email("user@tradehub.com")
+                            .email("user123@tradehub.com")
                             .password(passwordEncoder.encode("user123"))
                             .role(userRole)
                             .build());

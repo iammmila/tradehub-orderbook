@@ -1,5 +1,7 @@
 package com.ab.orderservice.service;
 
+import com.ab.orderservice.kafka.OrderEventFactory;
+import com.ab.orderservice.kafka.OrderEventsProducer;
 import com.ab.orderservice.kafka.TradeEventFactory;
 import com.ab.orderservice.kafka.TradeEventsProducer;
 import com.ab.orderservice.kafka.event.TradeCreatedEvent;
@@ -21,6 +23,8 @@ public class MatchingService {
     private final OrderRepository orderRepository;
     private final TradeEventFactory tradeEventFactory;
     private final TradeEventsProducer tradeEventsProducer;
+    private final OrderEventFactory orderEventFactory;
+    private final OrderEventsProducer orderEventsProducer;
 
     private static final List<OrderStatus> ACTIVE_STATUSES =
             List.of(OrderStatus.NEW, OrderStatus.PARTIALLY_FILLED);
@@ -90,6 +94,10 @@ public class MatchingService {
             updateStatusAfterFill(buy);
             updateStatusAfterFill(sell);
 
+            //KAFKA
+            publishFillEventIfNeeded(buy, tradeQty);
+            publishFillEventIfNeeded(sell, tradeQty);
+
             // Persist the resting order updates
             orderRepository.save(sell);
         }
@@ -137,8 +145,20 @@ public class MatchingService {
             updateStatusAfterFill(sell);
             updateStatusAfterFill(buy);
 
+            publishFillEventIfNeeded(buy, tradeQty);
+            publishFillEventIfNeeded(sell, tradeQty);
             // Persist the resting order updates
             orderRepository.save(buy);
+        }
+    }
+
+    private void publishFillEventIfNeeded(Order order, long filledNow) {
+        if (order.getStatus() == OrderStatus.PARTIALLY_FILLED) {
+            var ev = orderEventFactory.partiallyFilled(order, filledNow);
+            orderEventsProducer.publish(String.valueOf(order.getId()), ev);
+        } else if (order.getStatus() == OrderStatus.FILLED) {
+            var ev = orderEventFactory.filled(order);
+            orderEventsProducer.publish(String.valueOf(order.getId()), ev);
         }
     }
 

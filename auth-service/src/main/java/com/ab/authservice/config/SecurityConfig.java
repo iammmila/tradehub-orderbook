@@ -39,6 +39,9 @@ public class SecurityConfig {
                         // User area (user or admin)
                         .requestMatchers("/api/v1/users/**").hasAnyRole("USER", "ADMIN")
 
+                        .requestMatchers("/api/v1/trades/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/v1/notifications/**").hasAnyRole("USER", "ADMIN")
                         // Everything else requires login
                         .anyRequest().authenticated()
                 )
