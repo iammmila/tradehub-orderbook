@@ -7,6 +7,7 @@ import { Navigate } from "react-router-dom";
 import PublicRoot from "../pages/Main/PublicRoot/PublicRoot";
 import LandingPage from "../pages/Main/LandingPage/LandingPage";
 import Settings from "../pages/Main/Settings/Settings";
+import Dashboard from "../pages/Main/Dashboard/Dashboard";
 export const ROUTES = [
   // PUBLIC
   {
@@ -23,7 +24,11 @@ export const ROUTES = [
         path: "/app",
         element: <MainRoot />,
         children: [
-          { index: true, element: <Home /> },
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          {
+            path: "dashboard",
+            element: <Dashboard />,
+          },
           { path: "settings", element: <Settings /> },
         ],
       },

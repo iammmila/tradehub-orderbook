@@ -25,10 +25,14 @@ public class RoutesConfig {
                 .route("trades-all", r -> r.path("/api/v1/trades/**")
                         .uri("lb://TRADE-SERVICE"))
                 .route("notifications-all", r -> r.path("/api/v1/notifications/**")
-                        .filters(f -> f.rewritePath(
-                                "/api/v1/notifications/(?<segment>.*)",
-                                "/notifications/${segment}"))
                         .uri("lb://NOTIFICATION-SERVICE"))
+                .route("notifications-ws", r -> r.path("/ws/**")
+                        .uri("lb://NOTIFICATION-SERVICE"))
+//                .route("notifications-all", r -> r.path("/api/v1/notifications/**")
+//                        .filters(f -> f.rewritePath(
+//                                "/api/v1/notifications/(?<segment>.*)",
+//                                "/notifications/${segment}"))
+//                        .uri("lb://NOTIFICATION-SERVICE"))
                 .build();
     }
 }

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class TradeCreatedNotificationsConsumer {
 
     private final NotificationService service;
-    private final SimpMessagingTemplate ws; // optional for later UI
+    private final SimpMessagingTemplate ws;
 
     @KafkaListener(
             topics = "${app.kafka.topics.trade-events}",
@@ -49,8 +49,14 @@ public class TradeCreatedNotificationsConsumer {
                 .build());
 
         // WebSocket push (nice to have, you can ignore UI now)
-        ws.convertAndSend("/topic/notifications." + buyerNotif.getUserId(), NotificationMapper.toDto(buyerNotif));
-        ws.convertAndSend("/topic/notifications." + sellerNotif.getUserId(), NotificationMapper.toDto(sellerNotif));
+        ws.convertAndSendToUser(
+                buyerNotif.getUserId().toString(),
+                "/topic/notifications",
+                NotificationMapper.toDto(buyerNotif));
+        ws.convertAndSendToUser(
+                sellerNotif.getUserId().toString(),
+                "/topic/notifications",
+                NotificationMapper.toDto(sellerNotif));
 
         log.info("NOTIFICATION saved trade eventId={} buyerUserId={} sellerUserId={}",
                 event.eventId(), event.buyerUserId(), event.sellerUserId());

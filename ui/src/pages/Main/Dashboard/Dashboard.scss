@@ -1,0 +1,26 @@
+.dashWrap {
+    width: 100%;
+
+    .dashGrid {
+        width: 78%;
+        margin: 50px auto;
+
+        display: grid;
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        gap: 16px;
+    }
+}
+
+
+
+@media (max-width: 1100px) {
+    .dashGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 620px) {
+    .dashGrid {
+        grid-template-columns: 1fr;
+    }
+}

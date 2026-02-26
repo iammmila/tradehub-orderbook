@@ -11,6 +11,7 @@ import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -23,9 +24,8 @@ import org.springframework.stereotype.Component;
 public class OrderNotificationsConsumer {
 
     private final NotificationService service;
-
-    @Nullable
-    private final SimpMessagingTemplate ws; // optional
+    private final SimpMessagingTemplate ws;
+    private final SimpUserRegistry simpUserRegistry;
 
     // ORDER_CREATED
     @KafkaHandler
@@ -103,9 +103,19 @@ public class OrderNotificationsConsumer {
                 .entityType("ORDER")
                 .entityId(entityId)
                 .build());
+        var simpUser = simpUserRegistry.getUser(userId.toString());
+        log.info("WS USER '{}' sessions={}",
+                userId,
+                (simpUser == null ? "NONE" : simpUser.getSessions().stream().map(s -> s.getId()).toList())
+        );
+        ws.convertAndSendToUser(
+                notif.getUserId().toString(),
+                "/topic/notifications",
+                NotificationMapper.toDto(notif));
+        log.info("WS USERS CONNECTED={}",
+                simpUserRegistry.getUsers().stream().map(u -> u.getName()).toList());
 
-        if (ws != null) {
-            ws.convertAndSend("/topic/notifications." + notif.getUserId(), NotificationMapper.toDto(notif));
-        }
+
+        log.info("WS PUSH -> userId={} dest=/topic/notifications notifId={}", notif.getUserId(), notif.getId());
     }
 }

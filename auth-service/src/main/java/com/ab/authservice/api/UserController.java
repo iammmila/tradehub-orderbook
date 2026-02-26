@@ -2,7 +2,12 @@ package com.ab.authservice.api;
 
 import com.ab.authservice.dto.UpdateMeRequest;
 import com.ab.authservice.dto.user.ChangePasswordRequest;
+import com.ab.authservice.dto.user.UserDto;
 import com.ab.authservice.dto.user.UserResponse;
+import com.ab.authservice.exception.NotFoundException;
+import com.ab.authservice.exception.enums.ErrorCode;
+import com.ab.authservice.model.User;
+import com.ab.authservice.repository.UserRepository;
 import com.ab.authservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +24,14 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('USER','ADMIN')")
 public class UserController {
     private final UserService userService;
+    private final UserRepository userRepository;
+
+    @GetMapping("/by-username/{username}")
+    public ResponseEntity<UserDto> byUsername(@PathVariable String username) {
+        User u = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        return ResponseEntity.ok(new UserDto(u.getId(), u.getUsername()));
+    }
 
     //GET /api/v1/users/me -> 200 ok
     @GetMapping("/me")
