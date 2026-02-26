@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Cards from '../Cards/Cards';
-import { fetchTrades } from '../../../api/trades';
+import { fetchMyTrades } from '../../../api/trades';
 import "./TradesTodayCard.scss";
 import { isSameLocalDay, safeNumber, formatMoney } from "../../../utils/helpers";
 
@@ -16,7 +16,7 @@ const TradesTodayCard = () => {
     (async () => {
       try {
         setLoading(true);
-        const trades = await fetchTrades(0, 200);;
+        const trades = await fetchMyTrades(0, 200);;
 
         if (!alive) return;
 

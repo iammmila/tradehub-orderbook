@@ -1,0 +1,78 @@
+.instrument-donut {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 14px;
+
+    .chart-error,
+    .chart-empty {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+    }
+
+    &__chart {
+        position: relative;
+        height: 200px;
+    }
+
+    &__center {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+        text-align: center;
+    }
+
+    &__centerValue {
+        font-size: 26px;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.92);
+        line-height: 1;
+    }
+
+    &__centerLabel {
+        margin-top: 6px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.58);
+    }
+
+    &__legend {
+        display: grid;
+        gap: 10px;
+    }
+
+    .legend-item {
+        display: grid;
+        grid-template-columns: 10px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        box-shadow: 0 0 14px rgba(99, 102, 241, 0.12);
+    }
+
+    .legend-name {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 13px;
+    }
+
+    .legend-value {
+        color: rgba(255, 255, 255, 0.88);
+        font-weight: 700;
+        font-size: 13px;
+    }
+}

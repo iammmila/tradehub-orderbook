@@ -1,0 +1,13 @@
+.trades-over-time {
+    height: 100%;
+
+    .chart-error {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+    }
+}

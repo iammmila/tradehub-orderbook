@@ -8,6 +8,8 @@ import PublicRoot from "../pages/Main/PublicRoot/PublicRoot";
 import LandingPage from "../pages/Main/LandingPage/LandingPage";
 import Settings from "../pages/Main/Settings/Settings";
 import Dashboard from "../pages/Main/Dashboard/Dashboard";
+import Orders from "../pages/Main/Orders/Orders";
+import Trades from "../pages/Main/Trades/Trades";
 export const ROUTES = [
   // PUBLIC
   {
@@ -28,6 +30,14 @@ export const ROUTES = [
           {
             path: "dashboard",
             element: <Dashboard />,
+          },
+          {
+            path: "orders",
+            element: <Orders />,
+          },
+          {
+            path: "trades",
+            element: <Trades />,
           },
           { path: "settings", element: <Settings /> },
         ],
