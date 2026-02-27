@@ -1,9 +1,11 @@
 // NotificationsWsBridge.jsx
 import { useEffect, useRef } from "react";
 import { createNotificationsSocket } from "./notificationsSocket";
+import { useWsStatus } from "../context/WsStatusContext";
 
 export default function NotificationsWsBridge({ token, onNotification }) {
   const onNotificationRef = useRef(onNotification);
+  const { setStatus } = useWsStatus();
 
   useEffect(() => {
     onNotificationRef.current = onNotification;
@@ -16,13 +18,13 @@ export default function NotificationsWsBridge({ token, onNotification }) {
       getToken: () => token,
       onNotification: (dto) => onNotificationRef.current?.(dto), // stable ref
       onStatus: (s) => {
-        console.log("WS status:", s);
+        setStatus(s);
       },
     });
 
     socket.connect();
     return () => socket.disconnect();
-  }, [token]); 
+  }, [token, setStatus]);
 
   return null;
 }

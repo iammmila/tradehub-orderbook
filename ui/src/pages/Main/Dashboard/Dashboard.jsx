@@ -8,8 +8,10 @@ import TradesOverTimeChart from '../../../components/Dashboard/Charts/TradesOver
 import InstrumentDistributionDonut from '../../../components/Dashboard/Charts/InstrumentDistributionDonut/InstrumentDistributionDonut';
 import RecentOrdersTable from '../../../components/Dashboard/Tables/RecentOrdersTable/RecentOrdersTable';
 import RecentTradesTable from '../../../components/Dashboard/Tables/RecentTradesTable/RecentTradesTable';
+import LiveOrdersBar from '../../../components/Dashboard/LiveOrdersBar/LiveOrdersBar';
 
 const Dashboard = () => {
+
   return (
     <div className="dashWrap">
       {/* Row 1: KPI cards */}
@@ -19,7 +21,10 @@ const Dashboard = () => {
         <TradesTodayCard />
         <FillRateCard />
       </div>
-
+      <div className="dashGrid">
+        <LiveOrdersBar speed={60} />
+      </div>
+      
       {/* Row 2: Charts */}
       <div className="dashGrid dashGrid--charts">
         <div className="dashCol dashCol--big">

@@ -3,7 +3,7 @@ import { ROUTES } from "./routes/routes";
 import { HelmetProvider } from "react-helmet-async";
 import NotificationsWsBridge from "./ws/NotificationsWsBridge";
 import { useAuthToken } from "./auth/useAuthToken";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { useCallback } from "react";
 
 const router = createBrowserRouter(ROUTES);
@@ -23,9 +23,9 @@ function App() {
       <Toaster
         position="bottom-left"
         toastOptions={{
-          duration: 4500,
+          duration: 5000,
           style: {
-            background: "#111827", // dark
+            background: "#111827",
             color: "#fff",
             border: "1px solid rgba(255,255,255,0.12)",
             borderRadius: "14px",
@@ -34,8 +34,6 @@ function App() {
           },
         }}
       />
-
-      {/* your routes / layout */}
       <HelmetProvider>
         <RouterProvider router={router} />
       </HelmetProvider>

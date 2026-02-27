@@ -1,4 +1,4 @@
-import React, { useEffect, useState,  useContext, useMemo } from 'react'
+import React, { useEffect, useState, useContext, useMemo } from 'react'
 import './RecentTradesTable.scss'
 import TableCard from '../TableCard/TableCard';
 import TableFilters from '../TableFilters/TableFilters';
@@ -13,7 +13,7 @@ function compare(a, b) {
 }
 const RecentTradesTable = () => {
     const { user } = useContext(MainContext);
-    const myUserId = user?.id; 
+    const myUserId = user?.id;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [rows, setRows] = useState([]);
@@ -162,7 +162,7 @@ const RecentTradesTable = () => {
                                 <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Total</th>
-                                <th>Orders</th>
+                                <th>Role</th>
                             </tr>
                         </thead>
 
@@ -180,8 +180,16 @@ const RecentTradesTable = () => {
                                         <td>{formatMoney(t.price)}</td>
                                         <td>{formatNumber(t.quantity, 0)}</td>
                                         <td className="t-strong">{formatMoney(total)}</td>
-                                        <td className="t-muted">
-                                            {t.buyOrderId} / {t.sellOrderId}
+                                        <td>
+                                            {!myUserId ? (
+                                                <span className="badge">—</span>
+                                            ) : Number(t.buyerUserId) === Number(myUserId) ? (
+                                                <span className="badge badge--buy">You bought</span>
+                                            ) : Number(t.sellerUserId) === Number(myUserId) ? (
+                                                <span className="badge badge--sell">You sold</span>
+                                            ) : (
+                                                <span className="badge">Other</span>
+                                            )}
                                         </td>
                                     </tr>
                                 );

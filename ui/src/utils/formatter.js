@@ -20,9 +20,15 @@ export function formatNumber(n, maxFrac = 2) {
   if (!Number.isFinite(x)) return "-";
   return x.toLocaleString(undefined, { maximumFractionDigits: maxFrac });
 }
+const USD = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
-export function formatMoney(n) {
-  const x = Number(n);
-  if (!Number.isFinite(x)) return "-";
-  return x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+export function formatMoney(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return USD.format(n);
 }
