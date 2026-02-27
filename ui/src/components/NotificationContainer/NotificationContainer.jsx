@@ -11,8 +11,16 @@ import {
 
 import { normalizeFromPage, normalizeDto } from "../../utils/notificationNormalize";
 import toast from "react-hot-toast";
-
+ const ICON_BY_TYPE = {
+        ORDER_CREATED: "🟢",
+        ORDER_CANCELLED: "🟠",
+        ORDER_REPLACED: "🟣",
+        ORDER_PARTIALLY_FILLED: "🟡",
+        ORDER_FILLED: "✅",
+        TRADE_EXECUTED: "💱",
+    };
 const NotificationContainer = () => {
+   
     const [isOpen, setIsOpen] = useState(false);
     const [selectedNotification, setSelectedNotification] = useState(null);
     const dropdownRef = useRef(null);
@@ -57,9 +65,6 @@ const NotificationContainer = () => {
         }
     }
     useEffect(() => {
-        console.log("NotificationContainer mounted");
-    }, []);
-    useEffect(() => {
         const handler = (e) => {
             const dto = e.detail;
             const n = normalizeDto(dto);
@@ -69,7 +74,10 @@ const NotificationContainer = () => {
                 return [n, ...prev].slice(0, 50);
             });
 
-            setUnreadCount((c) => (typeof c === "number" ? c + 1 : c));
+            setUnreadCount((c) => (typeof c === "number" ? c + (n.isRead ? 0 : 1) : c));
+            toast(`${n.text}`, {
+                icon: ICON_BY_TYPE[n.type] || "🔔",
+            });
         };
 
         window.addEventListener("notif:ws", handler);

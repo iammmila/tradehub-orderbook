@@ -1,6 +1,6 @@
 .dashWrap {
     display: grid;
-    gap: 16px;
+    gap: 30px;
     width: 100%;
     padding: 50px 0;
 
@@ -24,13 +24,12 @@
             min-height: 320px;
         }
     }
+
+    .dashGrid--tables {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
 }
-
-
-
-
-
-
 
 /* Responsive */
 @media (max-width: 1100px) {

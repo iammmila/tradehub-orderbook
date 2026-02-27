@@ -51,11 +51,11 @@ public class TradeCreatedNotificationsConsumer {
         // WebSocket push (nice to have, you can ignore UI now)
         ws.convertAndSendToUser(
                 buyerNotif.getUserId().toString(),
-                "/topic/notifications",
+                "/queue/notifications",
                 NotificationMapper.toDto(buyerNotif));
         ws.convertAndSendToUser(
                 sellerNotif.getUserId().toString(),
-                "/topic/notifications",
+                "/queue/notifications",
                 NotificationMapper.toDto(sellerNotif));
 
         log.info("NOTIFICATION saved trade eventId={} buyerUserId={} sellerUserId={}",

@@ -16,14 +16,12 @@ const TradesTodayCard = () => {
     (async () => {
       try {
         setLoading(true);
-        const trades = await fetchMyTrades(0, 200);;
+        const trades = await fetchMyTrades(0, 200);
 
         if (!alive) return;
 
         const today = new Date();
-        const todays = (trades || []).filter((t) =>
-          isSameLocalDay(t.createdAt, today)
-        );
+        const todays = (trades || []).filter((t) => isSameLocalDay(t.createdAt, today));
 
         const volume = todays.reduce((sum, t) => {
           const qty = safeNumber(t.quantity);

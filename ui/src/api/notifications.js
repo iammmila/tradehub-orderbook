@@ -1,4 +1,3 @@
-// src/api/notifications.js
 import { api } from "./axios";
 
 /**
@@ -11,7 +10,7 @@ import { api } from "./axios";
 
 export async function getNotifications({ page = 0, size = 20 } = {}) {
   const res = await api.get("/v1/notifications", { params: { page, size } });
-  return res.data; // <-- returns the whole page object with .content
+  return res.data; 
 }
 
 export async function getUnreadCount() {

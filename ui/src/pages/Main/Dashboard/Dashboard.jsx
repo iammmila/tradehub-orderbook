@@ -6,6 +6,8 @@ import TradesTodayCard from '../../../components/Dashboard/TradesTodayCard/Trade
 import FillRateCard from '../../../components/Dashboard/FillRateCard/FillRateCard';
 import TradesOverTimeChart from '../../../components/Dashboard/Charts/TradesOverTimeChart/TradesOverTimeChart';
 import InstrumentDistributionDonut from '../../../components/Dashboard/Charts/InstrumentDistributionDonut/InstrumentDistributionDonut';
+import RecentOrdersTable from '../../../components/Dashboard/Tables/RecentOrdersTable/RecentOrdersTable';
+import RecentTradesTable from '../../../components/Dashboard/Tables/RecentTradesTable/RecentTradesTable';
 
 const Dashboard = () => {
   return (
@@ -26,6 +28,11 @@ const Dashboard = () => {
         <div className="dashCol dashCol--small">
           <InstrumentDistributionDonut />
         </div>
+      </div>
+
+      <div className="dashGrid dashGrid--tables">
+        <RecentOrdersTable />
+        <RecentTradesTable />
       </div>
     </div>
   )

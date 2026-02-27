@@ -4,9 +4,10 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import ChartCard from '../ChartCard/ChartCard';
 import { useDashboardTrades } from '../../../../hooks/useDashboardTrades';
 import { buildTradesTodayByHour } from '../../../../utils/tradeSeries';
+import { hourToAmPmLabel } from '../../../../utils/dateUtils';
+
 const TradesOverTimeChart = () => {
   const { trades, loading, error } = useDashboardTrades();
-
   const data = useMemo(() => buildTradesTodayByHour(trades), [trades]);
 
   return (
@@ -22,7 +23,16 @@ const TradesOverTimeChart = () => {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 8, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="hour" stroke="rgba(255,255,255,0.55)" tickLine={false} axisLine={false} />
+                <XAxis
+                  dataKey="hour"
+                  tickFormatter={hourToAmPmLabel}
+                  interval={2}                
+                  tickMargin={10}
+                  minTickGap={18}
+                  stroke="rgba(255,255,255,0.55)"
+                  tickLine={false}
+                  axisLine={false}
+                />
               <YAxis stroke="rgba(255,255,255,0.55)" tickLine={false} axisLine={false} allowDecimals={false} />
               <Tooltip
                 contentStyle={{

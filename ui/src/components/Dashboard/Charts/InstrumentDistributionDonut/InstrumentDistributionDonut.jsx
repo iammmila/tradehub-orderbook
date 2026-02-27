@@ -20,8 +20,9 @@ const COLORS = [
 const InstrumentDistributionDonut = () => {
     const { trades, loading, error } = useDashboardTrades();
 
-    const data = useMemo(() => buildInstrumentDistributionToday(trades, 5), [trades]);
+    const data = useMemo(() => buildInstrumentDistributionToday(trades), [trades]);
     const total = useMemo(() => data.reduce((s, x) => s + x.value, 0), [data]);
+    // const minWidth = Math.max(900, data.length * 70);
 
     return (
         <ChartCard
@@ -44,13 +45,19 @@ const InstrumentDistributionDonut = () => {
                                             background: "rgba(10, 14, 22, 0.95)",
                                             border: "1px solid rgba(255,255,255,0.10)",
                                             borderRadius: "12px",
-                                            color: "rgba(255,255,255,0.9)",
+                                            color: "#fff",
                                         }}
+                                        labelStyle={{ color: "rgba(255,255,255,0.85)" }}
+                                        itemStyle={{ color: "#fff" }}
+                                        cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                                        formatter={(value, name) => [`${value} trades`, name]}
                                     />
                                     <Pie
                                         data={data}
                                         dataKey="value"
                                         nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
                                         innerRadius="62%"
                                         outerRadius="88%"
                                         paddingAngle={2}

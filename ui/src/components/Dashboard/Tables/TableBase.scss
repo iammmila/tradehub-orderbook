@@ -1,0 +1,108 @@
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+
+    // hide scrollbar (optional)
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+        height: 0;
+    }
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 820px; 
+}
+
+.table thead th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.62);
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    position: sticky;
+    top: 0;
+    background: rgba(11, 15, 23, 0.95);
+    backdrop-filter: blur(8px);
+}
+
+.table tbody td {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.82);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    white-space: nowrap;
+}
+
+.table tbody tr {
+    transition: background 140ms ease, transform 140ms ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.t-muted {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.t-strong {
+    font-weight: 700;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.badge--buy {
+    color: rgba(34, 197, 94, 0.95);
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+.badge--sell {
+    color: rgba(248, 113, 113, 0.95);
+    border-color: rgba(248, 113, 113, 0.22);
+}
+
+.badge--new {
+    color: rgba(99, 102, 241, 0.95);
+    border-color: rgba(99, 102, 241, 0.22);
+}
+
+.badge--filled {
+    color: rgba(34, 197, 94, 0.95);
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+.badge--cancelled {
+    color: rgba(243, 57, 57, 0.95);
+    border-color: rgba(252, 82, 48, 0.22);
+}
+
+.table-empty {
+    padding: 18px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.table-error {
+    padding: 18px;
+    font-size: 13px;
+    color: rgba(248, 113, 113, 0.95);
+}

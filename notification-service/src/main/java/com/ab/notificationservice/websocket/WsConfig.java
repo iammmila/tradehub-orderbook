@@ -14,25 +14,22 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WsConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${app.ws.allowed-origins}")
     private String allowedOrigins;
-
-    private final WsJwtChannelInterceptor jwtChannelInterceptor;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+    private final UserIdHandshakeHandler userIdHandshakeHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
                 .setAllowedOrigins(allowedOrigins)
-                .withSockJS(); // keep SockJS for browser compatibility
+                .addInterceptors(jwtHandshakeInterceptor)
+                .setHandshakeHandler(userIdHandshakeHandler)
+                .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/queue", "/topic");
-        registry.setApplicationDestinationPrefixes("/app");
+        registry.enableSimpleBroker("/queue");
         registry.setUserDestinationPrefix("/user");
-    }
-
-    @Override
-    public void configureClientInboundChannel(org.springframework.messaging.simp.config.ChannelRegistration registration) {
-        registration.interceptors(jwtChannelInterceptor);
+        registry.setApplicationDestinationPrefixes("/app");
     }
 }

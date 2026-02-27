@@ -15,7 +15,9 @@ export default function NotificationsWsBridge({ token, onNotification }) {
     const socket = createNotificationsSocket({
       getToken: () => token,
       onNotification: (dto) => onNotificationRef.current?.(dto), // stable ref
-      onStatus: (s) => console.log("WS status:", s),
+      onStatus: (s) => {
+        console.log("WS status:", s);
+      },
     });
 
     socket.connect();

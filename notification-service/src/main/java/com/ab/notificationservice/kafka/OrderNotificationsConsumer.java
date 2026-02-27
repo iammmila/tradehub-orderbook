@@ -104,18 +104,13 @@ public class OrderNotificationsConsumer {
                 .entityId(entityId)
                 .build());
         var simpUser = simpUserRegistry.getUser(userId.toString());
-        log.info("WS USER '{}' sessions={}",
-                userId,
-                (simpUser == null ? "NONE" : simpUser.getSessions().stream().map(s -> s.getId()).toList())
-        );
         ws.convertAndSendToUser(
                 notif.getUserId().toString(),
-                "/topic/notifications",
+                "/queue/notifications",
                 NotificationMapper.toDto(notif));
         log.info("WS USERS CONNECTED={}",
                 simpUserRegistry.getUsers().stream().map(u -> u.getName()).toList());
 
-
-        log.info("WS PUSH -> userId={} dest=/topic/notifications notifId={}", notif.getUserId(), notif.getId());
+        log.info("WS PUSH -> userId={} dest=/queue/notifications notifId={}", notif.getUserId(), notif.getId());
     }
 }

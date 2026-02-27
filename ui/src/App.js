@@ -20,7 +20,20 @@ function App() {
         onNotification={handleNotification}
       />
 
-      <Toaster position="bottom-left" />
+      <Toaster
+        position="bottom-left"
+        toastOptions={{
+          duration: 4500,
+          style: {
+            background: "#111827", // dark
+            color: "#fff",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: "14px",
+            padding: "12px 14px",
+            boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+          },
+        }}
+      />
 
       {/* your routes / layout */}
       <HelmetProvider>

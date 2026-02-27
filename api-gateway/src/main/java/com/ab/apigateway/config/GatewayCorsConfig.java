@@ -23,8 +23,9 @@ public class GatewayCorsConfig {
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
+//        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/actuator/**", config);
         return new CorsWebFilter(source);
     }
 }

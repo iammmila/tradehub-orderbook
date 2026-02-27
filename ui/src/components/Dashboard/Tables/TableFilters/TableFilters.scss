@@ -1,0 +1,47 @@
+.tbl-filters {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    &__left {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    &__search input {
+        width: 240px;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 13px;
+        outline: none;
+
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        &:focus {
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 700px) {
+    .tbl-filters__search input {
+        width: 100%;
+    }
+}

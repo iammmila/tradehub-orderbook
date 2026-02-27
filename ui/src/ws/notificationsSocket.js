@@ -2,7 +2,6 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
-const WS_URL = "http://localhost:8090/ws"; // direct to notification-service (recommended)
 
 export function createNotificationsSocket({
   getToken,
@@ -17,21 +16,20 @@ export function createNotificationsSocket({
       onStatus?.("no-token");
       return;
     }
+    const WS_URL = `http://localhost:8080/ws?token=${encodeURIComponent("Bearer " + token)}`; // direct to notification-service (recommended)
 
     client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       connectHeaders: {
-        Authorization: `Bearer ${token}`,
+        // Authorization: `Bearer ${token}`,
       },
       reconnectDelay: 3000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
-      debug: (s) => console.log("[STOMP]", s), // disable logs, enable if needed
-
       onConnect: () => {
         onStatus?.("connected");
 
-        client.subscribe("/user/topic/notifications", (frame) => {
+        client.subscribe("/user/queue/notifications", (frame) => {
           try {
             const dto = JSON.parse(frame.body);
             onNotification?.(dto);

@@ -1,7 +1,7 @@
 .instrument-donut {
     height: 100%;
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: 200px 1fr; // donut area + legend area
     gap: 14px;
 
     .chart-error,
@@ -20,17 +20,21 @@
         height: 200px;
     }
 
+
     &__center {
         position: absolute;
         inset: 0;
-        display: grid;
-        place-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; 
         pointer-events: none;
         text-align: center;
+        transform: translateY(2px);
     }
 
     &__centerValue {
-        font-size: 26px;
+        font-size: 28px;
         font-weight: 800;
         color: rgba(255, 255, 255, 0.92);
         line-height: 1;
@@ -40,11 +44,23 @@
         margin-top: 6px;
         font-size: 12px;
         color: rgba(255, 255, 255, 0.58);
+        line-height: 1;
     }
 
     &__legend {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 6px;
         display: grid;
         gap: 10px;
+
+        &::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
     .legend-item {
@@ -68,6 +84,9 @@
     .legend-name {
         color: rgba(255, 255, 255, 0.78);
         font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .legend-value {

@@ -17,3 +17,11 @@ export function safeNumber(n) {
   const x = Number(n);
   return Number.isFinite(x) ? x : 0;
 }
+export function hourToAmPmLabel(hourStr) {
+  const h = Number(hourStr); // "00".."23"
+  if (!Number.isFinite(h)) return hourStr;
+
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12} ${suffix}`;
+}

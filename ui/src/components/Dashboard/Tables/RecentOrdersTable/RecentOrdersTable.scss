@@ -1,0 +1,45 @@
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .table-pill {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.72);
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .table-link {
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(99, 102, 241, 0.95);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 6px 4px;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.table-reset {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: transform 140ms ease, border-color 140ms ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        border-color: rgba(99, 102, 241, 0.30);
+    }
+}

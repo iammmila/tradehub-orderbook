@@ -23,7 +23,9 @@ public class JwtAuthGatewayFilter implements GlobalFilter {
 
     // Paths that should NOT require auth
     private boolean isPublicPath(String path) {
-        return path.startsWith("/api/v1/auth/"); // login/register/introspect etc.
+        return path.startsWith("/api/v1/auth/")
+                || path.startsWith("/actuator/")
+                || path.startsWith("/ws/"); // login/register/introspect etc.
     }
 
     @Override
