@@ -1,0 +1,244 @@
+.tradingPage {
+    width: 100%;
+    padding: 50px 0;
+}
+
+.tradingHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto 14px auto;
+}
+
+.tradingHeader__title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    color: white;
+}
+
+.tradingHeader__subtitle {
+    opacity: 0.85;
+    font-size: 13px;
+    margin-top: 4px;
+    color: white;
+}
+
+.tradingHeader__right {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.instrumentPicker {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 520px;
+}
+
+.instrumentPicker__label {
+    font-size: 12px;
+    opacity: 0.8;
+    color: white;
+}
+
+.instrumentPicker__controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.instrumentInput {
+    width: 220px;
+}
+
+.instrumentQuick {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    border: 1px solid;
+    color: rgba(99, 102, 241, 0.95);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.chip--active {
+    opacity: 1;
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.tradingHeader__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.switch {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    user-select: none;
+}
+
+.switch__label {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.tradingGrid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    /* ✅ fixed left width looks better */
+    gap: 14px;
+}
+
+.tradingRight {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.switch input[type="checkbox"] {
+    accent-color: #00ffa0;
+}
+
+.input {
+    height: 40px;
+    border-radius: 12px;
+    padding: 0 12px;
+
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    outline: none;
+    transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.input:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.input:focus {
+    border-color: rgba(0, 255, 160, 0.55);
+    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.12);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 1100px) {
+    .instrumentPicker {
+        min-width: 100%;
+    }
+
+    .tradingGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .instrumentInput {
+        width: 100%;
+    }
+
+    .instrumentPicker__controls {
+        flex-wrap: wrap;
+    }
+}
+
+/* Fancy Toggle Switch */
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    flex-direction: column-reverse;
+}
+
+.toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toggle__track {
+    width: 46px;
+    height: 26px;
+    border-radius: 999px;
+    position: relative;
+
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.toggle__track::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
+
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+
+    transition: left 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.toggle__text {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    opacity: 0.9;
+    color: white;
+}
+
+/* hover */
+.toggle:hover .toggle__track {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* checked (ON) */
+.toggle input:checked+.toggle__track {
+    background: rgba(0, 255, 160, 0.18);
+    border-color: rgba(0, 255, 160, 0.55);
+    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.12);
+}
+
+.toggle input:checked+.toggle__track::after {
+    left: calc(100% - 23px);
+    background: rgba(0, 255, 160, 0.95);
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.40),
+        0 0 0 6px rgba(0, 255, 160, 0.10);
+}
+
+/* keyboard focus */
+.toggle input:focus-visible+.toggle__track {
+    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.14);
+}

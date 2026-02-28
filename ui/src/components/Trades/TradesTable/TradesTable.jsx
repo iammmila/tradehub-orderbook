@@ -18,18 +18,20 @@ const TradesTable = () => {
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
-  const [totalPages, setTotalPages] = useState(0);
 
-  // Filters
-  const [instrument, setInstrument] = useState("");
+  const [pageInfo, setPageInfo] = useState({
+    number: 0,
+    totalElements: 0,
+  });
 
-  // Sorting (server-side like OrdersTable)
+  // ✅ separate:
+  const [search, setSearch] = useState("");          // client-side search (typing)
+  const [instrumentApi, setInstrumentApi] = useState(""); // optional server-side filter (exact)
+
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortDir, setSortDir] = useState("desc");
 
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
-
-  // userId -> username
   const [usernames, setUsernames] = useState({});
 
   const sortParam = useMemo(() => `${sortBy},${sortDir}`, [sortBy, sortDir]);
@@ -67,52 +69,98 @@ const TradesTable = () => {
       setLoading(true);
       setError(null);
 
-      const data = await fetchMyTradesPage(page, size, sortParam, instrument || undefined);
+      // ✅ use instrumentApi for backend filter; search should NOT hit backend
+      const data = await fetchMyTradesPage(page, size, sortParam, instrumentApi || undefined);
+
       const content = data?.content || [];
+      const p = data?.page || {};
 
       setRows(content);
-      setTotalPages(data?.totalPages ?? 0);
-      setLastUpdatedAt(new Date());
+      setPageInfo({
+        number: p?.number ?? page,
+        totalElements: p?.totalElements ?? 0,
+      });
 
+      setLastUpdatedAt(new Date());
       await resolveUsernames(content);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load trades");
     } finally {
       setLoading(false);
     }
-  }, [page, size, sortParam, instrument, resolveUsernames]);
+  }, [page, size, sortParam, instrumentApi, resolveUsernames]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   const toggleSort = (field) => {
-    if (sortBy !== field) {
-      setSortBy(field);
-      setSortDir("asc");
-      setPage(0);
-      return;
-    }
-    setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     setPage(0);
+    setSortBy((prev) => {
+      if (prev !== field) {
+        setSortDir("desc");
+        return field;
+      }
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      return prev;
+    });
   };
 
   const resetFilters = () => {
-    setInstrument("");
+    setSearch("");
+    setInstrumentApi("");
     setSortBy("createdAt");
     setSortDir("desc");
     setPage(0);
   };
 
   const filteredRows = useMemo(() => {
-    const q = instrument.trim().toUpperCase();
+    const q = search.trim().toUpperCase();
     let out = [...(rows || [])];
 
+    // ✅ client-side search only
     if (q) {
-      out = out.filter((t) => String(t.instrument || "").toUpperCase().includes(q));
+      out = out.filter((t) =>
+        String(t.instrument || "").toUpperCase().includes(q)
+      );
     }
+
+    // ✅ client-side fallback sort
+    const dir = sortDir === "asc" ? 1 : -1;
+
+    out.sort((a, b) => {
+      const av = a?.[sortBy];
+      const bv = b?.[sortBy];
+
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+
+      if (sortBy === "createdAt") {
+        const ad = new Date(av).getTime();
+        const bd = new Date(bv).getTime();
+        return (ad - bd) * dir;
+      }
+
+      if (typeof av === "number" && typeof bv === "number") {
+        return (av - bv) * dir;
+      }
+
+      const as = String(av).toUpperCase();
+      const bs = String(bv).toUpperCase();
+      if (as < bs) return -1 * dir;
+      if (as > bs) return 1 * dir;
+      return 0;
+    });
+
     return out;
-  }, [rows, instrument]);
+  }, [rows, search, sortBy, sortDir]);
+
+  // ✅ pagination computed from totalElements
+  const totalElements = pageInfo.totalElements ?? 0;
+  const lastPageIndex = totalElements > 0 ? Math.max(0, Math.ceil(totalElements / size) - 1) : 0;
+  const isFirstPage = page <= 0;
+  const isLastPage = totalElements > 0 ? page >= lastPageIndex : (rows?.length ?? 0) < size;
 
   return (
     <TableCard
@@ -128,9 +176,9 @@ const TradesTable = () => {
       }
     >
       <TableFilters
-        search={instrument}
-        onSearch={(v) => setInstrument(v)}
-        placeholder="Search instrument"
+        search={search}
+        onSearch={(v) => setSearch(v)}
+        placeholder="Search instrument (client-side)…"
         right={
           <div className="tradesTable__topActions">
             <button className="ordersBtn ordersBtn--secondary" onClick={resetFilters}>
@@ -195,6 +243,7 @@ const TradesTable = () => {
                 const timeStr = t.createdAt
                   ? `${formatDate(t.createdAt)} ${formatTime(t.createdAt)}`
                   : "-";
+
                 return (
                   <tr key={t.id}>
                     <td>{timeStr}</td>
@@ -202,16 +251,10 @@ const TradesTable = () => {
                     <td className="mono">{t.price != null ? formatMoney(t.price) : "-"}</td>
                     <td className="mono">{t.quantity != null ? formatNumber(t.quantity) : "-"}</td>
                     <td>
-                      <UserChip
-                        userId={t.buyerUserId}
-                        username={usernames[t.buyerUserId]}
-                      />
+                      <UserChip userId={t.buyerUserId} username={usernames[t.buyerUserId]} />
                     </td>
                     <td>
-                      <UserChip
-                        userId={t.sellerUserId}
-                        username={usernames[t.sellerUserId]}
-                      />
+                      <UserChip userId={t.sellerUserId} username={usernames[t.sellerUserId]} />
                     </td>
                   </tr>
                 );
@@ -225,19 +268,19 @@ const TradesTable = () => {
         <div className="ordersTable__pager">
           <button
             className="ordersBtn ordersBtn--secondary"
-            disabled={page <= 0}
-            onClick={() => setPage((p) => p - 1)}
+            disabled={loading || isFirstPage}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
           >
             Prev
           </button>
 
           <div className="ordersTable__pageInfo">
-            Page <b>{page + 1}</b> / <b>{Math.max(totalPages, 1)}</b>
+            Page <b>{page + 1}</b> / <b>{Math.max(lastPageIndex + 1, 1)}</b>
           </div>
 
           <button
             className="ordersBtn ordersBtn--secondary"
-            disabled={totalPages === 0 || page >= totalPages - 1}
+            disabled={loading || isLastPage}
             onClick={() => setPage((p) => p + 1)}
           >
             Next

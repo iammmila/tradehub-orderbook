@@ -1,0 +1,185 @@
+/* OrderEntryCard.scss */
+
+.oe {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Instrument row */
+.oeRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 12px;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.oeLabel {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.70);
+}
+
+.oeValue {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+/* Buy/Sell segmented control */
+.oeTabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.oeTab {
+    height: 44px;
+    border-radius: 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.88);
+
+    cursor: pointer;
+    font-weight: 900;
+    letter-spacing: 0.25px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    transition:
+        transform 120ms ease,
+        background 160ms ease,
+        border-color 160ms ease,
+        box-shadow 200ms ease,
+        filter 200ms ease;
+}
+
+.oeTab:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.oeTab:active {
+    transform: translateY(1px);
+}
+
+/* Active tabs */
+.oeTab--active {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(0, 255, 160, 0.45);
+    box-shadow: 0 0 0 5px rgba(0, 255, 160, 0.10);
+    color: rgba(255, 255, 255, 0.96);
+}
+
+/* Make BUY and SELL feel different, but still elegant */
+.oeTab--active:first-child {
+    /* BUY active */
+    box-shadow:
+        0 0 0 5px rgba(0, 255, 160, 0.10),
+        0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.oeTab--active:last-child {
+    /* SELL active */
+    border-color: rgba(255, 140, 140, 0.45);
+    box-shadow:
+        0 0 0 5px rgba(255, 140, 140, 0.10),
+        0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Form */
+.oeForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.oeField {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.oeField>span {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.70);
+}
+
+/* Inputs (scoped to this component) */
+.oeForm .input {
+    height: 42px;
+    border-radius: 12px;
+    padding: 0 12px;
+
+    color: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    outline: none;
+    transition:
+        border-color 140ms ease,
+        background 140ms ease,
+        box-shadow 160ms ease;
+}
+
+.oeForm .input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.oeForm .input:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.oeForm .input:focus {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(0, 255, 160, 0.55);
+    box-shadow: 0 0 0 5px rgba(0, 255, 160, 0.12);
+}
+
+/* Submit button feel nicer (keeps your existing ordersBtn classes) */
+.oe button.ordersBtn {
+    height: 44px;
+    border-radius: 14px;
+    font-weight: 900;
+    letter-spacing: 0.25px;
+
+    transition:
+        transform 120ms ease,
+        filter 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.oe button.ordersBtn:hover:not(:disabled) {
+    filter: brightness(1.06);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+}
+
+.oe button.ordersBtn:active:not(:disabled) {
+    transform: translateY(1px);
+    filter: brightness(0.98);
+}
+
+.oe button.ordersBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Optional: if TableCard subtitle shows errors, make error “feel” */
+.oeErrorHint {
+    color: rgba(255, 140, 140, 0.95);
+    font-weight: 800;
+}

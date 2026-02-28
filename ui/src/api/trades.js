@@ -11,12 +11,12 @@ export async function fetchMyTrades(
   });
   return res.data?.content || [];
 }
-export async function fetchMyTradesPage({
+export async function fetchMyTradesPage(
   page = 0,
   size = 10,
   sort = "createdAt,desc",
-  instrument = "",
-}) {
+  instrument 
+) {
   const params = { page, size, sort };
   if (instrument && instrument.trim()) params.instrument = instrument.trim();
 

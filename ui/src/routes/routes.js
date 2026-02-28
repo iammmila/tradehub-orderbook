@@ -1,5 +1,4 @@
 import MainRoot from "../pages/Main/MainRoot/MainRoot";
-import Home from "../pages/Main/Home/Home";
 import Register from "../pages/Main/Register/Register";
 import Login from "../pages/Main/Login/Login";
 import ProtectedRoute from "./ProtectedRoute";
@@ -10,6 +9,8 @@ import Settings from "../pages/Main/Settings/Settings";
 import Dashboard from "../pages/Main/Dashboard/Dashboard";
 import Orders from "../pages/Main/Orders/Orders";
 import Trades from "../pages/Main/Trades/Trades";
+import TradingPage from "../pages/Main/TradingPage/TradingPage";
+
 export const ROUTES = [
   // PUBLIC
   {
@@ -38,6 +39,10 @@ export const ROUTES = [
           {
             path: "trades",
             element: <Trades />,
+          },
+          {
+            path: "trading",
+            element: <TradingPage />,
           },
           { path: "settings", element: <Settings /> },
         ],

@@ -22,7 +22,7 @@ const UserChip = ({ userId, username }) => {
     if (userId == null) return <span>-</span>;
 
     return (
-        <div className="userChip" title={`User ID: ${userId}`}>
+        <div className="userChip" >
             <span className="userChip__avatar">{initial}</span>
 
             <span className="userChip__name">{label}</span>

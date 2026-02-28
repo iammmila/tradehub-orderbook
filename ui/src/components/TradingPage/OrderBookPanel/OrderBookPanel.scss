@@ -1,0 +1,118 @@
+.obGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.obSide__title {
+    font-size: 15px;
+    opacity: 0.85;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: white;
+}
+
+.obTableWrap {
+    max-height: 360px;
+    overflow: auto;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.obTable {
+    width: 100%;
+    border-collapse: collapse;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.obTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.75);
+
+    text-align: left;
+    padding: 10px 10px;
+
+    background: rgba(12, 14, 18, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.obTable tbody td {
+    padding: 9px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.92);
+    /* ✅ */
+}
+
+.obRow:hover td {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* empty state */
+.obEmpty {
+    text-align: center;
+    padding: 14px;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+/* clickable price */
+.obPriceBtn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    padding: 0;
+    margin: 0;
+
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.95);
+    /* ✅ white */
+
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(0, 255, 160, 0.5);
+
+    transition: color 140ms ease, text-decoration-color 140ms ease, transform 120ms ease;
+}
+
+.obPriceBtn:hover {
+    color: rgba(0, 255, 160, 0.95);
+    text-decoration-color: rgba(0, 255, 160, 0.95);
+}
+
+.obPriceBtn:active {
+    transform: translateY(1px);
+}
+
+.obPriceBtn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.14);
+    border-radius: 8px;
+}
+
+/* Make number columns readable */
+.obTable .mono {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+/* Optional: subtle side vibe (no hard red/green, still modern) */
+.obRow--bid td:first-child .obPriceBtn {
+    text-decoration-color: rgba(0, 255, 160, 0.55);
+}
+
+.obRow--ask td:first-child .obPriceBtn {
+    text-decoration-color: rgba(255, 140, 140, 0.45);
+}
+
+/* responsive */
+@media (max-width: 900px) {
+    .obGrid {
+        grid-template-columns: 1fr;
+    }
+}

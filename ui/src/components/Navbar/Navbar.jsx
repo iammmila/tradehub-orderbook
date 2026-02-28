@@ -13,7 +13,6 @@ function Navbar() {
   // 1. Determine login status
   const isLoggedIn = !!localStorage.getItem("token");
   const isLanding = location.pathname === "/";
-  const isApp = location.pathname.startsWith("/app");
 
   // 2. Define Public vs Private sections
   const sectionsPublic = useMemo(
@@ -29,6 +28,7 @@ function Navbar() {
   const sectionsPrivate = useMemo(
     () => [
       { path: "/app/dashboard", label: "Dashboard" },
+      { path: "/app/trading", label: "Trading" },
       { path: "/app/orders", label: "Orders" },
       { path: "/app/trades", label: "Trades" },
     ],
