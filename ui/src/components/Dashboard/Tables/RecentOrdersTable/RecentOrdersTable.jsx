@@ -5,6 +5,7 @@ import TableCard from '../TableCard/TableCard';
 import TableFilters from '../TableFilters/TableFilters';
 import { fetchOrdersPage } from '../../../../api/orders';
 import { formatDate, formatMoney, formatNumber, formatTime } from '../../../../utils/formatter';
+import { useNavigate } from 'react-router-dom';
 function statusBadgeClass(status) {
   const s = String(status || "").toUpperCase();
   if (s === "FILLED") return "badge badge--filled";
@@ -18,6 +19,7 @@ function compare(a, b) {
 }
 
 const RecentOrdersTable = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rows, setRows] = useState([]);
@@ -80,7 +82,7 @@ const RecentOrdersTable = () => {
   const rightSlot = (
     <div className="table-actions">
       <span className="table-pill">{loading ? "Loading..." : `${rows.length} rows`}</span>
-      <button className="table-link" type="button" onClick={() => window.location.assign("/app/orders")}>
+      <button className="table-link" type="button" onClick={() => navigate("/app/orders")}>
         View all
       </button>
     </div>

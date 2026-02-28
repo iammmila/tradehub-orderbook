@@ -9,11 +9,16 @@ import InstrumentDistributionDonut from '../../../components/Dashboard/Charts/In
 import RecentOrdersTable from '../../../components/Dashboard/Tables/RecentOrdersTable/RecentOrdersTable';
 import RecentTradesTable from '../../../components/Dashboard/Tables/RecentTradesTable/RecentTradesTable';
 import LiveOrdersBar from '../../../components/Dashboard/LiveOrdersBar/LiveOrdersBar';
+import { Helmet } from 'react-helmet';
 
 const Dashboard = () => {
 
   return (
     <div className="dashWrap">
+      <Helmet>
+        <title>Dashboard | Trading</title>
+        <meta name='description' content='It is Dashboard page of Trading Application' />
+      </Helmet>
       {/* Row 1: KPI cards */}
       <div className="dashGrid dashGrid--kpi">
         <OpenOrdersCard />

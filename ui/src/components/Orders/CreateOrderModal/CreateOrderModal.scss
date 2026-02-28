@@ -1,0 +1,97 @@
+@import "../_orders-ui";
+
+.field .select {
+    width: 100%;
+}
+
+.field__error {
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(255, 190, 190, 0.95);
+}
+
+.modal__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 16px;
+
+    overflow: auto;
+}
+
+.modal__card {
+    width: min(520px, 100%);
+    background: rgba(15, 18, 23, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    padding: 14px;
+
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+
+.modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+        margin: 0;
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.92);
+    }
+}
+
+.modal__form {
+    margin-top: 12px;
+    display: grid;
+    gap: 12px;
+}
+
+.modal__error {
+    background: rgba(255, 0, 0, 0.08);
+    border: 1px solid rgba(255, 0, 0, 0.22);
+    padding: 10px;
+    border-radius: 12px;
+    color: rgba(255, 190, 190, 0.95);
+    font-size: 13px;
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+
+    span {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.72);
+    }
+
+    input,
+    select {
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.9);
+        padding: 0 12px;
+        outline: none;
+
+        &:focus {
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+    }
+}
+
+.modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}

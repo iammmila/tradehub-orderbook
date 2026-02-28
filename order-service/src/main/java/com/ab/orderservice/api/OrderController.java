@@ -5,13 +5,14 @@ import com.ab.orderservice.dto.OrderResponse;
 import com.ab.orderservice.dto.ReplaceOrderRequest;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
-import com.ab.orderservice.security.RoleUtil;
+import com.ab.orderservice.security.AuthPrincipal;
 import com.ab.orderservice.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -26,6 +27,7 @@ public class OrderController {
     // get /api/v1/orders -> 200 ok
     @GetMapping
     public ResponseEntity<List<OrderResponse>> getOrders(
+            @AuthenticationPrincipal AuthPrincipal me,
             @RequestParam(required = false) OrderSide side,
             @RequestParam(required = false) String instrument,
             @RequestParam(required = false) OrderStatus status
@@ -39,54 +41,44 @@ public class OrderController {
     //    asc = ascending = oldest first
     @GetMapping("/my")
     public ResponseEntity<Page<OrderResponse>> getOrdersByUser(
-            @RequestHeader("X-User-Id") Long userId,
-            @RequestHeader(value = "X-Roles", required = false) String roles,
+            @AuthenticationPrincipal AuthPrincipal me,
             @RequestParam(required = false) OrderSide side,
             @RequestParam(required = false) String instrument,
             @RequestParam(required = false) OrderStatus status,
             Pageable pageable
     ) {
-        if (!RoleUtil.hasAnyRole(roles, "ROLE_USER", "ROLE_ADMIN")) {
-            return ResponseEntity.status(403).build();
-        }
-        return ResponseEntity.ok(orderService.getOrdersByUserPaged(userId, side, instrument, status, pageable));
+        return ResponseEntity.ok(
+                orderService.getOrdersByUserPaged(me.userId(), side, instrument, status, pageable));
     }
 
     // delete /api/v1/orders/orderid -> 200 OK
     @DeleteMapping("/{orderId}")
     public ResponseEntity<OrderResponse> cancelOrder(
-            @PathVariable Long orderId,
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @RequestHeader(value = "X-Roles", required = false) String roles
+            @AuthenticationPrincipal AuthPrincipal me,
+            @PathVariable Long orderId
     ) {
-        boolean isAdmin = RoleUtil.isAdmin(roles);
-        return ResponseEntity.ok(orderService.cancelOrder(orderId, currentUserId, isAdmin));
+        boolean isAdmin = false;
+        return ResponseEntity.ok(orderService.cancelOrder(orderId, me.userId(), isAdmin));
     }
 
     // PATCH /api/v1/orders/{orderId} -> 200 OK
     @PatchMapping("/{orderId}")
     public ResponseEntity<OrderResponse> replaceOrder(
+            @AuthenticationPrincipal AuthPrincipal me,
             @PathVariable Long orderId,
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @RequestHeader(value = "X-Roles", required = false) String roles,
             @Valid @RequestBody ReplaceOrderRequest request
     ) {
-        boolean isAdmin = RoleUtil.isAdmin(roles);
-        return ResponseEntity.ok(orderService.replaceOrder(orderId, currentUserId, isAdmin, request));
+        boolean isAdmin = false;
+        return ResponseEntity.ok(orderService.replaceOrder(orderId, me.userId(), isAdmin, request));
     }
 
     // post /api/v1/orders -> 201
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(
-            @RequestHeader("X-User-Id") Long userId,
-            @RequestHeader(value = "X-Roles", required = false) String roles,
+            @AuthenticationPrincipal AuthPrincipal me,
             @Valid @RequestBody CreateOrderRequest request
     ) {
-        if (!RoleUtil.hasAnyRole(roles, "ROLE_USER", "ROLE_ADMIN")) {
-            return ResponseEntity.status(403).build();
-        }
-
-        OrderResponse created = orderService.createOrder(userId, request);
+        OrderResponse created = orderService.createOrder(me.userId(), request);
         URI location = URI.create("/api/v1/orders/" + created.getId());
         return ResponseEntity.created(location).body(created);
     }

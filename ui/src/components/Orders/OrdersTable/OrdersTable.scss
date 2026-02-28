@@ -1,0 +1,103 @@
+@import "../orders-ui";
+.thActions {
+  width: 180px;
+}
+
+.badge--partial {
+  color: rgba(255, 170, 0, 0.95);
+  border-color: rgba(255, 170, 0, 0.22);
+}
+
+.table {
+  thead {
+    .thSortable {
+      cursor: pointer;
+      user-select: none;
+    }
+  }
+
+  tbody {
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    }
+
+    .sideBuy,
+    .sideSell {
+      font-weight: 700;
+    }
+
+    .actionsCell {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+  }
+}
+
+.ordersTable__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  gap: 12px;
+}
+
+.ordersTable__pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ordersTable__pageInfo {
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ordersTable__pageSize {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  span {
+    color: rgba(255, 255, 255, 0.88);
+  }
+}
+
+.ordersTable__topActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ordersTable__errorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ordersTable__rowsSelect {
+  height: 34px;
+  min-width: 72px;
+  padding: 0 12px;
+  border-radius: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.88);
+
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+
+  /* keep native arrow (looks clean like in your other tables) */
+  appearance: auto;
+  -webkit-appearance: menulist;
+  -moz-appearance: menulist;
+
+  &:focus {
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  }
+}

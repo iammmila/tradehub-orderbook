@@ -1,0 +1,16 @@
+@import "../_orders-ui"; 
+
+.replace__meta {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    display: grid;
+    gap: 4px;
+    font-size: 13px;
+    div{
+        font-size:18px ;
+        color: white;
+    }
+}

@@ -6,12 +6,14 @@ import { fetchMyTradesPage } from '../../../../api/trades';
 import { formatDate, formatMoney, formatNumber, formatTime } from '../../../../utils/formatter';
 import "../TableBase.scss"
 import { MainContext } from "../../../../context/ContextProvider";
+import { useNavigate } from 'react-router-dom';
 function compare(a, b) {
     if (a < b) return -1;
     if (a > b) return 1;
     return 0;
 }
 const RecentTradesTable = () => {
+    const navigate = useNavigate();
     const { user } = useContext(MainContext);
     const myUserId = user?.id;
     const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ const RecentTradesTable = () => {
     const rightSlot = (
         <div className="table-actions">
             <span className="table-pill">{loading ? "Loading..." : `${filtered.length} shown`}</span>
-            <button className="table-link" type="button" onClick={() => window.location.assign("/app/trades")}>
+            <button className="table-link" type="button" onClick={() => navigate("/app/trades")}>
                 View all
             </button>
         </div>
