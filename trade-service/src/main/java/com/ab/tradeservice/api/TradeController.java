@@ -2,7 +2,7 @@ package com.ab.tradeservice.api;
 
 import com.ab.tradeservice.dto.CreateTradeRequest;
 import com.ab.tradeservice.dto.TradeResponse;
-import com.ab.tradeservice.security.RoleUtil;
+import com.ab.tradeservice.security.AuthPrincipal;
 import com.ab.tradeservice.service.TradeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 
 @RestController
@@ -32,26 +32,18 @@ public class TradeController {
     //    asc = ascending = oldest first
     @GetMapping("/my")
     public ResponseEntity<Page<TradeResponse>> getMyTrades(
-            @RequestHeader("X-User-Id") Long userId,
-            @RequestHeader(value = "X-Roles", required = false) String roles,
+            @AuthenticationPrincipal AuthPrincipal me,
             @RequestParam(required = false) String instrument,
             Pageable pageable
     ) {
-        if (!RoleUtil.hasAnyRole(roles, "ROLE_USER", "ROLE_ADMIN")) {
-            return ResponseEntity.status(403).build();
-        }
-        return ResponseEntity.ok(tradeService.getMyTradesPaged(userId, instrument, pageable));
+        return ResponseEntity.ok(tradeService.getMyTradesPaged(me.userId(), instrument, pageable));
     }
 
     // optional: GET /api/v1/trades?instrument=BT -> 200 (ADMIN)
     @GetMapping
     public ResponseEntity<List<TradeResponse>> getTrades(
-            @RequestHeader(value = "X-Roles", required = false) String roles,
             @RequestParam(required = false) String instrument
     ) {
-        if (!RoleUtil.hasRole(roles, "ROLE_ADMIN")) {
-            return ResponseEntity.status(403).build();
-        }
         return ResponseEntity.ok(tradeService.getTrades(instrument));
     }
 }

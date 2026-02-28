@@ -8,9 +8,12 @@ export async function getMe() {
 export async function updateMe(payload) {
   // PUT for optional fields
   const res = await api.put("/v1/users/me", payload);
-  return res.data; // can be { user, token } or just user (see below)
+  return res.data; 
 }
-
+export async function fetchUserById(id) {
+  const res = await api.get(`/v1/users/${id}`);
+  return res.data; 
+}
 export async function changePassword(payload) {
   const res = await api.put("/v1/users/me/password", payload);
   return res.data;

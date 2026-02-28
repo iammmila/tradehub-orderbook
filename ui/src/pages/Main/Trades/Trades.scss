@@ -1,0 +1,26 @@
+.tradesPage {
+    display: grid;
+    gap: 30px;
+    width: 100%;
+    padding: 50px 0;
+
+    &__header {
+        margin: 0 auto;
+        width: 78%;
+        display: grid;
+        gap: 16px;
+
+        &-title {
+            color: white;
+            font-size: 40px;
+            margin: 0;
+        }
+    }
+
+    &__table {
+        margin: 0 auto;
+        width: 78%;
+        display: grid;
+        gap: 16px;
+    }
+}

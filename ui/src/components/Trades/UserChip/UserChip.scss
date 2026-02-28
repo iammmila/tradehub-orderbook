@@ -1,0 +1,47 @@
+.userChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    max-width: 260px;
+}
+
+.userChip__avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.userChip__name {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    color:rgba(99, 102, 241, 0.95);
+}
+
+.userChip__copy {
+    border: none;
+    background: transparent;
+    opacity: 0.75;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 4px;
+    border-radius: 6px;
+    color: inherit;
+
+    &:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.08);
+    }
+}

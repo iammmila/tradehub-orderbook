@@ -1,0 +1,39 @@
+.tradesTable__pager {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    .tradesTable__pageInfo {
+        opacity: 0.9;
+        font-size: 13px;
+    }
+
+}
+
+.tradesTable__topActions {
+    display: flex;
+    gap: 10px;
+}
+
+.tradesTable__footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    opacity: 0.9;
+    font-size: 13px;
+
+    span {
+        font-size: 20px;
+        color: white;
+    }
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.side {
+    font-weight: 600;
+    text-transform: uppercase;
+}
