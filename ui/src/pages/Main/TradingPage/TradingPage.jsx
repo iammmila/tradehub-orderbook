@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import "./TradingPage.scss";
 
 import OrderBookPanel from "../../../components/TradingPage/OrderBookPanel/OrderBookPanel";
@@ -6,21 +6,16 @@ import OrderEntryCard from "../../../components/TradingPage/OrderEntryCard/Order
 import OpenOrdersWidget from "../../../components/TradingPage/OpenOrdersWidget/OpenOrdersWidget";
 import Select from "../../../components/Dashboard/Tables/Select/Select";
 
-import { fetchOrderBook } from "../../../api/orderbook";
-import { formatDate, formatTime } from "../../../utils/formatter";
+import useOrderBookPolling from "../../../hooks/useOrderBookPolling";
 
 const DEFAULT_INSTRUMENTS = ["TST1", "BTC", "ETH", "AAPL", "TSLA"];
 
 const TradingPage = () => {
-    const [instrument, setInstrument] = useState("TST1");        // active instrument
-    const [instrumentDraft, setInstrumentDraft] = useState("TST1"); // typed value
+    const [instrument, setInstrument] = useState("TST1");
+    const [instrumentDraft, setInstrumentDraft] = useState("TST1");
 
     const [autoRefresh, setAutoRefresh] = useState(true);
-
-    const [book, setBook] = useState(null);
-    const [bookLoading, setBookLoading] = useState(true);
-    const [bookError, setBookError] = useState(null);
-    const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
+    const [showLevels, setShowLevels] = useState(false);
 
     const [prefill, setPrefill] = useState(null);
     const [openOrdersKey, setOpenOrdersKey] = useState(0);
@@ -29,49 +24,31 @@ const TradingPage = () => {
         setOpenOrdersKey((k) => k + 1);
     }, []);
 
-    const loadBook = useCallback(
-        async ({ showSpinner } = { showSpinner: false }) => {
-            if (!instrument) return;
-
-            try {
-                if (showSpinner) setBookLoading(true);
-                setBookError(null);
-
-                const data = await fetchOrderBook(instrument.trim());
-                setBook(data);
-                setLastUpdatedAt(new Date());
-            } catch (e) {
-                setBookError(e?.response?.data?.message || e?.message || "Failed to load orderbook");
-            } finally {
-                if (showSpinner) setBookLoading(false);
-            }
-        },
-        [instrument]
-    );
-
     const applyInstrument = useCallback(() => {
-        const next = instrumentDraft.trim().toUpperCase();
+        const next = String(instrumentDraft || "").trim().toUpperCase();
         if (!next) return;
         setInstrument(next);
     }, [instrumentDraft]);
 
-    useEffect(() => {
-        loadBook({ showSpinner: true });
-        bumpOpenOrders();
-    }, [instrument, loadBook, bumpOpenOrders]);
-
-    useEffect(() => {
-        if (!autoRefresh) return;
-        const id = setInterval(() => loadBook({ showSpinner: false }), 2000);
-        return () => clearInterval(id);
-    }, [autoRefresh, loadBook]);
+    const { book, loading, refreshing, error, refreshNow } = useOrderBookPolling({
+        instrument,
+        showLevels,
+        pollMs: 2000,
+        enabled: autoRefresh,
+    });
 
     const subtitle = useMemo(() => {
-        if (bookLoading) return "Loading…";
-        if (bookError) return "Error";
-        if (!lastUpdatedAt) return "";
-        return `Last updated: ${formatDate(lastUpdatedAt)} ${formatTime(lastUpdatedAt)}`;
-    }, [bookLoading, bookError, lastUpdatedAt]);
+        if (!instrument) return "Select an instrument to load orderbook";
+        if (loading) return "Loading…";
+        if (error) return `Error: ${String(error)}`;
+        if (refreshing) return "Updating…";
+        return "Live orderbook";
+    }, [instrument, loading, refreshing, error]);
+
+    const onManualRefresh = useCallback(() => {
+        refreshNow?.();
+        bumpOpenOrders();
+    }, [refreshNow, bumpOpenOrders]);
 
     return (
         <div className="tradingPage">
@@ -92,7 +69,7 @@ const TradingPage = () => {
                                 value={instrument}
                                 onChange={(v) => {
                                     setInstrumentDraft(v);
-                                    setInstrument(v); // triggers effect above
+                                    setInstrument(v);
                                 }}
                                 options={DEFAULT_INSTRUMENTS.map((x) => ({ label: x, value: x }))}
                             />
@@ -136,7 +113,7 @@ const TradingPage = () => {
                             <span className="toggle__text">Auto</span>
                         </label>
 
-                        <button className="ordersBtn ordersBtn--secondary" onClick={() => loadBook({ showSpinner: true })} type="button">
+                        <button className="ordersBtn ordersBtn--secondary" onClick={onManualRefresh} type="button">
                             Refresh
                         </button>
                     </div>
@@ -147,8 +124,15 @@ const TradingPage = () => {
                 <OrderBookPanel
                     instrument={instrument}
                     book={book}
-                    loading={bookLoading}
-                    error={bookError}
+                    loading={loading}
+                    refreshing={refreshing}
+                    error={error}
+                    showLevels={showLevels}
+                    onToggleLevels={(v) => {
+                        setShowLevels(v);
+                        // immediately refresh when toggle changes (best UX)
+                        refreshNow?.();
+                    }}
                     onPickPrice={(side, price) => setPrefill({ side, price })}
                 />
 
@@ -157,7 +141,7 @@ const TradingPage = () => {
                         instrument={instrument}
                         prefill={prefill}
                         onSubmitted={() => {
-                            loadBook({ showSpinner: false });
+                            refreshNow?.();
                             bumpOpenOrders();
                         }}
                     />
@@ -166,7 +150,7 @@ const TradingPage = () => {
                         instrument={instrument}
                         refreshKey={openOrdersKey}
                         onChanged={() => {
-                            loadBook({ showSpinner: false });
+                            refreshNow?.();
                             bumpOpenOrders();
                         }}
                     />

@@ -36,7 +36,6 @@ const OpenOrdersWidget = ({ instrument, refreshKey, onChanged }) => {
     }
   }, [instrument]);
 
-  // ✅ reload on instrument change OR refreshKey change
   useEffect(() => {
     load();
   }, [load, instrument, refreshKey]);
@@ -45,7 +44,7 @@ const OpenOrdersWidget = ({ instrument, refreshKey, onChanged }) => {
     try {
       await cancelOrder(id);
       setRows((prev) => prev.filter((x) => x.id !== id));
-      onChanged?.(); // TradingPage will bump refreshKey + reload book
+      onChanged?.();
     } catch (e) {
       setErr(e?.message || "Cancel failed");
     }
@@ -69,6 +68,7 @@ const OpenOrdersWidget = ({ instrument, refreshKey, onChanged }) => {
               <th>Side</th>
               <th>Price</th>
               <th>Remain</th>
+              <th>Instrument</th>
               <th></th>
             </tr>
           </thead>
@@ -89,6 +89,7 @@ const OpenOrdersWidget = ({ instrument, refreshKey, onChanged }) => {
                   <td className="mono">{String(o.side || "-").toUpperCase()}</td>
                   <td className="mono">{o.price != null ? formatMoney(o.price) : "-"}</td>
                   <td className="mono">{o.remainingQuantity != null ? formatNumber(o.remainingQuantity) : "-"}</td>
+                  <td className="mono">{o.instrument || "-"}</td>
                   <td className="ooActions">
                     <button
                       className="ordersBtn ordersBtn--danger ordersBtn--sm"

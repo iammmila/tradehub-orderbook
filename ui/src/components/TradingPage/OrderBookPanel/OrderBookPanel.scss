@@ -4,6 +4,10 @@
     gap: 12px;
 }
 
+.obTableWrap {
+    min-height: 320px;
+}
+
 .obSide__title {
     font-size: 15px;
     opacity: 0.85;
@@ -53,14 +57,12 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
-/* empty state */
 .obEmpty {
     text-align: center;
     padding: 14px;
     color: rgba(255, 255, 255, 0.65);
 }
 
-/* clickable price */
 .obPriceBtn {
     border: none;
     background: transparent;
@@ -72,7 +74,6 @@
     font-weight: 900;
     letter-spacing: 0.2px;
     color: rgba(255, 255, 255, 0.95);
-    /* ✅ white */
 
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -96,18 +97,99 @@
     border-radius: 8px;
 }
 
-/* Make number columns readable */
 .obTable .mono {
     color: rgba(255, 255, 255, 0.88);
 }
 
-/* Optional: subtle side vibe (no hard red/green, still modern) */
 .obRow--bid td:first-child .obPriceBtn {
     text-decoration-color: rgba(0, 255, 160, 0.55);
 }
 
 .obRow--ask td:first-child .obPriceBtn {
     text-decoration-color: rgba(255, 140, 140, 0.45);
+}
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    flex-direction: column-reverse;
+}
+
+.toggle--inline {
+    flex-direction: row;
+    gap: 10px;
+}
+
+.toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toggle__track {
+    width: 46px;
+    height: 26px;
+    border-radius: 999px;
+    position: relative;
+
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.toggle__track::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
+
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+
+    transition: left 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.toggle__text {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+/* hover */
+.toggle:hover .toggle__track {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* checked (ON) */
+.toggle input:checked+.toggle__track {
+    background: rgba(0, 255, 160, 0.18);
+    border-color: rgba(0, 255, 160, 0.55);
+    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.12);
+}
+
+.toggle input:checked+.toggle__track::after {
+    left: calc(100% - 23px);
+    background: rgba(0, 255, 160, 0.95);
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.40),
+        0 0 0 6px rgba(0, 255, 160, 0.10);
+}
+
+/* keyboard focus */
+.toggle input:focus-visible+.toggle__track {
+    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.14);
 }
 
 /* responsive */

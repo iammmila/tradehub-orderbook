@@ -1,28 +1,69 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./Select.scss"
+import ReactDOM from "react-dom";
+import "./Select.scss";
 
-const Select = ({ options, value, onChange, label, width = 140 }) => {
+const Select = ({ options = [], value, onChange, label, width = 140 }) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
+  const menuRef = useRef(null);
+  const [pos, setPos] = useState(null);
 
-  const current = useMemo(
-    () => options.find((o) => o.value === value) || options[0],
-    [options, value]
-  );
+  const current = useMemo(() => {
+    const v = value == null ? null : String(value);
+    return options.find((o) => String(o.value) === v) || null;
+  }, [options, value]);
+
+  const close = () => setOpen(false);
 
   useEffect(() => {
-    const onDoc = (e) => {
-      if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) setOpen(false);
+    const onDocPointerDown = (e) => {
+      const wrap = wrapRef.current;
+      const menu = menuRef.current;
+
+      const inWrap = wrap?.contains(e.target);
+      const inMenu = menu?.contains(e.target);
+
+      if (!inWrap && !inMenu) close();
     };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+
+    document.addEventListener("pointerdown", onDocPointerDown);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const updatePos = () => {
+      const el = wrapRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setPos({
+        left: r.left,
+        top: r.bottom + 8,
+        width: r.width,
+      });
+    };
+
+    updatePos();
+    window.addEventListener("resize", updatePos);
+    window.addEventListener("scroll", updatePos, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePos);
+      window.removeEventListener("scroll", updatePos, true);
+    };
+  }, [open]);
+
   const handleKeyDown = (e) => {
-    if (e.key === "Escape") setOpen(false);
-    if (e.key === "Enter" || e.key === " ") setOpen((v) => !v);
+    if (e.key === "Escape") close();
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setOpen((v) => !v);
+    }
   };
+
+  const displayLabel =
+    current?.label ?? (value ?? options?.[0]?.label ?? "");
 
   return (
     <div className="dashboardSelect" ref={wrapRef} style={{ width }}>
@@ -36,32 +77,49 @@ const Select = ({ options, value, onChange, label, width = 140 }) => {
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className="dashboardSelect__value">{current?.label}</span>
+        <span className="dashboardSelect__value">{displayLabel}</span>
         <span className="dashboardSelect__chev" />
       </button>
 
-      {open && (
-        <div className="dashboardSelect__menu" role="listbox">
-          {options.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              className={`dashboardSelect__opt ${opt.value === value ? "is-active" : ""}`}
-              onClick={() => {
-                onChange(opt.value);
-                setOpen(false);
-              }}
-              role="option"
-              aria-selected={opt.value === value}
-            >
-              <span className="dashboardSelect__optLabel">{opt.label}</span>
-              {opt.value === value && <span className="dashboardSelect__check">✓</span>}
-            </button>
-          ))}
-        </div>
-      )}
+      {open &&
+        pos &&
+        ReactDOM.createPortal(
+          <div
+            ref={menuRef}
+            className="dashboardSelect__menu dashboardSelect__menu--portal"
+            role="listbox"
+            style={{
+              position: "fixed",
+              left: pos.left,
+              top: pos.top,
+              width: pos.width,
+              zIndex: 2147483647,
+            }}
+          >
+            {options.map((opt) => {
+              const active = String(opt.value) === String(value);
+              return (
+                <button
+                  key={String(opt.value)}
+                  type="button"
+                  className={`dashboardSelect__opt ${active ? "is-active" : ""}`}
+                  onClick={() => {
+                    onChange?.(opt.value);
+                    close();
+                  }}
+                  role="option"
+                  aria-selected={active}
+                >
+                  <span className="dashboardSelect__optLabel">{opt.label}</span>
+                  {active && <span className="dashboardSelect__check">✓</span>}
+                </button>
+              );
+            })}
+          </div>,
+          document.body
+        )}
     </div>
-  )
-}
+  );
+};
 
-export default Select
+export default Select;

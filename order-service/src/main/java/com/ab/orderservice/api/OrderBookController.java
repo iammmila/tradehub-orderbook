@@ -24,7 +24,7 @@ public class OrderBookController {
     @GetMapping
     public ResponseEntity<OrderBookResponse> getBook(
             @AuthenticationPrincipal AuthPrincipal me,
-            @RequestParam String instrument,
+            @RequestParam(required = false) String instrument,
             @RequestParam(required = false) String exchange,
             @RequestParam(required = false, defaultValue = "false") boolean aggregated,
             @RequestParam(required = false, defaultValue = "false") boolean levels

@@ -86,24 +86,11 @@
     gap: 10px;
 }
 
-.switch {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-    user-select: none;
-}
-
-.switch__label {
-    font-size: 12px;
-    opacity: 0.9;
-}
-
 .tradingGrid {
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: 420px 1fr;
-    /* ✅ fixed left width looks better */
     gap: 14px;
 }
 
@@ -162,8 +149,6 @@
         flex-wrap: wrap;
     }
 }
-
-/* Fancy Toggle Switch */
 
 .toggle {
     display: inline-flex;

@@ -1,12 +1,23 @@
 import { api } from "./axios";
 
-/**
- * GET /api/v1/orderbook?instrument=TST1
- * returns { instrument, bids:[], asks:[] }
- */
-export async function fetchOrderBook(instrument) {
+export async function fetchOrderBook({
+  instrument,
+  aggregated = true,
+  levels = false,
+  signal,
+}) {
+  const inst = String(instrument || "").trim();
+  if (!inst)
+    return { bids: [], asks: [], aggregated, levels, instrument: null };
+
   const res = await api.get("/v1/orderbook", {
-    params: { instrument },
+    params: {
+      instrument: inst,
+      aggregated,
+      ...(levels ? { levels: true } : {}),
+    },
+    signal,
   });
+
   return res.data;
 }

@@ -1,7 +1,8 @@
 import React from 'react'
 import './TableCard.scss'
 
-const TableCard = ({ title, subtitle, rightSlot, children }) => {
+const TableCard = ({ title, subtitle, rightSlot, right, children }) => {
+  const resolvedRight = rightSlot ?? right;
   return (
     <div className="table-card">
       <div className="table-card__head">
@@ -9,7 +10,7 @@ const TableCard = ({ title, subtitle, rightSlot, children }) => {
           <div className="table-card__title">{title}</div>
           {subtitle && <div className="table-card__subtitle">{subtitle}</div>}
         </div>
-        {rightSlot && <div className="table-card__right">{rightSlot}</div>}
+        {resolvedRight && <div className="table-card__right">{resolvedRight}</div>}
       </div>
 
       <div className="table-card__body">{children}</div>

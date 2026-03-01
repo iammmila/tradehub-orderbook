@@ -32,6 +32,9 @@ public class OrderBookService {
         if (exchange != null && !exchange.isBlank() && !exchangeRegistry.isSupported(exchange)) {
             throw new BadRequestException(ErrorCode.EXCHANGE_NOT_SUPPORTED);
         }
+        if (instrument == null || instrument.isBlank()) {
+            throw new BadRequestException(ErrorCode.INSTRUMENT_REQUIRED);
+        }
         if (aggregated) {
             OrderBookResponse merged = aggregatedBook(inst);
             if (levels) {

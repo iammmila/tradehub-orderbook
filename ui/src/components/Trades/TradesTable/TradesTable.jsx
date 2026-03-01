@@ -24,9 +24,8 @@ const TradesTable = () => {
     totalElements: 0,
   });
 
-  // ✅ separate:
-  const [search, setSearch] = useState("");          // client-side search (typing)
-  const [instrumentApi, setInstrumentApi] = useState(""); // optional server-side filter (exact)
+  const [search, setSearch] = useState("");         
+  const [instrumentApi, setInstrumentApi] = useState("");
 
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortDir, setSortDir] = useState("desc");
@@ -69,7 +68,6 @@ const TradesTable = () => {
       setLoading(true);
       setError(null);
 
-      // ✅ use instrumentApi for backend filter; search should NOT hit backend
       const data = await fetchMyTradesPage(page, size, sortParam, instrumentApi || undefined);
 
       const content = data?.content || [];
@@ -118,14 +116,12 @@ const TradesTable = () => {
     const q = search.trim().toUpperCase();
     let out = [...(rows || [])];
 
-    // ✅ client-side search only
     if (q) {
       out = out.filter((t) =>
         String(t.instrument || "").toUpperCase().includes(q)
       );
     }
 
-    // ✅ client-side fallback sort
     const dir = sortDir === "asc" ? 1 : -1;
 
     out.sort((a, b) => {
@@ -156,7 +152,6 @@ const TradesTable = () => {
     return out;
   }, [rows, search, sortBy, sortDir]);
 
-  // ✅ pagination computed from totalElements
   const totalElements = pageInfo.totalElements ?? 0;
   const lastPageIndex = totalElements > 0 ? Math.max(0, Math.ceil(totalElements / size) - 1) : 0;
   const isFirstPage = page <= 0;

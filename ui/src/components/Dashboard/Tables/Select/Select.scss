@@ -20,7 +20,7 @@
         justify-content: space-between;
         gap: 10px;
         cursor: pointer;
-        transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+        transition: border-color 140ms ease, box-shadow 140ms ease;
 
         &:hover {
             border-color: rgba(99, 102, 241, 0.28);
@@ -53,58 +53,71 @@
             opacity: 0.9;
         }
     }
+}
 
-    .dashboardSelect__menu {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        width: 100%;
-        z-index: 50;
+/* ✅ Menu styles MUST be global because portal is outside .dashboardSelect */
+.dashboardSelect__menu {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(10, 14, 22, 0.96);
+    backdrop-filter: blur(10px);
 
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        background: rgba(10, 14, 22, 0.96);
-        backdrop-filter: blur(10px);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(99, 102, 241, 0.10);
 
-        box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.55),
-            0 0 0 1px rgba(99, 102, 241, 0.10);
+    padding: 6px;
 
-        padding: 6px;
+    max-height: 260px;
+    overflow: auto;
+}
 
-        .dashboardSelect__opt {
-            width: 100%;
-            text-align: left;
-            background: transparent;
-            border: none;
-            cursor: pointer;
+/* Non-portal fallback (if you ever render inside wrapper) */
+.dashboardSelect__menu:not(.dashboardSelect__menu--portal) {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    z-index: 999999;
+}
 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+/* Portal menu: JS sets fixed/top/left/width inline */
+.dashboardSelect__menu--portal {
+    z-index: 2147483647;
+}
 
-            padding: 10px 10px;
-            border-radius: 12px;
+/* ✅ Options MUST be global too */
+.dashboardSelect__opt {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
 
-            color: rgba(255, 255, 255, 0.84);
-            font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 
-            transition: background 140ms ease, transform 140ms ease;
+    padding: 10px 10px;
+    border-radius: 12px;
 
-            .dashboardSelect__check {
-                font-weight: 900;
-                color: rgba(99, 102, 241, 0.95);
-            }
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 13px;
 
-            &:hover {
-                background: rgba(99, 102, 241, 0.10);
-            }
+    transition: background 140ms ease;
+}
 
-            &.is-active {
-                background: rgba(99, 102, 241, 0.16);
-                color: rgba(255, 255, 255, 0.95);
-            }
-        }
-    }
+.dashboardSelect__opt:hover {
+    background: rgba(99, 102, 241, 0.10);
+}
+
+.dashboardSelect__opt.is-active {
+    background: rgba(99, 102, 241, 0.16);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.dashboardSelect__check {
+    font-weight: 900;
+    color: rgba(99, 102, 241, 0.95);
 }
