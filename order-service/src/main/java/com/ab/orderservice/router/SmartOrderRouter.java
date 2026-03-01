@@ -1,22 +1,24 @@
 package com.ab.orderservice.router;
 
 import com.ab.orderservice.dto.exchange.ExchangeInfo;
+import com.ab.orderservice.dto.route.RouteEstimateDto;
+import com.ab.orderservice.dto.route.RoutePlanResponse;
 import com.ab.orderservice.service.ExchangeRegistry;
 import com.ab.orderservice.model.Order;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
 import com.ab.orderservice.model.enums.OrderType;
 import com.ab.orderservice.repository.OrderRepository;
+import com.ab.orderservice.service.OrderBookService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SmartOrderRouter {
@@ -30,10 +32,8 @@ public class SmartOrderRouter {
         String inst = instrument.trim().toUpperCase(Locale.ROOT);
 
         List<VenueQuote> quotes = new ArrayList<>();
-
         for (String ex : exchangeRegistry.codes()) {
             ExchangeInfo info = exchangeRegistry.info(ex);
-
             VenueQuote q = quoteVenue(ex, info, inst, side, type, limitPrice, qty);
             quotes.add(q);
         }
@@ -46,16 +46,96 @@ public class SmartOrderRouter {
 
         String finalChosen = chosen;
         String reason = quotes.stream()
-                .filter(v -> v.getExchangeCode().equals(finalChosen))
+                .filter(v -> Objects.equals(v.getExchangeCode(), finalChosen))
                 .map(VenueQuote::getReason)
                 .findFirst()
                 .orElse("DEFAULT");
 
+        logAutoRouting(inst, side, qty, finalChosen, reason, quotes);
+
         return RouteDecision.builder()
-                .chosenExchange(chosen)
+                .chosenExchange(finalChosen)
                 .reason(reason)
                 .quotes(quotes)
                 .build();
+    }
+
+    public RoutePlanResponse plan(String instrument, OrderSide side, OrderType type, BigDecimal limitPrice, long qty) {
+        String inst = instrument.trim().toUpperCase(Locale.ROOT);
+
+        List<VenueQuote> quotes = new ArrayList<>();
+
+        for (String ex : exchangeRegistry.codes()) {
+            ExchangeInfo info = exchangeRegistry.info(ex);
+            VenueQuote q = quoteVenue(ex, info, inst, side, type, limitPrice, qty);
+            quotes.add(q);
+        }
+
+        // same selection logic
+        String chosen = chooseBest(quotes, side);
+        if (chosen == null || chosen.isBlank() || !exchangeRegistry.isSupported(chosen)) {
+            chosen = exchangeRegistry.normalizeOrDefault(null);
+        }
+
+        // convert VenueQuote -> RouteEstimateDto and sort in the same ranking order
+        List<RouteEstimateDto> ranked = quotes.stream()
+                .map(v -> RouteEstimateDto.builder()
+                        .exchange(v.getExchangeCode())
+                        .fillQuantity(v.getEstimatedFillQty())
+                        .vwap(v.getEstimatedExecPx())          // your VWAP is in estimatedExecPx now
+                        .effectiveVwap(v.getEffectivePrice())  // effective VWAP
+                        .reason(v.getReason())
+                        .build())
+                .sorted((a, b) -> {
+                    int fill = Long.compare(
+                            b.getFillQuantity() == null ? 0 : b.getFillQuantity(),
+                            a.getFillQuantity() == null ? 0 : a.getFillQuantity()
+                    );
+                    if (fill != 0) return fill;
+
+                    BigDecimal ea = a.getEffectiveVwap();
+                    BigDecimal eb = b.getEffectiveVwap();
+
+                    if (ea == null && eb == null) return a.getExchange().compareTo(b.getExchange());
+                    if (ea == null) return 1;
+                    if (eb == null) return -1;
+
+                    int priceCmp = (side == OrderSide.BUY) ? ea.compareTo(eb) : eb.compareTo(ea);
+                    if (priceCmp != 0) return priceCmp;
+
+                    return a.getExchange().compareTo(b.getExchange());
+                })
+                .toList();
+
+        // log it (top3)
+        String finalChosen = chosen;
+        String reason = ranked.stream()
+                .filter(r -> Objects.equals(r.getExchange(), finalChosen))
+                .map(RouteEstimateDto::getReason)
+                .findFirst()
+                .orElse("DEFAULT");
+
+        log.info("ROUTE_PLAN inst={} side={} qty={} chosen={} reason={} top3={}",
+                inst, side, qty, chosen, reason, top3String(ranked));
+
+        return RoutePlanResponse.builder()
+                .chosenExchange(chosen)
+                .ranked(ranked)
+                .build();
+    }
+
+    private String top3String(List<RouteEstimateDto> ranked) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Math.min(3, ranked.size()); i++) {
+            var r = ranked.get(i);
+            sb.append(i + 1).append(") ")
+                    .append(r.getExchange())
+                    .append(" fill=").append(r.getFillQuantity())
+                    .append(" eff=").append(r.getEffectiveVwap())
+                    .append(" vwap=").append(r.getVwap())
+                    .append(" | ");
+        }
+        return sb.toString();
     }
 
     private VenueQuote quoteVenue(
@@ -100,7 +180,6 @@ public class SmartOrderRouter {
         BigDecimal effectivePrice = null;
 
         if (takerNow) {
-            // Estimate liquidity available within limit (or all liquidity for MARKET)
             if (side == OrderSide.BUY) {
                 var sells = orderRepository
                         .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
@@ -108,7 +187,8 @@ public class SmartOrderRouter {
                         );
 
                 estimatedFill = estimateFillBuy(sells, qty, isMarket ? null : limitPrice);
-                estimatedExecPx = bestAsk; // simple proxy (not full VWAP)
+                VwapResult v = computeBuyVwap(sells, qty, isMarket ? null : limitPrice);
+                estimatedExecPx = v.vwap; // VWAP
                 effectivePrice = effectiveBuyPrice(estimatedExecPx, info.getTakerFeeBps());
             } else {
                 var buys = orderRepository
@@ -117,7 +197,8 @@ public class SmartOrderRouter {
                         );
 
                 estimatedFill = estimateFillSell(buys, qty, isMarket ? null : limitPrice);
-                estimatedExecPx = bestBid;
+                VwapResult v = computeSellVwap(buys, qty, isMarket ? null : limitPrice);
+                estimatedExecPx = v.vwap; // VWAP
                 effectivePrice = effectiveSellPrice(estimatedExecPx, info.getTakerFeeBps());
             }
         } else {
@@ -134,7 +215,7 @@ public class SmartOrderRouter {
             }
         }
 
-        String reason = buildReason(side, takerNow, estimatedFill, bestBid, bestAsk, info);
+        String reason = buildReason(side, takerNow, estimatedFill, bestBid, bestAsk, info, estimatedExecPx);
 
         return VenueQuote.builder()
                 .exchangeCode(ex)
@@ -170,6 +251,55 @@ public class SmartOrderRouter {
             remaining -= take;
         }
         return desiredQty - remaining;
+    }
+
+    private static VwapResult computeBuyVwap(List<Order> sellsAsc, long desiredQty, BigDecimal limitPriceOrNull) {
+        long remaining = desiredQty;
+        BigDecimal notional = BigDecimal.ZERO;
+        long filled = 0;
+
+        for (Order s : sellsAsc) {
+            if (remaining <= 0) break;
+            if (limitPriceOrNull != null && s.getPrice().compareTo(limitPriceOrNull) > 0) break;
+
+            long take = Math.min(remaining, s.getRemainingQuantity());
+            if (take <= 0) continue;
+
+            filled += take;
+            remaining -= take;
+            notional = notional.add(s.getPrice().multiply(BigDecimal.valueOf(take)));
+        }
+
+        if (filled == 0) return new VwapResult(0, null);
+
+        BigDecimal vwap = notional.divide(BigDecimal.valueOf(filled), 8, RoundingMode.HALF_UP);
+        return new VwapResult(filled, vwap);
+    }
+
+    private static VwapResult computeSellVwap(List<Order> buysDesc, long desiredQty, BigDecimal limitPriceOrNull) {
+        long remaining = desiredQty;
+        BigDecimal notional = BigDecimal.ZERO;
+        long filled = 0;
+
+        for (Order b : buysDesc) {
+            if (remaining <= 0) break;
+            if (limitPriceOrNull != null && b.getPrice().compareTo(limitPriceOrNull) < 0) break;
+
+            long take = Math.min(remaining, b.getRemainingQuantity());
+            if (take <= 0) continue;
+
+            filled += take;
+            remaining -= take;
+            notional = notional.add(b.getPrice().multiply(BigDecimal.valueOf(take)));
+        }
+
+        if (filled == 0) return new VwapResult(0, null);
+
+        BigDecimal vwap = notional.divide(BigDecimal.valueOf(filled), 8, RoundingMode.HALF_UP);
+        return new VwapResult(filled, vwap);
+    }
+
+    private record VwapResult(long filled, BigDecimal vwap) {
     }
 
     private static BigDecimal effectiveBuyPrice(BigDecimal px, int feeBps) {
@@ -215,12 +345,60 @@ public class SmartOrderRouter {
                 .orElse("XLON");
     }
 
-    private static String buildReason(OrderSide side, boolean takerNow, long fill, BigDecimal bestBid, BigDecimal bestAsk, ExchangeInfo info) {
+    private static String buildReason(
+            OrderSide side,
+            boolean takerNow,
+            long fill,
+            BigDecimal bestBid,
+            BigDecimal bestAsk,
+            ExchangeInfo info,
+            BigDecimal vwapOrNull
+    ) {
         if (takerNow) {
-            return "TAKER_NOW: fill=" + fill + " takerFeeBps=" + info.getTakerFeeBps()
-                    + " top=" + (side == OrderSide.BUY ? bestAsk : bestBid);
+            return "TAKER_VWAP: fill=" + fill
+                    + " takerFeeBps=" + info.getTakerFeeBps()
+                    + " vwap=" + vwapOrNull
+                    + " touch=" + (side == OrderSide.BUY ? bestAsk : bestBid);
         }
         return "MAKER: makerFeeBps=" + info.getMakerFeeBps()
                 + " touch=" + (side == OrderSide.BUY ? bestAsk : bestBid);
+    }
+
+    private void logAutoRouting(String inst, OrderSide side, long qty, String chosen, String reason, List<VenueQuote> quotes) {
+        // Sort same as chooseBest ranking, then take top3 for log
+        List<VenueQuote> sorted = new ArrayList<>(quotes);
+        String best = chooseBest(sorted, side);
+        // If best is computed by chooseBest, we still want top3 ordering:
+        // We'll reuse comparator by sorting with same logic:
+        sorted.sort((a, b) -> {
+            int fill = Long.compare(b.getEstimatedFillQty(), a.getEstimatedFillQty());
+            if (fill != 0) return fill;
+
+            BigDecimal ea = a.getEffectivePrice();
+            BigDecimal eb = b.getEffectivePrice();
+
+            if (ea == null && eb == null) return a.getExchangeCode().compareTo(b.getExchangeCode());
+            if (ea == null) return 1;
+            if (eb == null) return -1;
+
+            int priceCmp = (side == OrderSide.BUY) ? ea.compareTo(eb) : eb.compareTo(ea);
+            if (priceCmp != 0) return priceCmp;
+
+            return a.getExchangeCode().compareTo(b.getExchangeCode());
+        });
+
+        StringBuilder top3 = new StringBuilder();
+        for (int i = 0; i < Math.min(3, sorted.size()); i++) {
+            VenueQuote q = sorted.get(i);
+            top3.append(i + 1).append(") ")
+                    .append(q.getExchangeCode())
+                    .append(" fill=").append(q.getEstimatedFillQty())
+                    .append(" eff=").append(q.getEffectivePrice())
+                    .append(" vwap=").append(q.getEstimatedExecPx())
+                    .append(" | ");
+        }
+
+        log.info("AUTO_ROUTE inst={} side={} qty={} chosen={} reason={} top3={}",
+                inst, side, qty, chosen, reason, top3);
     }
 }

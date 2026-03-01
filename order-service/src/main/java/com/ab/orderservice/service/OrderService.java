@@ -14,9 +14,7 @@ import com.ab.orderservice.kafka.event.OrderCreatedEvent;
 import com.ab.orderservice.kafka.event.OrderReplacedEvent;
 import com.ab.orderservice.mapper.OrderMapper;
 import com.ab.orderservice.model.Order;
-import com.ab.orderservice.model.enums.OrderSide;
-import com.ab.orderservice.model.enums.OrderStatus;
-import com.ab.orderservice.model.enums.OrderType;
+import com.ab.orderservice.model.enums.*;
 import com.ab.orderservice.repository.OrderRepository;
 import com.ab.orderservice.repository.OrderSpecifications;
 import com.ab.orderservice.router.SmartOrderRouter;
@@ -57,6 +55,9 @@ public class OrderService {
         }
 
         String exchangeCode;
+        RoutingMode routingMode;
+        RoutedBy routedBy;
+        String routeReason = null;
         String requested = request.getExchangeCode();
         if (requested != null && !requested.isBlank()) {
             // MANUAL
@@ -65,6 +66,8 @@ public class OrderService {
                 throw new BadRequestException(ErrorCode.EXCHANGE_NOT_SUPPORTED);
             }
             exchangeCode = norm;
+            routingMode = RoutingMode.MANUAL;
+            routedBy = RoutedBy.USER;
         } else {
             // AUTO (router decides)
             var decision = smartOrderRouter.route(
@@ -77,6 +80,14 @@ public class OrderService {
 
             exchangeCode = decision != null ? decision.getChosenExchange() : null;
             exchangeCode = exchangeRegistry.normalizeOrDefault(exchangeCode);
+            routingMode = RoutingMode.AUTO;
+            routedBy = RoutedBy.SOR;
+
+            try {
+                routeReason = (decision != null) ? decision.getReason() : null;
+            } catch (Exception ignored) {
+                routeReason = null;
+            }
         }
         Order order = Order.builder()
                 .instrument(instrument)
@@ -91,6 +102,9 @@ public class OrderService {
                 .status(OrderStatus.NEW)
                 .createdAt(LocalDateTime.now())
                 .userId(userId)
+                .routingMode(routingMode)
+                .routedBy(routedBy)
+                .routeReason(routeReason)
                 .build();
 
         Order saved = orderRepository.save(order);
@@ -222,6 +236,9 @@ public class OrderService {
                 .remainingQuantity(order.getRemainingQuantity())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())
+                .routingMode(order.getRoutingMode())
+                .routedBy(order.getRoutedBy())
+                .routeReason(order.getRouteReason())
                 .build();
     }
 }

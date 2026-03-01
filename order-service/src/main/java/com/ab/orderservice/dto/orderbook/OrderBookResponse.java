@@ -16,6 +16,11 @@ public class OrderBookResponse {
     private String instrument;
     private String exchange;
     private boolean aggregated;
+
     private List<OrderResponse> bids; // BUY
     private List<OrderResponse> asks; // SELL
+
+    private boolean levels;                 // true if levels were requested
+    private List<OrderBookLevel> bidLevels; // grouped by price
+    private List<OrderBookLevel> askLevels;
 }

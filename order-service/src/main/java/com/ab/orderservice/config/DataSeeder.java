@@ -1,10 +1,8 @@
 package com.ab.orderservice.config;
 
+import com.ab.orderservice.model.enums.*;
 import com.ab.orderservice.service.ExchangeRegistry;
 import com.ab.orderservice.model.Order;
-import com.ab.orderservice.model.enums.OrderSide;
-import com.ab.orderservice.model.enums.OrderStatus;
-import com.ab.orderservice.model.enums.OrderType;
 import com.ab.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +61,12 @@ public class DataSeeder implements CommandLineRunner {
 
             long qty = 10 + random.nextInt(100);
 
+            RoutingMode routingMode = random.nextBoolean() ? RoutingMode.MANUAL : RoutingMode.AUTO;
+            RoutedBy routedBy = (routingMode == RoutingMode.MANUAL) ? RoutedBy.USER : RoutedBy.SOR;
+            String routeReason = (routingMode == RoutingMode.AUTO)
+                    ? "DEV_SEED_AUTO"
+                    : null;
+
             Order order = Order.builder()
                     .instrument(instruments.get(random.nextInt(instruments.size())))
                     .side(side)
@@ -75,6 +79,9 @@ public class DataSeeder implements CommandLineRunner {
                     .remainingQuantity(qty)
                     .status(OrderStatus.NEW)
                     .createdAt(LocalDateTime.now().minusMinutes(random.nextInt(60)))
+                    .routingMode(routingMode)
+                    .routedBy(routedBy)
+                    .routeReason(routeReason)
                     .userId(userId)
                     .build();
 
@@ -83,6 +90,7 @@ public class DataSeeder implements CommandLineRunner {
 
         log.info("Order seeding completed.");
     }
+
     private String pickExchange() {
         var codes = exchangeRegistry.codes().stream().toList();
         return codes.get(random.nextInt(codes.size()));

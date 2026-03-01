@@ -1,5 +1,6 @@
 package com.ab.orderservice.api;
 
+import com.ab.orderservice.dto.route.RoutePlanResponse;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderType;
 import com.ab.orderservice.router.RouteDecision;
@@ -29,5 +30,16 @@ public class RoutingController {
     ) {
         RouteDecision decision = router.route(instrument, side, type, price, quantity);
         return ResponseEntity.ok(decision);
+    }
+
+    @GetMapping("/plan")
+    public ResponseEntity<RoutePlanResponse> plan(
+            @RequestParam String instrument,
+            @RequestParam OrderSide side,
+            @RequestParam OrderType type,
+            @RequestParam(required = false) BigDecimal price,
+            @RequestParam long quantity
+    ) {
+        return ResponseEntity.ok(router.plan(instrument, side, type, price, quantity));
     }
 }

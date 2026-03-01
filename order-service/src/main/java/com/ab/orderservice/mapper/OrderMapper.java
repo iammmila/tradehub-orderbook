@@ -25,6 +25,9 @@ public final class OrderMapper {
                 .minExecSize(order.getMinExecSize())
                 .visible(order.getVisible())
                 .userId(order.getUserId())
+                .routingMode(order.getRoutingMode())
+                .routedBy(order.getRoutedBy())
+                .routeReason(order.getRouteReason())
                 .build();
     }
 }

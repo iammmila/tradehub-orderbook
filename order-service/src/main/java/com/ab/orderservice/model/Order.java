@@ -1,8 +1,6 @@
 package com.ab.orderservice.model;
 
-import com.ab.orderservice.model.enums.OrderSide;
-import com.ab.orderservice.model.enums.OrderStatus;
-import com.ab.orderservice.model.enums.OrderType;
+import com.ab.orderservice.model.enums.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +44,18 @@ public class Order {
             exchangeCode = exchangeCode.trim().toUpperCase(Locale.ROOT);
         }
     }
+
+    // inside Order entity
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoutingMode routingMode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoutedBy routedBy;
+
+    @Column(length = 160)
+    private String routeReason;
 
     // e.g. "BT", "VOD", "AAPL"
     @Column(nullable = false, length = 20)

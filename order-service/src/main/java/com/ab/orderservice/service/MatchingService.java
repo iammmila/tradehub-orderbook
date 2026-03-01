@@ -87,6 +87,9 @@ public class MatchingService {
 
             long tradeQty = Math.min(buy.getRemainingQuantity(), sell.getRemainingQuantity());
 
+            if (!satisfiesMinExec(buy.getMinExecSize(), sell.getMinExecSize(), tradeQty)) {
+                continue; // skip this counter-order
+            }
             // Trade price = resting order price (sell price)
             BigDecimal tradePrice = sell.getPrice();
             LocalDateTime now = LocalDateTime.now();
@@ -142,6 +145,9 @@ public class MatchingService {
             }
             long tradeQty = Math.min(sell.getRemainingQuantity(), buy.getRemainingQuantity());
 
+            if (!satisfiesMinExec(buy.getMinExecSize(), sell.getMinExecSize(), tradeQty)) {
+                continue; // skip this counter-order
+            }
             // Trade price = resting order price (buy price)
             BigDecimal tradePrice = buy.getPrice();
 
@@ -164,6 +170,12 @@ public class MatchingService {
             // Persist the resting order updates
             orderRepository.save(buy);
         }
+    }
+
+    private boolean satisfiesMinExec(Long incomingMin, Long restingMin, long tradeQty) {
+        if (incomingMin != null && tradeQty < incomingMin) return false;
+        if (restingMin != null && tradeQty < restingMin) return false;
+        return true;
     }
 
     private void publishFillEventIfNeeded(Order order, long filledNow) {

@@ -1,8 +1,6 @@
 package com.ab.orderservice.dto;
 
-import com.ab.orderservice.model.enums.OrderSide;
-import com.ab.orderservice.model.enums.OrderStatus;
-import com.ab.orderservice.model.enums.OrderType;
+import com.ab.orderservice.model.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,4 +27,8 @@ public class OrderResponse {
     private Boolean visible;
     private Long userId;
     private String exchangeCode;
+
+    private RoutingMode routingMode; // MANUAL / AUTO
+    private RoutedBy routedBy;       // USER / SOR
+    private String routeReason;
 }
