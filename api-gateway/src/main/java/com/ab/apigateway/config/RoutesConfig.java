@@ -19,7 +19,9 @@ public class RoutesConfig {
                         .uri("lb://AUTH-SERVICE"))
                 .route("orders-all", r -> r.path(
                                 "/api/v1/orders/**",
-                                "/api/v1/orderbook/**"
+                                "/api/v1/orderbook/**",
+                                "/api/v1/exchanges/**",
+                                "/api/v1/route/**"
                         )
                         .uri("lb://ORDER-SERVICE"))
                 .route("trades-all", r -> r.path("/api/v1/trades/**")

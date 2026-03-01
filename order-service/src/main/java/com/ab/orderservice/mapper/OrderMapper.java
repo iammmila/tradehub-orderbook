@@ -20,6 +20,10 @@ public final class OrderMapper {
                 .remainingQuantity(order.getRemainingQuantity())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())
+                .exchangeCode(order.getExchangeCode())
+                .type(order.getType())
+                .minExecSize(order.getMinExecSize())
+                .visible(order.getVisible())
                 .userId(order.getUserId())
                 .build();
     }

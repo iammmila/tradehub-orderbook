@@ -40,8 +40,13 @@ public class MatchingService {
         }
 
         // Normalize instrument
-        String instrument = incoming.getInstrument().trim();
+        String instrument = incoming.getInstrument().trim().toUpperCase();
         incoming.setInstrument(instrument);
+
+        if (incoming.getExchangeCode() == null || incoming.getExchangeCode().isBlank()) {
+            throw new IllegalStateException("Incoming order has null exchangeCode");
+        }
+        incoming.setExchangeCode(incoming.getExchangeCode().trim().toUpperCase());
 
         if (incoming.getSide() == OrderSide.BUY) {
             matchBuy(incoming);
@@ -53,15 +58,18 @@ public class MatchingService {
     }
 
     private void matchBuy(Order buy) {
+        String ex = buy.getExchangeCode();
         // Get SELL candidates sorted by best price then FIFO
         List<Order> sells = orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+                        ex,
                         buy.getInstrument(),
                         OrderSide.SELL,
                         ACTIVE_STATUSES,
                         0L
                 );
         Long buyerId = buy.getUserId();
+
         for (Order sell : sells) {
             if (buy.getRemainingQuantity() <= 0) break;
 
@@ -70,10 +78,11 @@ public class MatchingService {
                 continue;
             }
 
-            // Price condition: buyPrice >= sellPrice
-            if (buy.getPrice().compareTo(sell.getPrice()) < 0) {
-                // Because sells are sorted by price ASC, once this fails, all next sells will be even more expensive
-                break;
+            boolean buyIsMarket = buy.getType() != null && buy.getType().name().equals("MARKET");
+            if (!buyIsMarket) {
+                if (buy.getPrice().compareTo(sell.getPrice()) < 0) {
+                    break;
+                }
             }
 
             long tradeQty = Math.min(buy.getRemainingQuantity(), sell.getRemainingQuantity());
@@ -104,15 +113,19 @@ public class MatchingService {
     }
 
     private void matchSell(Order sell) {
+        String ex = sell.getExchangeCode();
+
         // Get BUY candidates sorted by best price then FIFO
         List<Order> buys = orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+                        ex,
                         sell.getInstrument(),
                         OrderSide.BUY,
                         ACTIVE_STATUSES,
                         0L
                 );
         Long sellerId = sell.getUserId();
+
         for (Order buy : buys) {
             if (sell.getRemainingQuantity() <= 0) break;
 
@@ -120,12 +133,13 @@ public class MatchingService {
             if (buy.getUserId().equals(sellerId)) {
                 continue;
             }
-            // Price condition: buyPrice >= sellPrice
-            if (buy.getPrice().compareTo(sell.getPrice()) < 0) {
-                // Because buys are sorted by price DESC, once this fails, all next buys will be even lower
-                break;
-            }
 
+            boolean sellIsMarket = sell.getType() != null && sell.getType().name().equals("MARKET");
+            if (!sellIsMarket) {
+                if (buy.getPrice().compareTo(sell.getPrice()) < 0) {
+                    break;
+                }
+            }
             long tradeQty = Math.min(sell.getRemainingQuantity(), buy.getRemainingQuantity());
 
             // Trade price = resting order price (buy price)

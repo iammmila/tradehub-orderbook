@@ -21,10 +21,12 @@ public class OrderBookController {
     @GetMapping
     public ResponseEntity<OrderBookResponse> getBook(
             @AuthenticationPrincipal AuthPrincipal me,
-            @RequestParam String instrument
+            @RequestParam String instrument,
+            @RequestParam(required = false) String exchange,
+            @RequestParam(required = false, defaultValue = "false") boolean aggregated
     ) {
         // "me" will be null only if SecurityConfig allowed anonymous access.
         // With anyRequest().authenticated(), it will never be null.
-        return ResponseEntity.ok(orderBookService.getOrderBook(instrument));
+        return ResponseEntity.ok(orderBookService.getOrderBook(instrument, exchange, aggregated));
     }
 }

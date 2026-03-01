@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderBookResponse {
     private String instrument;
+    private String exchange;
+    private boolean aggregated;
     private List<OrderResponse> bids; // BUY
     private List<OrderResponse> asks; // SELL
 }

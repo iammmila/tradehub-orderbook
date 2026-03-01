@@ -2,6 +2,7 @@ package com.ab.orderservice.model;
 
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
+import com.ab.orderservice.model.enums.OrderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 @Entity
 @Data
@@ -21,6 +23,29 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private OrderType type; // LIMIT / MARKET / etc.
+
+    // For MIN_EXECUTION_SIZE
+    @Column(name = "min_exec_size")
+    private Long minExecSize;
+
+    // Whether it should appear in public orderbook (HIDDEN_LIMIT => false)
+    @Column(nullable = false)
+    private Boolean visible;
+
+    @Column(name = "exchange_code", nullable = false, length = 16)
+    private String exchangeCode;
+
+    @PrePersist
+    void prePersist() {
+        // normalize if set somewhere else
+        if (exchangeCode != null) {
+            exchangeCode = exchangeCode.trim().toUpperCase(Locale.ROOT);
+        }
+    }
 
     // e.g. "BT", "VOD", "AAPL"
     @Column(nullable = false, length = 20)

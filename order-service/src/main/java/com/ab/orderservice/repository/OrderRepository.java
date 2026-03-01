@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
@@ -20,6 +21,38 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     );
 
     List<Order> findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+            String instrument,
+            OrderSide side,
+            List<OrderStatus> statuses,
+            Long remainingQuantity
+    );
+
+    List<Order> findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+            String exchangeCode,
+            String instrument,
+            OrderSide side,
+            List<OrderStatus> statuses,
+            Long remainingQuantity
+    );
+
+    List<Order> findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+            String exchangeCode,
+            String instrument,
+            OrderSide side,
+            List<OrderStatus> statuses,
+            Long remainingQuantity
+    );
+
+    Optional<Order> findFirstByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+            String exchangeCode,
+            String instrument,
+            OrderSide side,
+            List<OrderStatus> statuses,
+            Long remainingQuantity
+    );
+
+    Optional<Order> findFirstByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+            String exchangeCode,
             String instrument,
             OrderSide side,
             List<OrderStatus> statuses,

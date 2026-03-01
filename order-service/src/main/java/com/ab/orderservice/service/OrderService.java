@@ -16,14 +16,18 @@ import com.ab.orderservice.mapper.OrderMapper;
 import com.ab.orderservice.model.Order;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
+import com.ab.orderservice.model.enums.OrderType;
 import com.ab.orderservice.repository.OrderRepository;
 import com.ab.orderservice.repository.OrderSpecifications;
+import com.ab.orderservice.router.SmartOrderRouter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,12 +38,54 @@ public class OrderService {
     private final MatchingService matchingService;
     private final OrderEventsProducer orderEventsProducer;
     private final OrderEventFactory orderEventFactory;
+    private final ExchangeRegistry exchangeRegistry;
+    private final SmartOrderRouter smartOrderRouter;
 
+    @Transactional
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
+        OrderType type = request.getType() != null ? request.getType() : OrderType.LIMIT;
+        boolean visible = type != OrderType.HIDDEN_LIMIT;
+        String instrument = request.getInstrument().trim().toUpperCase();
+
+        BigDecimal price = request.getPrice();
+        if (type == OrderType.MARKET) {
+            if (price == null) price = BigDecimal.ZERO;
+        } else {
+            if (price == null) {
+                throw new BadRequestException(ErrorCode.ORDER_PRICE_REQUIRED);
+            }
+        }
+
+        String exchangeCode;
+        String requested = request.getExchangeCode();
+        if (requested != null && !requested.isBlank()) {
+            // MANUAL
+            String norm = requested.trim().toUpperCase();
+            if (!exchangeRegistry.isSupported(norm)) {
+                throw new BadRequestException(ErrorCode.EXCHANGE_NOT_SUPPORTED);
+            }
+            exchangeCode = norm;
+        } else {
+            // AUTO (router decides)
+            var decision = smartOrderRouter.route(
+                    instrument,
+                    request.getSide(),
+                    type,
+                    type == OrderType.MARKET ? null : price,
+                    request.getQuantity()
+            );
+
+            exchangeCode = decision != null ? decision.getChosenExchange() : null;
+            exchangeCode = exchangeRegistry.normalizeOrDefault(exchangeCode);
+        }
         Order order = Order.builder()
-                .instrument(request.getInstrument())
+                .instrument(instrument)
+                .exchangeCode(exchangeCode)
                 .side(request.getSide())
-                .price(request.getPrice())
+                .type(type)
+                .visible(visible)
+                .minExecSize(request.getMinExecSize())
+                .price(price)
                 .quantity(request.getQuantity())
                 .remainingQuantity(request.getQuantity())
                 .status(OrderStatus.NEW)
@@ -154,7 +200,7 @@ public class OrderService {
 
         Order saved = orderRepository.save(order);
 
-        // Kafka: ORDER_REPLACED (via factory)
+        // Kafka: ORDER_REPLACED
         OrderReplacedEvent event = orderEventFactory.replaced(before, saved);
         orderEventsProducer.publish(String.valueOf(saved.getId()), event);
 
@@ -165,7 +211,11 @@ public class OrderService {
         return Order.builder()
                 .id(order.getId())
                 .userId(order.getUserId())
+                .exchangeCode(order.getExchangeCode())
                 .instrument(order.getInstrument())
+                .type(order.getType())
+                .visible(order.getVisible())
+                .minExecSize(order.getMinExecSize())
                 .side(order.getSide())
                 .price(order.getPrice())
                 .quantity(order.getQuantity())

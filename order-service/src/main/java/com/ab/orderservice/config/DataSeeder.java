@@ -1,8 +1,10 @@
 package com.ab.orderservice.config;
 
+import com.ab.orderservice.service.ExchangeRegistry;
 import com.ab.orderservice.model.Order;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
+import com.ab.orderservice.model.enums.OrderType;
 import com.ab.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import java.util.Random;
 public class DataSeeder implements CommandLineRunner {
 
     private final OrderRepository orderRepository;
+    private final ExchangeRegistry exchangeRegistry;
     private final Random random = new Random();
 
     @Override
@@ -42,9 +45,18 @@ public class DataSeeder implements CommandLineRunner {
 
         List<String> instruments = List.of("BT", "VOD", "AAPL", "TSLA");
 
+        List<OrderType> types = List.of(
+                OrderType.LIMIT,
+                OrderType.LIMIT,
+                OrderType.LIMIT,
+                OrderType.HIDDEN_LIMIT
+        );
         for (int i = 0; i < 30; i++) {
             Long userId = demoUserIds.get(random.nextInt(demoUserIds.size()));
             OrderSide side = random.nextBoolean() ? OrderSide.BUY : OrderSide.SELL;
+
+            OrderType type = types.get(random.nextInt(types.size()));
+            boolean visible = type != OrderType.HIDDEN_LIMIT;
 
             BigDecimal price = BigDecimal.valueOf(90 + random.nextDouble() * 20)
                     .setScale(2, RoundingMode.HALF_UP);
@@ -54,6 +66,10 @@ public class DataSeeder implements CommandLineRunner {
             Order order = Order.builder()
                     .instrument(instruments.get(random.nextInt(instruments.size())))
                     .side(side)
+                    .exchangeCode(pickExchange())
+                    .type(type)
+                    .visible(visible)
+                    .minExecSize(null)
                     .price(price)
                     .quantity(qty)
                     .remainingQuantity(qty)
@@ -66,5 +82,9 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         log.info("Order seeding completed.");
+    }
+    private String pickExchange() {
+        var codes = exchangeRegistry.codes().stream().toList();
+        return codes.get(random.nextInt(codes.size()));
     }
 }
