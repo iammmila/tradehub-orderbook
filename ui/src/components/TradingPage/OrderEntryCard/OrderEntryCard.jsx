@@ -5,8 +5,7 @@ import { createOrder } from "../../../api/orders";
 import { formatMoney } from "../../../utils/formatter";
 import { fetchRoutingPlan } from "../../../api/routing";
 import Select from "../../Dashboard/Tables/Select/Select";
-
-const EXCHANGES = ["XLON", "XNAS", "XTKS"];
+import { fetchExchanges } from "../../../api/exchange";
 
 function toNum(x) {
   const n = Number(x);
@@ -20,7 +19,9 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
   const [quantity, setQuantity] = useState("");
   const [routingMode, setRoutingMode] = useState("AUTO"); // AUTO | MANUAL
   const [exchangeCode, setExchangeCode] = useState("XLON");
-
+  const [exchanges, setExchanges] = useState([]);
+  const [exLoading, setExLoading] = useState(false);
+  const [exErr, setExErr] = useState(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [planLoading, setPlanLoading] = useState(false);
   const [planErr, setPlanErr] = useState(null);
@@ -28,13 +29,52 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
 
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
+  useEffect(() => {
+    let alive = true;
 
+    (async () => {
+      try {
+        setExLoading(true);
+        setExErr(null);
+
+        const list = await fetchExchanges(); // array of objects
+        if (!alive) return;
+
+        setExchanges(list);
+
+        const firstCode = list?.[0]?.exchangeCode ? String(list[0].exchangeCode) : "";
+
+        setExchangeCode((prev) => {
+          const prevStr = prev == null ? "" : String(prev);
+          if (prevStr && list.some((e) => String(e.exchangeCode) === prevStr)) return prevStr;
+          return firstCode;
+        });
+      } catch (e) {
+        if (!alive) return;
+        setExErr(e?.response?.data?.message || e?.message || "Failed to load exchanges");
+        setExchanges([]);
+        setExchangeCode("");
+      } finally {
+        if (alive) setExLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+  
   useEffect(() => {
     if (!prefill) return;
     if (prefill.side) setSide(prefill.side);
     if (prefill.price != null) setPrice(String(prefill.price));
   }, [prefill]);
-
+  const exchangeOptions = useMemo(() => {
+    return (exchanges || []).map((x) => ({
+      value: x.exchangeCode,
+      label: `${x.exchangeCode} • ${x.region} • M:${x.makerFeeBps}bps / T:${x.takerFeeBps}bps`,
+    }));
+  }, [exchanges]);
   const p = useMemo(() => toNum(price), [price]);
   const q = useMemo(() => toNum(quantity), [quantity]);
 
@@ -48,7 +88,12 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
     if (!instrument || !instrument.trim()) return "Instrument is required";
     if (!q || q <= 0) return "Quantity must be > 0";
     if (type === "LIMIT" && (!p || p <= 0)) return "Price must be > 0 for LIMIT";
-    if (routingMode === "MANUAL" && !exchangeCode) return "Exchange is required for MANUAL";
+    if (routingMode === "MANUAL") {
+      if (!exchangeCode) return "Exchange is required for MANUAL";
+      if (exchanges.length > 0 && !exchanges.some((e) => e.exchangeCode === exchangeCode)) {
+        return "Selected exchange is invalid";
+      }
+    }
     return null;
   };
 
@@ -65,7 +110,7 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
         side,
         type,
         quantity: q,
-        ...(type === "LIMIT" ? { price: p } : {}),
+        ...(type === "LIMIT" ? { price: p } : { price: 0 }),
         ...(routingMode === "MANUAL" ? { exchangeCode } : {}),
         routingMode,
       };
@@ -77,7 +122,15 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
 
       onSubmitted?.();
     } catch (e) {
-      setErr(e?.response?.data?.message || e?.message || "Failed to create order");
+      const msg =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        (Array.isArray(e?.response?.data?.errors)
+          ? e.response.data.errors.map((x) => `${x.field}: ${x.defaultMessage}`).join(", ")
+          : null) ||
+        e?.message ||
+        "Failed to create order";
+      setErr(msg);
     } finally {
       setBusy(false);
     }
@@ -120,7 +173,7 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
       ? err
       : approxValue != null
         ? `Approx value: ${formatMoney(approxValue)}`
-        : "Tip: click a price level in the orderbook to prefill";
+        : "Tip: click a price in the orderbook to fill your price";
 
   const planRows = plan?.quotes || plan?.ranked || [];
   const chosen = plan?.chosenExchange || plan?.chosen;
@@ -214,13 +267,21 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
           {routingMode === "MANUAL" ? (
             <div className="oeField">
               <span>Exchange</span>
+
+              {exErr ? (
+                <div className="oeError">{exErr}</div>
+              ) : null}
+
               <Select
                 label={null}
                 width={"100%"}
                 value={exchangeCode}
                 onChange={(v) => setExchangeCode(v)}
-                options={EXCHANGES.map((x) => ({ label: x, value: x }))}
+                options={exchangeOptions}
               />
+              <div className="oeHint">
+                {exLoading ? "Loading exchanges…" : exchanges.length ? "" : "No exchanges available"}
+              </div>
             </div>
           ) : (
             <div className="oeField">
@@ -304,7 +365,7 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
                   </div>
 
                   <div className="rpCard">
-                    <div className="rpCard__k">Total Est. Fill</div>
+                    <div className="rpCard__k">Total Expected filled</div>
                     <div className="rpCard__v mono">{totalFill || 0}</div>
                     <div className="rpCard__s">Sum of venue estimates</div>
                   </div>
@@ -325,10 +386,10 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
                     <thead>
                       <tr>
                         <th>Venue</th>
-                        <th className="taR">Est. Fill</th>
-                        <th className="taR">VWAP</th>
-                        <th className="taR">Effective</th>
-                        <th>Why</th>
+                        <th className="taR">Expected filled</th>
+                        <th className="taR">Average price</th>
+                        <th className="taR">All-in price</th>
+                        <th>Reason</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -365,7 +426,7 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
                 </div>
 
                 <div className="routePlan__footer">
-                  Tip: if the chosen venue surprises you, check the “Why” column (fees, maker/taker, touch price, or fill limit).
+                  Tip: if the chosen venue surprises you, check the “Reason” column (fees, maker/taker, touch price, or fill limit).
                 </div>
               </>
             )}

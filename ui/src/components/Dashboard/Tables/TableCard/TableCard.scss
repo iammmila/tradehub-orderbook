@@ -5,6 +5,9 @@
     border-radius: 18px;
     padding: 18px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    min-height: 400px;
+    height: auto;
+    align-self: start;
 
     transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
     will-change: transform, box-shadow;

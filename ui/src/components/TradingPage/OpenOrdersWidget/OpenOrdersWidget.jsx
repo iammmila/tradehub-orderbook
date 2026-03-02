@@ -6,6 +6,13 @@ import "./OpenOrdersWidget.scss";
 import { fetchOrdersPage, cancelOrder } from "../../../api/orders";
 import { formatDate, formatTime, formatMoney, formatNumber } from "../../../utils/formatter";
 
+const normMode = (m) => {
+  const s = String(m || "").toUpperCase();
+  if (s === "MANUAL") return "MANUAL";
+  if (s === "AUTO") return "AUTO";
+  return s || "-";
+};
+
 const OpenOrdersWidget = ({ instrument, refreshKey, onChanged }) => {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
@@ -67,8 +74,9 @@ const OpenOrdersWidget = ({ instrument, refreshKey, onChanged }) => {
               <th>Time</th>
               <th>Side</th>
               <th>Price</th>
-              <th>Remain</th>
+              <th>Left</th>
               <th>Instrument</th>
+              <th>Venue</th>
               <th></th>
             </tr>
           </thead>
@@ -76,31 +84,43 @@ const OpenOrdersWidget = ({ instrument, refreshKey, onChanged }) => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="table-empty">Loading…</td>
+                <td colSpan={7} className="table-empty">Loading…</td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="table-empty">No open orders.</td>
+                <td colSpan={7} className="table-empty">No open orders.</td>
               </tr>
             ) : (
-              rows.map((o) => (
-                <tr key={o.id}>
-                  <td>{o.createdAt ? `${formatDate(o.createdAt)} ${formatTime(o.createdAt)}` : "-"}</td>
-                  <td className="mono">{String(o.side || "-").toUpperCase()}</td>
-                  <td className="mono">{o.price != null ? formatMoney(o.price) : "-"}</td>
-                  <td className="mono">{o.remainingQuantity != null ? formatNumber(o.remainingQuantity) : "-"}</td>
-                  <td className="mono">{o.instrument || "-"}</td>
-                  <td className="ooActions">
-                    <button
-                      className="ordersBtn ordersBtn--danger ordersBtn--sm"
-                      onClick={() => cancel(o.id)}
-                      type="button"
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </tr>
-              ))
+              rows.map((o) => {
+                const venue = o.exchangeCode || o.exchange || "-";
+                const mode = normMode(o.routingMode);
+                return (
+                  <tr key={o.id}>
+                    <td>{o.createdAt ? `${formatDate(o.createdAt)} ${formatTime(o.createdAt)}` : "-"}</td>
+                    <td className="mono">{String(o.side || "-").toUpperCase()}</td>
+                    <td className="mono">{o.price != null ? formatMoney(o.price) : "-"}</td>
+                    <td className="mono">{o.remainingQuantity != null ? formatNumber(o.remainingQuantity) : "-"}</td>
+                    <td className="mono">{o.instrument || "-"}</td>
+
+                    <td className="mono">
+                      {venue}
+                      <span className={`ooMode ooMode--${mode.toLowerCase()}`}>
+                        {mode}
+                      </span>
+                    </td>
+
+                    <td className="ooActions">
+                      <button
+                        className="ordersBtn ordersBtn--danger ordersBtn--sm"
+                        onClick={() => cancel(o.id)}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

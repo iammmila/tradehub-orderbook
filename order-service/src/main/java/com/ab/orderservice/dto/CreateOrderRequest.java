@@ -25,8 +25,7 @@ public class CreateOrderRequest {
     @NotNull
     private OrderType type;
 
-    @Positive
-    @NotNull
+    @DecimalMin(value = "0", inclusive = true)
     private BigDecimal price;
 
     @NotNull
@@ -39,12 +38,16 @@ public class CreateOrderRequest {
     private String exchangeCode;
 
     // Custom validation rule:
-    @AssertTrue(message = "price is required for LIMIT/HIDDEN_LIMIT orders")
+    @AssertTrue(message = "price must be > 0 for LIMIT / HIDDEN_LIMIT / MIN_EXECUTION_SIZE orders")
     public boolean isPriceValid() {
         if (type == null) return true;
-        return switch (type) {
-            case MARKET -> true;
-            default -> price != null;
-        };
+
+        if (type == OrderType.MARKET) {
+            // MARKET ignores price
+            return true;
+        }
+
+        // For all non-market types, require positive price
+        return price != null && price.compareTo(BigDecimal.ZERO) > 0;
     }
 }

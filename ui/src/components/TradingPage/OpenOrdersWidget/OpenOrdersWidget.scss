@@ -11,3 +11,25 @@
 .ooWrap .table td {
     padding: 8px 10px;
 }
+
+.ooMode {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 16px;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .06);
+    color: rgba(255, 255, 255, .85);
+}
+
+.ooMode--auto {
+    background: rgba(80, 160, 255, .12);
+    border-color: rgba(80, 160, 255, .25);
+}
+
+.ooMode--manual {
+    background: rgba(255, 190, 80, .12);
+    border-color: rgba(255, 190, 80, .25);
+}

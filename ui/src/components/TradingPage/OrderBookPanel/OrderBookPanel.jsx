@@ -90,14 +90,14 @@ const OrderBookPanel = ({
             onChange={(e) => onToggleLevels?.(e.target.checked)}
           />
           <span className="toggle__track" />
-          <span className="toggle__text">Levels</span>
+          <span className="toggle__text">Grouped</span>
         </label>
       }
     >
       <div className="obGrid">
         {/* BIDS */}
         <div className="obSide">
-          <div className="obSide__title">Bids</div>
+          <div className="obSide__title">Buy offers</div>
 
           <div className="obTableWrap">
             <table className="obTable">
@@ -105,13 +105,13 @@ const OrderBookPanel = ({
                 {isLevelsMode ? (
                   <tr>
                     <th>Price</th>
-                    <th>Total Qty</th>
+                    <th>Total</th>
                   </tr>
                 ) : (
                   <tr>
                     <th>Price</th>
                     <th>Qty</th>
-                    <th>Remain</th>
+                    <th>Left</th>
                   </tr>
                 )}
               </thead>
@@ -126,7 +126,7 @@ const OrderBookPanel = ({
                 ) : (isLevelsMode ? bidLevels : bids).length === 0 ? (
                   <tr>
                     <td colSpan={isLevelsMode ? 2 : 3} className="obEmpty">
-                      No bids
+                        No Buy offers
                     </td>
                   </tr>
                 ) : isLevelsMode ? (
@@ -176,7 +176,7 @@ const OrderBookPanel = ({
 
         {/* ASKS */}
         <div className="obSide">
-          <div className="obSide__title">Asks</div>
+          <div className="obSide__title">Sell offers</div>
 
           <div className="obTableWrap">
             <table className="obTable">
@@ -184,7 +184,7 @@ const OrderBookPanel = ({
                 {isLevelsMode ? (
                   <tr>
                     <th>Price</th>
-                    <th>Total Qty</th>
+                    <th>Total</th>
                   </tr>
                 ) : (
                   <tr>
@@ -205,7 +205,7 @@ const OrderBookPanel = ({
                 ) : (isLevelsMode ? askLevels : asks).length === 0 ? (
                   <tr>
                     <td colSpan={isLevelsMode ? 2 : 3} className="obEmpty">
-                      No asks
+                        No Sell offers
                     </td>
                   </tr>
                 ) : isLevelsMode ? (

@@ -62,8 +62,12 @@ const Select = ({ options = [], value, onChange, label, width = 140 }) => {
     }
   };
 
-  const displayLabel =
-    current?.label ?? (value ?? options?.[0]?.label ?? "");
+  const displayLabel = useMemo(() => {
+    if (current?.label != null) return String(current.label);
+    if (value != null && (typeof value === "string" || typeof value === "number")) return String(value);
+    if (options?.[0]?.label != null) return String(options[0].label);
+    return "";
+  }, [current, value, options]);
 
   return (
     <div className="dashboardSelect" ref={wrapRef} style={{ width }}>

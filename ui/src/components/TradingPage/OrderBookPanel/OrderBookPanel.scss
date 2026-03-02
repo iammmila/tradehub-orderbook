@@ -1,56 +1,113 @@
+/* OrderBookPanel.scss */
+
 .obGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 12px;
+    align-items: start;
 }
 
-.obTableWrap {
-    min-height: 320px;
+@media (max-width: 900px) {
+    .obGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.obSide {
+    min-width: 0;
 }
 
 .obSide__title {
-    font-size: 15px;
-    opacity: 0.85;
-    margin-bottom: 8px;
-    font-weight: 700;
-    color: white;
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.92);
 }
 
 .obTableWrap {
-    max-height: 360px;
-    overflow: auto;
+    min-height: 400px;
+    width: 100%;
+    min-width: 0;
+
+    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 12px;
     background: rgba(255, 255, 255, 0.03);
+
+    box-shadow:
+        0 16px 60px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    /* desktop: grow naturally */
+    max-height: none;
+    overflow: visible;
+}
+
+/* mobile: cap + scroll */
+@media (max-width: 900px) {
+    .obTableWrap {
+        max-height: 70vh;
+        overflow: auto;
+    }
+
+    .obTableWrap::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .obTableWrap::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .obTableWrap::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.20);
+    }
 }
 
 .obTable {
     width: 100%;
-    border-collapse: collapse;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
     color: rgba(255, 255, 255, 0.92);
+    font-size: 13px;
+}
+
+.obTable th,
+.obTable td {
+    padding: 10px 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .obTable thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-
     font-size: 12px;
-    font-weight: 800;
-    color: rgba(255, 255, 255, 0.75);
-
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    color: rgba(255, 255, 255, 0.72);
     text-align: left;
-    padding: 10px 10px;
-
-    background: rgba(12, 14, 18, 0.92);
     border-bottom: 1px solid rgba(255, 255, 255, 0.10);
 }
 
+@media (max-width: 900px) {
+    .obTable thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: rgba(12, 14, 18, 0.92);
+        backdrop-filter: blur(10px);
+    }
+}
+
 .obTable tbody td {
-    padding: 9px 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.92);
-    /* ✅ */
+    vertical-align: middle;
+}
+
+.obTable tbody tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.015);
 }
 
 .obRow:hover td {
@@ -59,32 +116,30 @@
 
 .obEmpty {
     text-align: center;
-    padding: 14px;
-    color: rgba(255, 255, 255, 0.65);
+    padding: 18px 12px;
+    color: rgba(255, 255, 255, 0.68);
+    font-weight: 700;
+}
+
+.mono {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.88);
 }
 
 .obPriceBtn {
     border: none;
     background: transparent;
     cursor: pointer;
-
     padding: 0;
     margin: 0;
 
-    font-weight: 900;
+    font-weight: 950;
     letter-spacing: 0.2px;
-    color: rgba(255, 255, 255, 0.95);
-
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(0, 255, 160, 0.5);
 
-    transition: color 140ms ease, text-decoration-color 140ms ease, transform 120ms ease;
-}
-
-.obPriceBtn:hover {
-    color: rgba(0, 255, 160, 0.95);
-    text-decoration-color: rgba(0, 255, 160, 0.95);
+    transition: transform 120ms ease, color 140ms ease, text-decoration-color 140ms ease;
 }
 
 .obPriceBtn:active {
@@ -93,20 +148,28 @@
 
 .obPriceBtn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.14);
-    border-radius: 8px;
-}
-
-.obTable .mono {
-    color: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 2px 6px;
+    margin: -2px -6px;
 }
 
 .obRow--bid td:first-child .obPriceBtn {
-    text-decoration-color: rgba(0, 255, 160, 0.55);
+    color: rgba(0, 255, 160, 0.92);
+    text-decoration-color: rgba(0, 255, 160, 0.40);
 }
 
 .obRow--ask td:first-child .obPriceBtn {
-    text-decoration-color: rgba(255, 140, 140, 0.45);
+    color: rgba(255, 140, 140, 0.92);
+    text-decoration-color: rgba(255, 140, 140, 0.35);
+}
+
+.obRow--bid:hover td {
+    box-shadow: inset 3px 0 0 rgba(0, 255, 160, 0.20);
+}
+
+.obRow--ask:hover td {
+    box-shadow: inset 3px 0 0 rgba(255, 140, 140, 0.18);
 }
 
 .toggle {
@@ -115,12 +178,6 @@
     gap: 10px;
     cursor: pointer;
     user-select: none;
-    flex-direction: column-reverse;
-}
-
-.toggle--inline {
-    flex-direction: row;
-    gap: 10px;
 }
 
 .toggle input {
@@ -134,10 +191,8 @@
     height: 26px;
     border-radius: 999px;
     position: relative;
-
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
-
     transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -147,32 +202,21 @@
     top: 50%;
     left: 3px;
     transform: translateY(-50%);
-
     width: 20px;
     height: 20px;
     border-radius: 999px;
-
     background: rgba(255, 255, 255, 0.92);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
-
-    transition: left 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    transition: left 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
 .toggle__text {
     font-size: 13px;
     font-weight: 900;
     letter-spacing: 0.2px;
-    opacity: 0.9;
-    color: rgba(255, 255, 255, 0.92);
+    color: rgba(255, 255, 255, 0.90);
 }
 
-/* hover */
-.toggle:hover .toggle__track {
-    background: rgba(255, 255, 255, 0.10);
-    border-color: rgba(255, 255, 255, 0.22);
-}
-
-/* checked (ON) */
 .toggle input:checked+.toggle__track {
     background: rgba(0, 255, 160, 0.18);
     border-color: rgba(0, 255, 160, 0.55);
@@ -182,19 +226,4 @@
 .toggle input:checked+.toggle__track::after {
     left: calc(100% - 23px);
     background: rgba(0, 255, 160, 0.95);
-    box-shadow:
-        0 10px 22px rgba(0, 0, 0, 0.40),
-        0 0 0 6px rgba(0, 255, 160, 0.10);
-}
-
-/* keyboard focus */
-.toggle input:focus-visible+.toggle__track {
-    box-shadow: 0 0 0 4px rgba(0, 255, 160, 0.14);
-}
-
-/* responsive */
-@media (max-width: 900px) {
-    .obGrid {
-        grid-template-columns: 1fr;
-    }
 }
