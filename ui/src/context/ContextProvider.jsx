@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createContext } from 'react'
 import { isAuthenticated } from '../api/auth';
 import { getMe } from '../api/users';
-import axios from "axios"
 
 export const MainContext = createContext(null)
 function ContextProvider({ children }) {

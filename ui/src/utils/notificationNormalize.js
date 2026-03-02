@@ -18,16 +18,48 @@ export function normalizeFromPage(pageDto) {
   return items.map(normalizeDto);
 }
 
+export function stripIds(input) {
+  if (input == null) return "";
+  let s = String(input);
+
+  // Common patterns: "id=123", "orderId: 123", "tradeId 123", "order id 123"
+  s = s.replace(
+    /\b(?:orderId|tradeId|notificationId|id)\s*(?:[:=]|\s)\s*\d+\b/gi,
+    "",
+  );
+
+  // Patterns like "#123" (often used as id references)
+  s = s.replace(/#\s*\d+\b/g, "");
+
+  // Parenthesized numeric ids: "(123)" or "( 123 )"
+  s = s.replace(/\(\s*\d+\s*\)/g, "");
+
+  // If backend inserts "Order 123" / "Trade 123" style:
+  s = s.replace(/\b(?:Order|Trade|Notification)\s+\d+\b/gi, (m) => {
+    // Keep the word, drop the number
+    return m.replace(/\d+/g, "").trim();
+  });
+
+  // Clean separators left behind: " -  - " or "::"
+  s = s.replace(/\s*[-–—:|]\s*(?=[-–—:|])/g, " ");
+  s = s.replace(/\s{2,}/g, " ").trim();
+
+  return s;
+}
+
 export function normalizeDto(n) {
   return {
-    id: n.id,
-    text: n.title,
-    details: n.message,
-    isRead: Boolean(n.read),
-    time: timeAgo(n.createdAt),
-    createdAt: n.createdAt,
-    type: n.type,
-    entityType: n.entityType,
-    entityId: n.entityId,
+    // Clean title + message so UI never shows internal ids
+    text: stripIds(n?.title),
+    details: stripIds(n?.message),
+
+    isRead: Boolean(n?.read),
+    time: timeAgo(n?.createdAt),
+    createdAt: n?.createdAt,
+    type: n?.type,
+    entityType: n?.entityType,
+
+    // If you later need navigation, keep raw ids here (NOT displayed)
+    entityId: n?.entityId ?? n?.orderId ?? n?.tradeId ?? null,
   };
 }

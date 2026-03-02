@@ -1,28 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import "../TableBase.scss"
 import "./RecentOrdersTable.scss"
 import TableCard from '../TableCard/TableCard';
 import TableFilters from '../TableFilters/TableFilters';
-import { fetchOrdersPage } from '../../../../api/orders';
-import { formatDate, formatMoney, formatNumber, formatTime } from '../../../../utils/formatter';
 import { useNavigate } from 'react-router-dom';
-function statusBadgeClass(status) {
-  const s = String(status || "").toUpperCase();
-  if (s === "FILLED") return "badge badge--filled";
-  if (s === "CANCELLED") return "badge badge--cancelled";
-  return "badge badge--new"; // NEW default
-}
-function compare(a, b) {
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-}
+import RecentOrdersGrid from './RecentOrdersGrid';
+import { useRecentOrders } from '../../../../hooks/useRecentOrders';
+import { compare, isSameLocalDay } from "../../../../utils/recentOrdersUtils";
 
 const RecentOrdersTable = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [rows, setRows] = useState([]);
+  const { loading, error, rows, reload } = useRecentOrders();
 
   // UI filters
   const [search, setSearch] = useState("");
@@ -30,41 +18,25 @@ const RecentOrdersTable = () => {
   const [status, setStatus] = useState("ALL");
   const [sort, setSort] = useState("NEWEST");
 
-  useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      try {
-        setLoading(true);
-        const page = await fetchOrdersPage(0, 10, "createdAt,desc");
-        if (!alive) return;
-
-        setRows(page?.content || []);
-        setError(null);
-      } catch (e) {
-        if (!alive) return;
-        const msg = e?.response
-          ? `HTTP ${e.response.status} - ${JSON.stringify(e.response.data)}`
-          : (e?.message || "error");
-        setError(msg);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-
-    return () => { alive = false; };
-  }, []);
+  // NEW: Range filter
+  const [range, setRange] = useState("ALL"); // TODAY | ALL
 
   const filtered = useMemo(() => {
     const q = search.trim().toUpperCase();
-
     let out = [...(rows || [])];
 
+    // Range
+    if (range === "TODAY") {
+      const now = new Date();
+      out = out.filter((o) => isSameLocalDay(o.createdAt, now));
+    }
+
+    // Filters
     if (q) out = out.filter((o) => String(o.instrument || "").toUpperCase().includes(q));
     if (side !== "ALL") out = out.filter((o) => o.side === side);
     if (status !== "ALL") out = out.filter((o) => String(o.status || "").toUpperCase() === status);
 
-    // sorting
+    // Sorting
     out.sort((a, b) => {
       if (sort === "NEWEST") return compare(new Date(b.createdAt).getTime(), new Date(a.createdAt).getTime());
       if (sort === "OLDEST") return compare(new Date(a.createdAt).getTime(), new Date(b.createdAt).getTime());
@@ -75,25 +47,44 @@ const RecentOrdersTable = () => {
       return 0;
     });
 
-    // keep dashboard table compact
+    // Dashboard: keep compact
     return out.slice(0, 10);
-  }, [rows, search, side, status, sort]);
+  }, [rows, search, side, status, sort, range]);
 
+  const reset = () => {
+    setSearch("");
+    setSide("ALL");
+    setStatus("ALL");
+    setSort("NEWEST");
+    setRange("ALL");
+  };
   const rightSlot = (
     <div className="table-actions">
       <span className="table-pill">{loading ? "Loading..." : `${rows.length} rows`}</span>
       <button className="table-link" type="button" onClick={() => navigate("/app/orders")}>
         View all
       </button>
+      <button className="table-link" type="button" onClick={reload}>
+        Refresh
+      </button>
     </div>
   );
 
   return (
-    <TableCard title="Recent Orders" subtitle="Latest 10 orders" rightSlot={rightSlot}>
+    <TableCard title="Recent Orders" subtitle="Latest orders snapshot" rightSlot={rightSlot}>
       <TableFilters
         search={search}
         onSearch={setSearch}
         selects={[
+          {
+            label: "Time",
+            value: range,
+            onChange: setRange,
+            options: [
+              { value: "ALL", label: "All" },
+              { value: "TODAY", label: "Today" },
+            ],
+          },
           {
             label: "Side",
             value: side,
@@ -130,16 +121,7 @@ const RecentOrdersTable = () => {
           },
         ]}
         right={
-          <button
-            className="table-reset"
-            type="button"
-            onClick={() => {
-              setSearch("");
-              setSide("ALL");
-              setStatus("ALL");
-              setSort("NEWEST");
-            }}
-          >
+          <button className="table-reset" type="button" onClick={reset}>
             Reset
           </button>
         }
@@ -153,43 +135,10 @@ const RecentOrdersTable = () => {
         ) : filtered.length === 0 ? (
           <div className="table-empty">No results. Try clearing filters.</div>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Instrument</th>
-                <th>Side</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Remaining</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filtered.map((o) => (
-                <tr key={o.id}>
-                  <td>
-                    <div className="t-strong">{formatTime(o.createdAt)}</div>
-                    <div className="t-muted">{formatDate(o.createdAt)}</div>
-                  </td>
-                  <td className="t-strong">{o.instrument}</td>
-                  <td>
-                    <span className={`badge ${o.side === "BUY" ? "badge--buy" : "badge--sell"}`}>{o.side}</span>
-                  </td>
-                  <td>{formatMoney(o.price)}</td>
-                  <td>{formatNumber(o.quantity, 0)}</td>
-                  <td>{formatNumber(o.remainingQuantity, 0)}</td>
-                  <td>
-                    <span className={statusBadgeClass(o.status)}>{o.status}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <RecentOrdersGrid rows={filtered} />
         )}
       </div>
     </TableCard>
   );
-}
-export default RecentOrdersTable
+};
+export default RecentOrdersTable;

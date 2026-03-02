@@ -142,21 +142,6 @@ const NotificationContainer = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-    // useEffect(() => {
-    //     const sock = createNotificationsSocket({
-    //         getToken: () => token,
-    //         onNotification: (dto) => {
-    //             // keep your current event-based flow
-    //             window.dispatchEvent(new CustomEvent("notif:ws", { detail: dto }));
-    //         },
-    //         onStatus: (s) => {
-    //             setStatus(s);
-    //         },
-    //     });
-
-    //     sock.connect();
-    //     return () => sock.disconnect();
-    // }, [token, setStatus]);
     return (
         <>
             <div className="notification-container" ref={dropdownRef}>

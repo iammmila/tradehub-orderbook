@@ -10,9 +10,12 @@ import RecentOrdersTable from '../../../components/Dashboard/Tables/RecentOrders
 import RecentTradesTable from '../../../components/Dashboard/Tables/RecentTradesTable/RecentTradesTable';
 import LiveOrdersBar from '../../../components/Dashboard/LiveOrdersBar/LiveOrdersBar';
 import { Helmet } from 'react-helmet';
+import RoutingSummaryCard from '../../../components/Dashboard/RoutingSummaryCard/RoutingSummaryCard';
+import { useRecentOrders } from '../../../hooks/useRecentOrders';
 
 const Dashboard = () => {
-
+  const { loading, error, orders } = useRecentOrders();
+  const lastUpdatedAt = React.useMemo(() => (loading ? null : new Date()), [loading]);
   return (
     <div className="dashWrap">
       <Helmet>
@@ -29,7 +32,7 @@ const Dashboard = () => {
       <div className="dashGrid">
         <LiveOrdersBar speed={60} />
       </div>
-      
+
       {/* Row 2: Charts */}
       <div className="dashGrid dashGrid--charts">
         <div className="dashCol dashCol--big">
@@ -40,6 +43,14 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* NEW: routing summary row (optional placement) */}
+      <div className="dashGrid ">
+        <RoutingSummaryCard
+          orders={orders}
+          loading={loading}
+          error={error}
+          lastUpdatedAt={lastUpdatedAt} />
+      </div>
       <div className="dashGrid dashGrid--tables">
         <RecentOrdersTable />
         <RecentTradesTable />

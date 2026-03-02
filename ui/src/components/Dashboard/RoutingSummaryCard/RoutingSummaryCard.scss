@@ -1,0 +1,275 @@
+/* RoutingSummaryCard.scss */
+
+.routingSum {
+  display: grid;
+  gap: 14px;
+  padding: 6px 2px;
+}
+
+/* Make the content not full width */
+.routingSum__container {
+  max-width: 760px;          /* change to 680/720/820 as you like */
+  margin: 0 auto;            /* center it */
+  width: 100%;
+}
+
+/* If you want it aligned to left (not centered), use this instead:
+.routingSum__container { max-width: 760px; width: 100%; }
+*/
+
+.routingSum__kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 920px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card blocks */
+.routingSum__kpi {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  position: relative;
+  overflow: hidden;
+}
+
+.routingSum__kpi::before {
+  content: "";
+  position: absolute;
+  inset: -60px -80px auto auto;
+  width: 160px;
+  height: 160px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.10), transparent 60%);
+  pointer-events: none;
+}
+
+/* Accent glows */
+.routingSum__kpi--auto::before {
+  background: radial-gradient(circle at 30% 30%, rgba(0, 255, 180, 0.18), transparent 60%);
+}
+.routingSum__kpi--manual::before {
+  background: radial-gradient(circle at 30% 30%, rgba(120, 150, 255, 0.18), transparent 60%);
+}
+
+/* TEXT COLORS */
+.routingSum__kpiLabel {
+  font-size: 16px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  color: rgba(225, 235, 255, 0.82);
+}
+
+.routingSum__kpiValue {
+  margin-top: 6px;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.05;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+/* AUTO / MANUAL number accent colors */
+.routingSum__kpi--auto .routingSum__kpiValue {
+  color: rgba(0, 255, 180, 0.95);
+  text-shadow: 0 0 22px rgba(0, 255, 180, 0.18);
+}
+
+.routingSum__kpi--manual .routingSum__kpiValue {
+  color: rgba(140, 170, 255, 0.95);
+  text-shadow: 0 0 22px rgba(140, 170, 255, 0.16);
+}
+
+.routingSum__kpiHint {
+  margin-top: 8px;
+  font-size: 16px;
+  color: rgba(200, 210, 230, 0.72);
+}
+
+.routingSum__pillRow {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.routingSum__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 16px;
+  color: rgba(240, 245, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.routingSum__pill--auto {
+  border-color: rgba(0, 255, 180, 0.30);
+  background: rgba(0, 255, 180, 0.10);
+  color: rgba(0, 255, 180, 0.95);
+}
+
+.routingSum__pill--muted {
+  color: rgba(215, 225, 245, 0.80);
+}
+
+/* Divider */
+.routingSum__divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.14),
+    transparent
+  );
+}
+
+.routingSum__details {
+  display: grid;
+  gap: 10px;
+}
+
+.routingSum__detailRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.routingSum__detailLabel {
+  font-size: 16px;
+  color: rgba(215, 225, 245, 0.82);
+}
+
+.routingSum__detailValue {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.routingSum__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+}
+
+.routingSum__reason {
+  max-width: 520px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: rgba(225, 235, 255, 0.90);
+  padding: 6px 10px;
+  border-radius: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+
+  @media (max-width: 920px) {
+    max-width: 100%;
+  }
+}
+
+.routingSum__muted {
+  color: rgba(200, 210, 230, 0.70);
+}
+
+.routingSum__note {
+  margin-top: 4px;
+  font-size: 16px;
+  color: rgba(200, 210, 230, 0.68);
+}
+
+/* Skeleton */
+.routingSum__skeleton {
+  display: grid;
+  gap: 12px;
+  padding: 6px 2px;
+}
+
+.routingSum__skRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 920px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.routingSum__skBox {
+  height: 92px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.04)
+  );
+  background-size: 200% 100%;
+  animation: routingSk 1.2s ease-in-out infinite;
+}
+
+.routingSum__skLine {
+  height: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.03)
+  );
+  background-size: 200% 100%;
+  animation: routingSk 1.2s ease-in-out infinite;
+}
+
+.routingSum__skLine--short {
+  width: 68%;
+}
+
+@keyframes routingSk {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Empty/Error states */
+.routingSum__state {
+  padding: 10px 4px;
+  display: grid;
+  gap: 6px;
+}
+
+.routingSum__stateTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.routingSum__stateText {
+  font-size: 16px;
+  color: rgba(200, 210, 230, 0.75);
+}
+
+.routingSum__state--error .routingSum__stateTitle {
+  color: rgba(255, 120, 120, 0.95);
+}
