@@ -4,11 +4,11 @@ Feature: Order Matching Engine
 
   Scenario: Full match between a new BUY order and an existing SELL order
     Given the following resting orders exist in the book:
-      | id | side | quantity | price | instrument | userId | status |
-      | 10 | SELL | 100      | 150.0 | AAPL       | 2      | NEW    |
+      | id | side | quantity | price | instrument | userId | status | exchangeCode | type  |
+      | 10 | SELL | 100      | 150.0 | AAPL       | 2      | NEW    | XNAS         | LIMIT |
     When a new BUY order arrives:
-      | id | side | quantity | price | instrument | userId | status |
-      | 20 | BUY  | 100      | 150.0 | AAPL       | 1      | NEW    |
+      | id | side | quantity | price | instrument | userId | status | exchangeCode | type  |
+      | 20 | BUY  | 100      | 150.0 | AAPL       | 1      | NEW    | XNAS         | LIMIT |
     Then the BUY order should be "FILLED" with 0 remaining quantity
     And the SELL order 10 should be "FILLED" with 0 remaining quantity
     And a trade event should be published for 100 shares at 150.0

@@ -1,11 +1,14 @@
 package com.ab.orderservice.service;
 
+import com.ab.orderservice.kafka.OrderEventFactory;
+import com.ab.orderservice.kafka.OrderEventsProducer;
 import com.ab.orderservice.kafka.TradeEventFactory;
 import com.ab.orderservice.kafka.TradeEventsProducer;
 import com.ab.orderservice.kafka.event.TradeCreatedEvent;
 import com.ab.orderservice.model.Order;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
+import com.ab.orderservice.model.enums.OrderType;
 import com.ab.orderservice.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -33,16 +37,25 @@ public class MatchingServiceTest {
     @Mock
     private TradeEventsProducer tradeEventsProducer;
 
+    @Mock
+    private OrderEventFactory orderEventFactory;
+
+    @Mock
+    private OrderEventsProducer orderEventsProducer;
+
     @InjectMocks
     private MatchingService matchingService;
 
     // Helper to quickly build orders with defaults
     private Order order(Long id, Long userId, String instrument, OrderSide side,
+                        String exchangeCode, OrderType type,
                         String price, long qty, long remaining, OrderStatus status) {
         return Order.builder()
                 .id(id)
                 .userId(userId)
                 .instrument(instrument)
+                .exchangeCode(exchangeCode)
+                .type(type)
                 .side(side)
                 .price(new BigDecimal(price))
                 .quantity(qty)
@@ -54,146 +67,149 @@ public class MatchingServiceTest {
 
     @Test
     void match_shouldReturnImmediately_whenRemainingQuantityNull() {
-        // service should do nothing if incoming has no remaining qty
         Order incoming = order(
-                1L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "100.00",
-                10,
-                0,
-                OrderStatus.NEW);
+                1L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 10, 0, OrderStatus.NEW
+        );
         incoming.setRemainingQuantity(null);
 
         matchingService.match(incoming);
 
-        verifyNoInteractions(orderRepository, tradeEventFactory, tradeEventsProducer);
+        verifyNoInteractions(orderRepository, tradeEventFactory, tradeEventsProducer, orderEventFactory, orderEventsProducer);
     }
 
     @Test
     void match_shouldReturnImmediately_whenRemainingQuantityZeroOrNegative() {
         Order incoming = order(
-                1L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "100.00",
-                10,
-                0,
-                OrderStatus.NEW);
+                1L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 10, 0, OrderStatus.NEW
+        );
 
         matchingService.match(incoming);
 
-        verifyNoInteractions(orderRepository, tradeEventFactory, tradeEventsProducer);
+        verifyNoInteractions(orderRepository, tradeEventFactory, tradeEventsProducer, orderEventFactory, orderEventsProducer);
     }
 
     @Test
     void match_shouldReturnImmediately_whenStatusNotActive() {
-        // only NEW / PARTIALLY_FILLED are matched (ACTIVE_STATUSES)
         Order incoming = order(
-                1L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "100.00",
-                10,
-                10,
-                OrderStatus.CANCELLED);
+                1L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 10, 10, OrderStatus.CANCELLED
+        );
 
         matchingService.match(incoming);
 
-        verifyNoInteractions(orderRepository, tradeEventFactory, tradeEventsProducer);
+        verifyNoInteractions(orderRepository, tradeEventFactory, tradeEventsProducer, orderEventFactory, orderEventsProducer);
     }
+
+    @Test
+    void match_shouldThrow_whenExchangeCodeMissing() {
+        Order incoming = order(
+                1L, 10L, "AAPL", OrderSide.BUY,
+                null, OrderType.LIMIT,
+                "100.00", 10, 10, OrderStatus.NEW
+        );
+
+        assertThatThrownBy(() -> matchingService.match(incoming))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("exchangeCode");
+
+        verifyNoInteractions(tradeEventFactory, tradeEventsProducer, orderEventFactory, orderEventsProducer);
+        // orderRepository isn't called because we fail before querying
+        verifyNoInteractions(orderRepository);
+    }
+
 
     // BUY matching
     @Test
-    void matchBuy_shouldFillCompletely_againstOneSell_andPublishEvent_andPersistBoth() {
-        // incoming BUY: wants 10 at price 105
+    void matchBuy_shouldFillCompletely_againstOneSell_andPublishTrade_andPersistBoth() {
+        // incoming BUY: wants 10 at 105
         Order buy = order(
-                100L,
-                10L,
-                " AAPL ",
-                OrderSide.BUY,
-                "105.00",
-                10,
-                10,
-                OrderStatus.NEW);
+                100L, 10L, " AAPL ", OrderSide.BUY,
+                "xnas", OrderType.LIMIT,
+                "105.00", 10, 10, OrderStatus.NEW
+        );
 
-        // resting SELL: 10 at price 100 (matchable)
+        // resting SELL: 10 at 100
         Order sell = order(
-                200L,
-                20L,
-                "AAPL",
-                OrderSide.SELL,
-                "100.00",
-                10,
-                10,
-                OrderStatus.NEW);
+                200L, 20L, "AAPL", OrderSide.SELL,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 10, 10, OrderStatus.NEW
+        );
 
         when(orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
-                        eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)))
-                .thenReturn(List.of(sell));
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+                        eq("XNAS"), eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)
+                )
+        ).thenReturn(List.of(sell));
 
-        // event only that we publish it.
-        TradeCreatedEvent event = mock(TradeCreatedEvent.class);
+        TradeCreatedEvent tradeEvent = mock(TradeCreatedEvent.class);
         when(tradeEventFactory.created(any(Order.class), any(Order.class), any(BigDecimal.class), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(event);
+                .thenReturn(tradeEvent);
+
+        // Fill events (your service publishes these now)
+        when(orderEventFactory.filled(any(Order.class))).thenReturn(mock(com.ab.orderservice.kafka.event.OrderFilledEvent.class));
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         // Act
         matchingService.match(buy);
 
-        // Assert - instrument trimmed + stored back into incoming
+        // instrument + exchangeCode normalized
         assertThat(buy.getInstrument()).isEqualTo("AAPL");
+        assertThat(buy.getExchangeCode()).isEqualTo("XNAS");
 
-        // After full fill, both become FILLED, remaining=0
+        // both FILLED
         assertThat(buy.getRemainingQuantity()).isEqualTo(0L);
         assertThat(buy.getStatus()).isEqualTo(OrderStatus.FILLED);
 
         assertThat(sell.getRemainingQuantity()).isEqualTo(0L);
         assertThat(sell.getStatus()).isEqualTo(OrderStatus.FILLED);
 
-        // Publish should use buy id as key (your code uses buy.getId())
-        verify(tradeEventsProducer).publish(eq("100"), same(event));
+        // Trade publish uses buy id as key
+        verify(tradeEventsProducer).publish(eq("100"), same(tradeEvent));
+
+        // Filled events published for both orders
+        verify(orderEventsProducer).publish(eq("100"), any()); // buy filled
+        verify(orderEventsProducer).publish(eq("200"), any()); // sell filled
+
+        // Persist resting order during loop + persist incoming at end
         verify(orderRepository, atLeastOnce()).save(sell);
         verify(orderRepository, atLeastOnce()).save(buy);
     }
 
     @Test
     void matchBuy_shouldPartiallyFill_whenSellNotEnough() {
-        // BUY wants 10
         Order buy = order(
-                101L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "105.00",
-                10,
-                10,
-                OrderStatus.NEW);
+                101L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "105.00", 10, 10, OrderStatus.NEW
+        );
 
-        // SELL has only 4
         Order sell = order(
-                201L,
-                20L,
-                "AAPL",
-                OrderSide.SELL,
-                "100.00",
-                4,
-                4,
-                OrderStatus.NEW);
+                201L, 20L, "AAPL", OrderSide.SELL,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 4, 4, OrderStatus.NEW
+        );
 
         when(orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
-                        eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)))
-                .thenReturn(List.of(sell));
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+                        eq("XNAS"), eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)
+                )
+        ).thenReturn(List.of(sell));
 
-        TradeCreatedEvent event = mock(TradeCreatedEvent.class);
+        TradeCreatedEvent tradeEvent = mock(TradeCreatedEvent.class);
         when(tradeEventFactory.created(any(), any(), any(), anyLong(), any()))
-                .thenReturn(event);
+                .thenReturn(tradeEvent);
+
+        // partial fill events
+        when(orderEventFactory.partiallyFilled(any(Order.class), anyLong()))
+                .thenReturn(mock(com.ab.orderservice.kafka.event.OrderPartiallyFilledEvent.class));
+        when(orderEventFactory.filled(any(Order.class)))
+                .thenReturn(mock(com.ab.orderservice.kafka.event.OrderFilledEvent.class));
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -207,158 +223,133 @@ public class MatchingServiceTest {
         assertThat(sell.getRemainingQuantity()).isEqualTo(0L);
         assertThat(sell.getStatus()).isEqualTo(OrderStatus.FILLED);
 
-        verify(tradeEventsProducer).publish(eq("101"), same(event));
+        verify(tradeEventsProducer).publish(eq("101"), same(tradeEvent));
+
+        // buy partially filled, sell filled
+        verify(orderEventsProducer).publish(eq("101"), any());
+        verify(orderEventsProducer).publish(eq("201"), any());
     }
 
     @Test
     void matchBuy_shouldBreak_whenBuyPriceTooLow_forBestSell() {
-        // BUY price 90
         Order buy = order(
-                102L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "90.00",
-                10,
-                10,
-                OrderStatus.NEW);
-        // Best SELL is 100 (not matchable), and because sells sorted ASC, we break immediately.
+                102L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "90.00", 10, 10, OrderStatus.NEW
+        );
+
         Order sell = order(
-                202L,
-                20L,
-                "AAPL",
-                OrderSide.SELL,
-                "100.00",
-                10,
-                10,
-                OrderStatus.NEW);
+                202L, 20L, "AAPL", OrderSide.SELL,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 10, 10, OrderStatus.NEW
+        );
 
         when(orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
-                        eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)))
-                .thenReturn(List.of(sell));
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+                        eq("XNAS"), eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)
+                )
+        ).thenReturn(List.of(sell));
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         matchingService.match(buy);
 
-        // No trade happened -> no publish
+        // No trade -> no publish
         verifyNoInteractions(tradeEventFactory);
         verify(tradeEventsProducer, never()).publish(anyString(), any());
 
-        // Status remains NEW, remaining unchanged
+        // incoming unchanged (still NEW)
         assertThat(buy.getRemainingQuantity()).isEqualTo(10L);
         assertThat(buy.getStatus()).isEqualTo(OrderStatus.NEW);
 
-        // Still saved at end
+        // saved at end
         verify(orderRepository).save(buy);
-        // Resting order not saved because no match
         verify(orderRepository, never()).save(sell);
     }
 
     @Test
     void matchBuy_shouldSkipSelfTrade_andContinueToNextCandidate() {
-        // BUY by user 10
         Order buy = order(
-                103L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "105.00",
-                10,
-                10,
-                OrderStatus.NEW);
+                103L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "105.00", 10, 10, OrderStatus.NEW
+        );
 
-        // First SELL is same user -> should be skipped
         Order sellSelf = order(
-                203L,
-                10L,
-                "AAPL",
-                OrderSide.SELL,
-                "100.00",
-                10,
-                10,
-                OrderStatus.NEW);
+                203L, 10L, "AAPL", OrderSide.SELL,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 10, 10, OrderStatus.NEW
+        );
 
-        // Second SELL is different user -> should match
         Order sellOther = order(
-                204L,
-                20L,
-                "AAPL",
-                OrderSide.SELL,
-                "100.00",
-                10,
-                10,
-                OrderStatus.NEW);
+                204L, 20L, "AAPL", OrderSide.SELL,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 10, 10, OrderStatus.NEW
+        );
 
         when(orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
-                        eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)))
-                .thenReturn(List.of(sellSelf, sellOther));
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceAscCreatedAtAsc(
+                        eq("XNAS"), eq("AAPL"), eq(OrderSide.SELL), anyList(), eq(0L)
+                )
+        ).thenReturn(List.of(sellSelf, sellOther));
 
-        TradeCreatedEvent event = mock(TradeCreatedEvent.class);
+        TradeCreatedEvent tradeEvent = mock(TradeCreatedEvent.class);
         when(tradeEventFactory.created(any(), any(), any(), anyLong(), any()))
-                .thenReturn(event);
+                .thenReturn(tradeEvent);
+
+        when(orderEventFactory.filled(any(Order.class)))
+                .thenReturn(mock(com.ab.orderservice.kafka.event.OrderFilledEvent.class));
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         matchingService.match(buy);
 
-        // Should trade exactly once (with sellOther)
-        verify(tradeEventsProducer, times(1)).publish(eq("103"), same(event));
+        verify(tradeEventsProducer, times(1)).publish(eq("103"), same(tradeEvent));
 
-        // buy should be filled (10 matched)
         assertThat(buy.getRemainingQuantity()).isEqualTo(0L);
         assertThat(buy.getStatus()).isEqualTo(OrderStatus.FILLED);
 
-        // sellSelf unchanged (skipped)
+        // self order untouched
         assertThat(sellSelf.getRemainingQuantity()).isEqualTo(10L);
         assertThat(sellSelf.getStatus()).isEqualTo(OrderStatus.NEW);
 
-        // sellOther filled
+        // other filled
         assertThat(sellOther.getRemainingQuantity()).isEqualTo(0L);
         assertThat(sellOther.getStatus()).isEqualTo(OrderStatus.FILLED);
     }
 
     // SELL matching
     @Test
-    void matchSell_shouldFillCompletely_againstOneBuy_andPublishEvent_andPersistBoth() {
-        // incoming SELL: wants to sell 5 at 100
+    void matchSell_shouldFillCompletely_againstOneBuy_andPublishTrade_andPersistBoth() {
         Order sell = order(
-                300L,
-                20L,
-                "AAPL",
-                OrderSide.SELL,
-                "100.00",
-                5,
-                5,
-                OrderStatus.NEW);
+                300L, 20L, "AAPL", OrderSide.SELL,
+                "XNAS", OrderType.LIMIT,
+                "100.00", 5, 5, OrderStatus.NEW
+        );
 
-        // resting BUY: price 105 (matchable), qty 5
         Order buy = order(
-                400L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "105.00",
-                5,
-                5,
-                OrderStatus.NEW);
+                400L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "105.00", 5, 5, OrderStatus.NEW
+        );
 
         when(orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
-                        eq("AAPL"), eq(OrderSide.BUY), anyList(), eq(0L)))
-                .thenReturn(List.of(buy));
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+                        eq("XNAS"), eq("AAPL"), eq(OrderSide.BUY), anyList(), eq(0L)
+                )
+        ).thenReturn(List.of(buy));
 
-        TradeCreatedEvent event = mock(TradeCreatedEvent.class);
+        TradeCreatedEvent tradeEvent = mock(TradeCreatedEvent.class);
         when(tradeEventFactory.created(any(), any(), any(), anyLong(), any()))
-                .thenReturn(event);
+                .thenReturn(tradeEvent);
+
+        when(orderEventFactory.filled(any(Order.class)))
+                .thenReturn(mock(com.ab.orderservice.kafka.event.OrderFilledEvent.class));
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         matchingService.match(sell);
 
-        // Trade price uses resting BUY price in matchSell
         assertThat(sell.getRemainingQuantity()).isEqualTo(0L);
         assertThat(sell.getStatus()).isEqualTo(OrderStatus.FILLED);
 
@@ -366,7 +357,11 @@ public class MatchingServiceTest {
         assertThat(buy.getStatus()).isEqualTo(OrderStatus.FILLED);
 
         // publish key is buy id
-        verify(tradeEventsProducer).publish(eq("400"), same(event));
+        verify(tradeEventsProducer).publish(eq("400"), same(tradeEvent));
+
+        // filled events published for both orders
+        verify(orderEventsProducer).publish(eq("400"), any());
+        verify(orderEventsProducer).publish(eq("300"), any());
 
         verify(orderRepository, atLeastOnce()).save(buy);
         verify(orderRepository, atLeastOnce()).save(sell);
@@ -374,29 +369,23 @@ public class MatchingServiceTest {
 
     @Test
     void matchSell_shouldBreak_whenBestBuyPriceTooLow() {
-        // SELL price 120, best BUY is 110 -> not matchable -> break
         Order sell = order(
-                301L,
-                20L,
-                "AAPL",
-                OrderSide.SELL,
-                "120.00",
-                5,
-                5, OrderStatus.NEW);
+                301L, 20L, "AAPL", OrderSide.SELL,
+                "XNAS", OrderType.LIMIT,
+                "120.00", 5, 5, OrderStatus.NEW
+        );
+
         Order buy = order(
-                401L,
-                10L,
-                "AAPL",
-                OrderSide.BUY,
-                "110.00",
-                5,
-                5,
-                OrderStatus.NEW);
+                401L, 10L, "AAPL", OrderSide.BUY,
+                "XNAS", OrderType.LIMIT,
+                "110.00", 5, 5, OrderStatus.NEW
+        );
 
         when(orderRepository
-                .findByInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
-                        eq("AAPL"), eq(OrderSide.BUY), anyList(), eq(0L)))
-                .thenReturn(List.of(buy));
+                .findByExchangeCodeAndInstrumentAndSideAndStatusInAndRemainingQuantityGreaterThanOrderByPriceDescCreatedAtAsc(
+                        eq("XNAS"), eq("AAPL"), eq(OrderSide.BUY), anyList(), eq(0L)
+                )
+        ).thenReturn(List.of(buy));
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -412,4 +401,3 @@ public class MatchingServiceTest {
         verify(orderRepository, never()).save(buy);
     }
 }
-

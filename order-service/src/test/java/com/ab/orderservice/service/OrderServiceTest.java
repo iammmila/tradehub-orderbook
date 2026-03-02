@@ -12,9 +12,9 @@ import com.ab.orderservice.kafka.event.OrderCancelledEvent;
 import com.ab.orderservice.kafka.event.OrderCreatedEvent;
 import com.ab.orderservice.kafka.event.OrderReplacedEvent;
 import com.ab.orderservice.model.Order;
-import com.ab.orderservice.model.enums.OrderSide;
-import com.ab.orderservice.model.enums.OrderStatus;
+import com.ab.orderservice.model.enums.*;
 import com.ab.orderservice.repository.OrderRepository;
+import com.ab.orderservice.router.SmartOrderRouter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +44,12 @@ public class OrderServiceTest {
     @Mock
     private OrderEventFactory orderEventFactory;
 
+    @Mock
+    private ExchangeRegistry exchangeRegistry;
+
+    @Mock
+    private SmartOrderRouter smartOrderRouter;
+
     @InjectMocks
     private OrderService orderService;
 
@@ -59,15 +65,33 @@ public class OrderServiceTest {
 
     @Test
     void createOrder_shouldSavePublishMatchReloadAndReturnResponse() {
-        // Arrange (given): prepare input + mock behavior
+        // Arrange
         CreateOrderRequest req = CreateOrderRequest.builder()
                 .instrument("AAPL")
                 .side(OrderSide.BUY)
+                .type(OrderType.LIMIT)
                 .price(new BigDecimal("150.25"))
                 .quantity(100L)
+                .exchangeCode(null)
                 .build();
 
-        // the repository returns a saved order with id
+        // Router returns a decision (AUTO)
+        var decision = mock(com.ab.orderservice.router.RouteDecision.class);
+        when(decision.getChosenExchange()).thenReturn("XNAS");
+        when(decision.getReason()).thenReturn("BEST_PRICE");
+
+        when(smartOrderRouter.route(
+                eq("AAPL"),
+                eq(OrderSide.BUY),
+                eq(OrderType.LIMIT),
+                eq(new BigDecimal("150.25")),
+                eq(100L)
+        )).thenReturn(decision);
+
+        // normalizeOrDefault should return a valid exchange code
+        when(exchangeRegistry.normalizeOrDefault("XNAS")).thenReturn("XNAS");
+
+        // repository save assigns id
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
             o.setId(99L);
@@ -77,51 +101,58 @@ public class OrderServiceTest {
         OrderCreatedEvent createdEvent = mock(OrderCreatedEvent.class);
         when(orderEventFactory.created(any(Order.class))).thenReturn(createdEvent);
 
-        // after matching, service reloads by id; return an updated order
+        // reload returns "updated" after matching
         Order updated = Order.builder()
                 .id(99L)
                 .instrument("AAPL")
+                .exchangeCode("XNAS")
                 .side(OrderSide.BUY)
+                .type(OrderType.LIMIT)
+                .visible(true)
                 .price(new BigDecimal("150.25"))
                 .quantity(100L)
                 .remainingQuantity(40L)
                 .status(OrderStatus.PARTIALLY_FILLED)
                 .createdAt(LocalDateTime.now())
                 .userId(userId)
+                .routingMode(RoutingMode.AUTO)
+                .routedBy(RoutedBy.SOR)
+                .routeReason("BEST_PRICE")
                 .build();
+
         when(orderRepository.findById(99L)).thenReturn(Optional.of(updated));
 
-        // Act (When): call method under test
+        // Act
         OrderResponse resp = orderService.createOrder(userId, req);
 
-        // ArgumentCaptor: it lets us inspect the exact Order object passed into repository.save(...)
-        // then (save called with correct initial state)
+        // Assert saved order fields before matching
         ArgumentCaptor<Order> savedCaptor = ArgumentCaptor.forClass(Order.class);
         verify(orderRepository).save(savedCaptor.capture());
         Order savedArg = savedCaptor.getValue();
 
-        // These asserts prove createOrder sets correct initial fields before saving
         assertThat(savedArg.getInstrument()).isEqualTo("AAPL");
+        assertThat(savedArg.getExchangeCode()).isEqualTo("XNAS");
         assertThat(savedArg.getSide()).isEqualTo(OrderSide.BUY);
+        assertThat(savedArg.getType()).isEqualTo(OrderType.LIMIT);
+        assertThat(savedArg.getVisible()).isTrue();
         assertThat(savedArg.getPrice()).isEqualByComparingTo("150.25");
         assertThat(savedArg.getQuantity()).isEqualTo(100L);
         assertThat(savedArg.getRemainingQuantity()).isEqualTo(100L);
         assertThat(savedArg.getStatus()).isEqualTo(OrderStatus.NEW);
         assertThat(savedArg.getUserId()).isEqualTo(userId);
-        // LocalDateTime.now() changes every run, so we only check it is set.
         assertThat(savedArg.getCreatedAt()).isNotNull();
 
-        // Kafka publish verification: ensure event factory + producer are called
+        assertThat(savedArg.getRoutingMode()).isEqualTo(RoutingMode.AUTO);
+        assertThat(savedArg.getRoutedBy()).isEqualTo(RoutedBy.SOR);
+        assertThat(savedArg.getRouteReason()).isEqualTo("BEST_PRICE");
+
+        // Kafka publish + match + reload
         verify(orderEventFactory).created(any(Order.class));
         verify(orderEventsProducer).publish(eq("99"), same(createdEvent));
-
-        // matching runs after create
         verify(matchingService).match(any(Order.class));
-
-        // reload called
         verify(orderRepository).findById(99L);
 
-        // response reflects reloaded order
+        // Response reflects reloaded order
         assertThat(resp.getId()).isEqualTo(99L);
         assertThat(resp.getRemainingQuantity()).isEqualTo(40L);
         assertThat(resp.getStatus()).isEqualTo(OrderStatus.PARTIALLY_FILLED);
@@ -129,14 +160,30 @@ public class OrderServiceTest {
 
     @Test
     void createOrder_shouldReturnSavedIfReloadNotFound() {
-        // given
-        // If reload fails (Optional.empty), it falls back to "saved" order.
+        // Arrange
         CreateOrderRequest req = CreateOrderRequest.builder()
                 .instrument("VOD")
                 .side(OrderSide.SELL)
+                .type(OrderType.LIMIT)
                 .price(new BigDecimal("10.00"))
                 .quantity(50L)
+                .exchangeCode(null)
                 .build();
+
+        // Router decision
+        var decision = mock(com.ab.orderservice.router.RouteDecision.class);
+        when(decision.getChosenExchange()).thenReturn("XLON");
+        when(decision.getReason()).thenReturn("BEST_PROCEEDS");
+
+        when(smartOrderRouter.route(
+                eq("VOD"),
+                eq(OrderSide.SELL),
+                eq(OrderType.LIMIT),
+                eq(new BigDecimal("10.00")),
+                eq(50L)
+        )).thenReturn(decision);
+
+        when(exchangeRegistry.normalizeOrDefault("XLON")).thenReturn("XLON");
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
@@ -147,14 +194,18 @@ public class OrderServiceTest {
         OrderCreatedEvent createdEvent = mock(OrderCreatedEvent.class);
         when(orderEventFactory.created(any(Order.class))).thenReturn(createdEvent);
 
+        // Reload fails -> fallback to saved
         when(orderRepository.findById(7L)).thenReturn(Optional.empty());
 
-        // when
+        // Act
         OrderResponse resp = orderService.createOrder(userId, req);
 
-        // then
+        // Assert: publish + match happened
         verify(orderEventsProducer).publish(eq("7"), same(createdEvent));
         verify(matchingService).match(any(Order.class));
+        verify(orderRepository).findById(7L);
+
+        // Fallback response is based on "saved" order (NEW, remaining = quantity)
         assertThat(resp.getId()).isEqualTo(7L);
         assertThat(resp.getInstrument()).isEqualTo("VOD");
         assertThat(resp.getStatus()).isEqualTo(OrderStatus.NEW);

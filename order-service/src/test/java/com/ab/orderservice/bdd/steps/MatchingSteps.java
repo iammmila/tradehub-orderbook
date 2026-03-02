@@ -2,8 +2,7 @@ package com.ab.orderservice.bdd.steps;
 
 import com.ab.orderservice.kafka.TradeEventsProducer;
 import com.ab.orderservice.model.Order;
-import com.ab.orderservice.model.enums.OrderSide;
-import com.ab.orderservice.model.enums.OrderStatus;
+import com.ab.orderservice.model.enums.*;
 import com.ab.orderservice.repository.OrderRepository;
 import com.ab.orderservice.service.MatchingService;
 import io.cucumber.datatable.DataTable;
@@ -86,35 +85,38 @@ public class MatchingSteps {
     @Given("the following resting orders exist in the book:")
     public void existingOrders(DataTable table) {
         List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+        transactionTemplate.execute(tx -> {
+            // Convert table rows to real Order entities and persist them
+            List<Order> restingOrders = rows.stream().map(r -> {
+                Order o = new Order();
+                Long id = parseLongOrNull(r.get("id"));
+                o.setSide(OrderSide.valueOf(req(r, "side")));
+                long qty = Long.parseLong(req(r, "quantity"));
+                o.setQuantity(qty);
+                o.setRemainingQuantity(qty);
+                o.setRoutingMode(RoutingMode.MANUAL);
+                o.setRoutedBy(RoutedBy.USER);
+                o.setPrice(new BigDecimal(req(r, "price")));
+                o.setInstrument(req(r, "instrument"));
+                o.setUserId(Long.parseLong(req(r, "userId")));
+                o.setStatus(OrderStatus.valueOf(req(r, "status")));
+                o.setExchangeCode(req(r, "exchangeCode"));
+                o.setType(OrderType.valueOf(req(r, "type")));
+                o.setVisible(o.getType() != OrderType.HIDDEN_LIMIT);
+                // If your Order uses @GeneratedValue and refuses manual IDs, comment this out:
+                if (id != null) o.setId(id);
+                o.setCreatedAt(LocalDateTime.now());
+                return o;
+            }).toList();
 
-        // Convert table rows to real Order entities and persist them
-        List<Order> restingOrders = rows.stream().map(r -> {
-            Long id = parseLongOrNull(r.get("id"));
-            OrderSide side = OrderSide.valueOf(r.get("side"));
-            long qty = Long.parseLong(r.get("quantity"));
-            BigDecimal price = new BigDecimal(r.get("price"));
-            String instrument = r.get("instrument");
-            Long userId = Long.parseLong(r.get("userId"));
-            OrderStatus status = OrderStatus.valueOf(r.get("status"));
+            orderRepository.saveAll(restingOrders);
 
-            // Build order - adapt to your entity constructor/builder
-            Order o = new Order();
-            // If your Order uses @GeneratedValue and refuses manual IDs, comment this out:
-            if (id != null) o.setId(id);
+            // flush is OK now because we are inside a tx
+            entityManager.flush();
+            return null;
+        });
 
-            o.setSide(side);
-            o.setQuantity(qty);
-            o.setRemainingQuantity(qty); // important: matching uses remainingQuantity not total quantity
-            o.setPrice(price);
-            o.setInstrument(instrument);
-            o.setUserId(userId);
-            o.setStatus(status);
-            o.setCreatedAt(LocalDateTime.now());
-
-            return o;
-        }).toList();
-
-        orderRepository.saveAll(restingOrders);
+        entityManager.clear();
     }
 
     @When("a new BUY order arrives:")
@@ -122,32 +124,42 @@ public class MatchingSteps {
         Map<String, String> r = table.asMaps(String.class, String.class).get(0);
 
         incomingOrder = new Order();
+
         Long id = parseLongOrNull(r.get("id"));
+        // If @GeneratedValue disallows this, remove it:
         if (id != null) incomingOrder.setId(id);
 
-        incomingOrder.setSide(OrderSide.valueOf(r.get("side")));
-        long qty = Long.parseLong(r.get("quantity"));
+        incomingOrder.setSide(OrderSide.valueOf(req(r, "side")));
+        long qty = Long.parseLong(req(r, "quantity"));
         incomingOrder.setQuantity(qty);
         incomingOrder.setRemainingQuantity(qty);
-        incomingOrder.setPrice(new BigDecimal(r.get("price")));
-        incomingOrder.setInstrument(r.get("instrument"));
-        incomingOrder.setUserId(Long.parseLong(r.get("userId")));
-        incomingOrder.setStatus(OrderStatus.valueOf(r.get("status")));
-        incomingOrder.setCreatedAt(LocalDateTime.now());
 
-        Order capturedIncoming = incomingOrder;
+        incomingOrder.setPrice(new BigDecimal(req(r, "price")));
+        incomingOrder.setInstrument(req(r, "instrument"));
+        incomingOrder.setUserId(Long.parseLong(req(r, "userId")));
+        incomingOrder.setStatus(OrderStatus.valueOf(req(r, "status")));
+
+        incomingOrder.setExchangeCode(req(r, "exchangeCode"));
+        incomingOrder.setType(OrderType.valueOf(req(r, "type")));
+        incomingOrder.setCreatedAt(LocalDateTime.now());
+        incomingOrder.setRoutingMode(RoutingMode.MANUAL);
+        incomingOrder.setRoutedBy(RoutedBy.USER);
+        incomingOrder.setVisible(incomingOrder.getType() != OrderType.HIDDEN_LIMIT);
+        Order captured = incomingOrder;
         transactionTemplate.execute(status -> {
-            matchingService.match(capturedIncoming);
+            incomingOrder = orderRepository.save(incomingOrder);
+            matchingService.match(incomingOrder);
             return null;
         });
+
         entityManager.clear();
     }
 
     @Then("the BUY order should be {string} with {int} remaining quantity")
     public void verifyIncomingOrder(String expectedStatus, int expectedRemaining) {
-        // We check the in-memory object (it may be updated by matching logic)
-        // assertEquals(OrderStatus.valueOf(expectedStatus), incomingOrder.getStatus());
-        assertEquals((long) expectedRemaining, incomingOrder.getRemainingQuantity().longValue());
+        Order buy = orderRepository.findById(incomingOrder.getId()).orElseThrow();
+        assertEquals(OrderStatus.valueOf(expectedStatus), buy.getStatus());
+        assertEquals(expectedRemaining, buy.getRemainingQuantity());
     }
 
     @Then("the SELL order {int} should be {string} with {int} remaining quantity")
@@ -180,7 +192,14 @@ public class MatchingSteps {
         );
     }
 
-    //Helper: safely parse Long from a string cell (supports blanks).
+    private static String req(Map<String, String> row, String key) {
+        String v = row.get(key);
+        if (v == null || v.trim().isEmpty()) {
+            throw new IllegalArgumentException("Missing required column: " + key);
+        }
+        return v.trim();
+    }
+
     private static Long parseLongOrNull(String s) {
         if (s == null) return null;
         String t = s.trim();

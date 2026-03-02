@@ -1,5 +1,6 @@
 package com.ab.orderservice.bdd;
 
+import com.ab.orderservice.kafka.OrderEventsProducer;
 import com.ab.orderservice.kafka.TradeEventsProducer;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,10 @@ public class CucumberSpringConfig {
      * - The Spring context starts with a mocked TradeEventsProducer.
      * - Any service that autowires TradeEventsProducer (like MatchingService) receives the mock.
      */
+    // so this MUST be mocked to stop real Kafka sends.
+    @MockitoBean
+    private OrderEventsProducer orderEventsProducer;
+
     @MockitoBean
     private TradeEventsProducer tradeEventsProducer;
 }
