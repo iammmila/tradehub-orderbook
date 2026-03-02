@@ -1,12 +1,9 @@
-/* OrderEntryCard.scss */
-
 .oe {
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
-/* Instrument row */
 .oeRow {
     display: flex;
     align-items: center;
@@ -33,11 +30,20 @@
     color: rgba(255, 255, 255, 0.92);
 }
 
-/* Tabs */
 .oeTabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+}
+
+.oeTabs--type4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 520px) {
+    .oeTabs--type4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .oeTab {
@@ -73,7 +79,6 @@
     transform: translateY(1px);
 }
 
-/* Active */
 .oeTab--active {
     background: rgba(255, 255, 255, 0.10);
     border-color: rgba(0, 255, 160, 0.45);
@@ -81,7 +86,6 @@
     color: rgba(255, 255, 255, 0.96);
 }
 
-/* BUY vs SELL feel */
 .oeTab--active:first-child {
     box-shadow:
         0 0 0 5px rgba(0, 255, 160, 0.10),
@@ -95,7 +99,6 @@
         0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Form */
 .oeForm {
     display: flex;
     flex-direction: column;
@@ -115,7 +118,6 @@
     color: rgba(255, 255, 255, 0.70);
 }
 
-/* Inputs */
 .oeForm .input {
     height: 42px;
     border-radius: 12px;
@@ -147,7 +149,6 @@
     box-shadow: 0 0 0 5px rgba(0, 255, 160, 0.12);
 }
 
-/* Buttons */
 .oe button.ordersBtn {
     height: 44px;
     border-radius: 14px;

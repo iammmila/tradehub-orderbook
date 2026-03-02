@@ -17,7 +17,16 @@ const rowKey = (r, idx) => {
 
   return `${ex}|${p}|${q}|${rem}|${t}|${idx}`;
 };
+function isVisibleInBook(r) {
+  // Prefer explicit `visible` boolean if backend sends it
+  if (typeof r?.visible === "boolean") return r.visible;
 
+  // Or infer from type if backend includes it
+  const t = String(r?.type || "").toUpperCase();
+  if (t === "HIDDEN_LIMIT") return false;
+
+  return true; // default: show
+}
 const levelKey = (lvl, idx) => {
   const p = lvl?.price ?? "na";
   const tq = lvl?.totalQuantity ?? lvl?.quantity ?? "na";
@@ -41,26 +50,28 @@ const OrderBookPanel = ({
   const isLevelsMode = !!showLevels;
 
   const bids = useMemo(() => {
-    const arr = (book?.bids || []).slice();
+    const arr = (book?.bids || []).filter(isVisibleInBook).slice();
     arr.sort((a, b) => (safeNum(b.price) ?? 0) - (safeNum(a.price) ?? 0));
     return arr;
   }, [book]);
 
   const asks = useMemo(() => {
-    const arr = (book?.asks || []).slice();
+    const arr = (book?.asks || []).filter(isVisibleInBook).slice();
     arr.sort((a, b) => (safeNum(a.price) ?? 0) - (safeNum(b.price) ?? 0));
     return arr;
   }, [book]);
 
   const bidLevels = useMemo(() => {
-    const arr = (book?.bidLevels || book?.bids || []).slice();
+    const src = book?.bidLevels || book?.bids || [];
+    const arr = src.filter(isVisibleInBook).slice();
     arr.sort((a, b) => (safeNum(b.price) ?? 0) - (safeNum(a.price) ?? 0));
     return arr;
   }, [book]);
 
   const askLevels = useMemo(() => {
-    const arr = (book?.askLevels || book?.asks || []).slice();
-    arr.sort((a, b) => (safeNum(a.price) ?? 0) - (safeNum(b.price) ?? 0));;
+    const src = book?.askLevels || book?.asks || [];
+    const arr = src.filter(isVisibleInBook).slice();
+    arr.sort((a, b) => (safeNum(a.price) ?? 0) - (safeNum(b.price) ?? 0));
     return arr;
   }, [book]);
 

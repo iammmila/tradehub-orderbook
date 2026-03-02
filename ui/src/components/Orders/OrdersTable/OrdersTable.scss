@@ -1,4 +1,5 @@
 @import "../orders-ui";
+
 .thActions {
   width: 180px;
 }
@@ -6,6 +7,37 @@
 .badge--partial {
   color: rgba(255, 170, 0, 0.95);
   border-color: rgba(255, 170, 0, 0.22);
+}
+
+.badge--auto {
+  background: rgba(46, 204, 113, 0.14);
+  border: 1px solid rgba(46, 204, 113, 0.28);
+  color: rgba(46, 204, 113, 0.95);
+}
+
+.badge--manual {
+  background: rgba(52, 152, 219, 0.14);
+  border: 1px solid rgba(52, 152, 219, 0.28);
+  color: rgba(52, 152, 219, 0.95);
+}
+
+.reasonCell {
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.muted {
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.ordersTable__note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  opacity: 0.75;
+  color: aqua;
 }
 
 .table {

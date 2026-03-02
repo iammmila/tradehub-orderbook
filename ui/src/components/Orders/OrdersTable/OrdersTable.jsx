@@ -19,15 +19,41 @@ function statusBadgeClass(status) {
   if (s === "PARTIALLY_FILLED") return "badge badge--partial";
   return "badge badge--new";
 }
+function exchangeBadgeClass(exchangeCode) {
+  const s = String(exchangeCode || "").toUpperCase();
+  if (s === "XLON") return "badge badge--partial";
+  if (s === "XNAS") return "badge badge--cancelled";
+  if (s === "XTKS") return "badge badge--filled";
+  return "badge badge--new";
+}
+function routingBadgeClass(mode) {
+  const m = String(mode || "").toUpperCase();
+  if (m === "AUTO") return "badge badge--auto";
+  if (m === "MANUAL") return "badge badge--manual";
+  return "badge";
+}
 
+function routedByLabel(value) {
+  const v = String(value || "").toUpperCase();
+  if (v === "SOR") return "SOR";
+  if (v === "USER") return "USER";
+  return v || "-";
+}
+
+function shortText(s, max = 34) {
+  const str = String(s || "");
+  if (!str) return "-";
+  if (str.length <= max) return str;
+  return str.slice(0, max - 1) + "…";
+}
 function isCancellable(status) {
   const s = String(status || "").toUpperCase();
-  return s === "NEW" || s === "PARTIALLY_FILLED";
+  return s === "NEW";
 }
 
 function isReplaceable(status) {
   const s = String(status || "").toUpperCase();
-  return s === "NEW" || s === "PARTIALLY_FILLED";
+  return s === "NEW";
 }
 
 const OrdersTable = () => {
@@ -43,6 +69,7 @@ const OrdersTable = () => {
   const [instrument, setInstrument] = useState("");
   const [side, setSide] = useState("");     // "" means All
   const [status, setStatus] = useState(""); // "" means All
+  const [routingMode, setRoutingMode] = useState("");
 
   // Sorting (server-side kept as you had)
   const [sortBy, setSortBy] = useState("createdAt");
@@ -63,8 +90,6 @@ const OrdersTable = () => {
       setLoading(true);
       setError(null);
 
-      // ✅ IMPORTANT: instrument is NOT sent to API anymore
-      // we filter instrument on client-side like RecentOrdersTable
       const data = await fetchOrdersPage(
         page,
         size,
@@ -89,7 +114,6 @@ const OrdersTable = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, size, side, status, sortParam]);
 
-  // ✅ Client-side instrument filter same as RecentOrdersTable
   const filteredRows = useMemo(() => {
     const q = instrument.trim().toUpperCase();
     let out = [...(rows || [])];
@@ -100,12 +124,15 @@ const OrdersTable = () => {
       );
     }
 
-    // side/status already filtered server-side, but keeping safe:
     if (side) out = out.filter((o) => String(o.side || "").toUpperCase() === String(side).toUpperCase());
     if (status) out = out.filter((o) => String(o.status || "").toUpperCase() === String(status).toUpperCase());
-
+    if (routingMode) {
+      out = out.filter((o) =>
+        String(o.routingMode || "").toUpperCase() === String(routingMode).toUpperCase()
+      );
+    }
     return out;
-  }, [rows, instrument, side, status]);
+  }, [rows, instrument, side, status, routingMode]);
 
   const toggleSort = (field) => {
     if (sortBy !== field) {
@@ -164,8 +191,6 @@ const OrdersTable = () => {
         search={instrument}
         onSearch={(v) => {
           setInstrument(v);
-          // ✅ do NOT reset page here (client-side filter)
-          // if you want: setPage(0); (optional)
         }}
         selects={[
           {
@@ -181,6 +206,20 @@ const OrdersTable = () => {
               { label: "SELL", value: "SELL" },
             ],
             width: 140,
+          },
+          {
+            label: "Routing",
+            value: routingMode,
+            onChange: (v) => {
+              setPage(0);
+              setRoutingMode(v);
+            },
+            options: [
+              { label: "All", value: "" },
+              { label: "AUTO", value: "AUTO" },
+              { label: "MANUAL", value: "MANUAL" },
+            ],
+            width: 160,
           },
           {
             label: "Status",
@@ -199,6 +238,7 @@ const OrdersTable = () => {
             width: 180,
           },
         ]}
+
         right={
           <div className="ordersTable__topActions">
             <button className="ordersBtn ordersBtn--primary" onClick={() => setIsCreateOpen(true)}>
@@ -213,7 +253,11 @@ const OrdersTable = () => {
           </div>
         }
       />
-
+      {instrument.trim() && (
+        <div className="ordersTable__note">
+          Filtering instrument applies to the current page only.
+        </div>
+      )}
       {error && (
         <div className="table-error">
           <div>{error}</div>
@@ -241,7 +285,11 @@ const OrdersTable = () => {
                 Quantity {sortBy === "quantity" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
               <th>Remaining</th>
+              <th>Exchange</th>
               <th>Status</th>
+              <th>Routing</th>
+              <th>By</th>
+              <th>Reason</th>
               <th className="thActions">Actions</th>
             </tr>
           </thead>
@@ -273,7 +321,25 @@ const OrdersTable = () => {
                   <td className="mono">{r.quantity != null ? formatNumber(r.quantity) : "-"}</td>
                   <td className="mono">{r.remainingQuantity != null ? formatNumber(r.remainingQuantity) : "-"}</td>
                   <td>
+                    <span className={exchangeBadgeClass(r.exchangeCode)}>
+                      {r.exchangeCode != null ? r.exchangeCode : "-"}
+                    </span>
+                  </td>
+                  <td>
                     <span className={statusBadgeClass(r.status)}>{r.status}</span>
+                  </td>
+                  <td>
+                    <span className={routingBadgeClass(r.routingMode)}>
+                      {String(r.routingMode || "-").toUpperCase()}
+                    </span>
+                  </td>
+
+                  <td className="muted">
+                    {routedByLabel(r.routedBy)}
+                  </td>
+
+                  <td className="reasonCell" title={r.routeReason || ""}>
+                    {shortText(r.routeReason, 42)}
                   </td>
                   <td className="actionsCell">
                     <button

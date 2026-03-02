@@ -26,9 +26,11 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
   const [planLoading, setPlanLoading] = useState(false);
   const [planErr, setPlanErr] = useState(null);
   const [plan, setPlan] = useState(null);
+  const [minExecSize, setMinExecSize] = useState("");
 
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
+  
   useEffect(() => {
     let alive = true;
 
@@ -79,7 +81,7 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
   const q = useMemo(() => toNum(quantity), [quantity]);
 
   const approxValue = useMemo(() => {
-    if (type !== "LIMIT") return null;
+    if (type === "MARKET") return null;
     if (p == null || q == null) return null;
     return p * q;
   }, [p, q, type]);
@@ -88,15 +90,18 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
     if (!instrument || !instrument.trim()) return "Instrument is required";
     if (!q || q <= 0) return "Quantity must be > 0";
     if (type === "LIMIT" && (!p || p <= 0)) return "Price must be > 0 for LIMIT";
-    if (routingMode === "MANUAL") {
-      if (!exchangeCode) return "Exchange is required for MANUAL";
-      if (exchanges.length > 0 && !exchanges.some((e) => e.exchangeCode === exchangeCode)) {
-        return "Selected exchange is invalid";
-      }
+    if (type !== "MARKET" && (!p || p <= 0)) return "Price must be > 0 for this order type";
+    if (type === "MIN_EXECUTION_SIZE") {
+      const m = toNum(minExecSize);
+      if (m == null || m < 0) return "Min exec size must be ≥ 0";
+      if (q != null && m > q) return "Min exec size cannot be greater than quantity";
     }
     return null;
   };
-
+  useEffect(() => {
+    if (type === "MARKET") setPrice("");
+    if (type !== "MIN_EXECUTION_SIZE") setMinExecSize("");
+  }, [type]);
   const submit = async () => {
     setErr(null);
     const v = validate();
@@ -110,9 +115,9 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
         side,
         type,
         quantity: q,
-        ...(type === "LIMIT" ? { price: p } : { price: 0 }),
+        ...(type !== "MARKET" ? { price: p } : {}), // don't send price for MARKET
+        ...(type === "MIN_EXECUTION_SIZE" ? { minExecSize: Number(minExecSize) } : {}),
         ...(routingMode === "MANUAL" ? { exchangeCode } : {}),
-        routingMode,
       };
       await createOrder(payload);
 
@@ -212,12 +217,25 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
         </div>
 
         {/* Type */}
-        <div className="oeTabs">
+        <div className="oeTabs oeTabs--type4">
           <button className={`oeTab ${type === "LIMIT" ? "oeTab--active" : ""}`} onClick={() => setType("LIMIT")} type="button">
             Limit
           </button>
+
           <button className={`oeTab ${type === "MARKET" ? "oeTab--active" : ""}`} onClick={() => setType("MARKET")} type="button">
             Market
+          </button>
+
+          <button className={`oeTab ${type === "HIDDEN_LIMIT" ? "oeTab--active" : ""}`} onClick={() => setType("HIDDEN_LIMIT")} type="button">
+            Hidden
+          </button>
+
+          <button
+            className={`oeTab ${type === "MIN_EXECUTION_SIZE" ? "oeTab--active" : ""}`}
+            onClick={() => setType("MIN_EXECUTION_SIZE")}
+            type="button"
+          >
+            Minimum Execution Size
           </button>
         </div>
 
@@ -240,7 +258,7 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
         </div>
 
         <div className="oeForm">
-          {type === "LIMIT" && (
+          {type !== "MARKET" && (
             <label className="oeField">
               <span>Limit Price</span>
               <input
@@ -252,7 +270,18 @@ const OrderEntryCard = ({ instrument, prefill, onSubmitted }) => {
               />
             </label>
           )}
-
+          {type === "MIN_EXECUTION_SIZE" && (
+            <label className="oeField">
+              <span>Min Exec Size</span>
+              <input
+                className="input"
+                value={minExecSize}
+                onChange={(e) => setMinExecSize(e.target.value)}
+                placeholder="e.g. 5"
+                inputMode="numeric"
+              />
+            </label>
+          )}
           <label className="oeField">
             <span>Quantity</span>
             <input
