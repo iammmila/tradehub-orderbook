@@ -3,7 +3,19 @@
 .thActions {
   width: 180px;
 }
+.clickRow {
+  cursor: pointer;
+  transition: background 140ms ease;
 
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  &:focus {
+    outline: 2px solid rgba(120, 170, 255, 0.35);
+    outline-offset: -2px;
+  }
+}
 .badge--partial {
   color: rgba(255, 170, 0, 0.95);
   border-color: rgba(255, 170, 0, 0.22);

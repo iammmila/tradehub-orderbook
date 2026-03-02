@@ -121,6 +121,19 @@ public class OrderService {
         return OrderMapper.toResponse(updated);
     }
 
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(Long orderId, Long currentUserId, boolean isAdmin) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Ownership check (unless ADMIN)
+        Long ownerId = order.getUserId();
+        if (!isAdmin && !ownerId.equals(currentUserId)) {
+            throw new ForbiddenException(ErrorCode.ACCESS_DENIED);
+        }
+        return OrderMapper.toResponse(order);
+    }
+
     public List<OrderResponse> getOrders(OrderSide side, String instrument, OrderStatus status) {
         Specification<Order> specification = OrderSpecifications.withFilters(side, instrument, status);
 

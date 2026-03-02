@@ -72,6 +72,15 @@ public class OrderController {
         return ResponseEntity.ok(orderService.replaceOrder(orderId, me.userId(), isAdmin, request));
     }
 
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> getOrderById(
+            @AuthenticationPrincipal AuthPrincipal me,
+            @PathVariable Long orderId
+    ) {
+        boolean isAdmin = false;
+        return ResponseEntity.ok(orderService.getOrderById(orderId, me.userId(), isAdmin));
+    }
+
     // post /api/v1/orders -> 201
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(

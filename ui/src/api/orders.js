@@ -31,6 +31,20 @@ export async function fetchOrdersPage(
   return res.data; // Page<OrderResponse>
 }
 
+export async function fetchOrderById(id) {
+  try {
+    const res = await api.get(`/v1/orders/${id}`);
+    return res.data;
+  } catch (err) {
+    const status = err?.response?.status;
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      "Failed to load order";
+    throw new Error(status ? `${msg} (HTTP ${status})` : msg);
+  }
+}
 export async function createOrder(payload) {
   const res = await api.post("/v1/orders", payload);
   return res.data;

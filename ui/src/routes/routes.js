@@ -10,6 +10,10 @@ import Dashboard from "../pages/Main/Dashboard/Dashboard";
 import Orders from "../pages/Main/Orders/Orders";
 import Trades from "../pages/Main/Trades/Trades";
 import TradingPage from "../pages/Main/TradingPage/TradingPage";
+import OrderRoot from "../pages/Main/OrderRoot/OrderRoot";
+import OrderDetails from "../pages/Main/OrderDetails/OrderDetails";
+import TradeDetails from "../pages/Main/TradeDetails/TradeDetails";
+import TradeRoot from "../pages/Main/TradeRoot/TradeRoot";
 
 export const ROUTES = [
   // PUBLIC
@@ -34,11 +38,31 @@ export const ROUTES = [
           },
           {
             path: "orders",
-            element: <Orders />,
+            element: <OrderRoot />,
+            children: [
+              {
+                path: "",
+                element: <Orders />,
+              },
+              {
+                path: ":id",
+                element: <OrderDetails />,
+              },
+            ],
           },
           {
             path: "trades",
-            element: <Trades />,
+            element: <TradeRoot />,
+            children: [
+              {
+                path: "",
+                element: <Trades />,
+              },
+              {
+                path: ":id",
+                element: <TradeDetails />,
+              },
+            ],
           },
           {
             path: "trading",

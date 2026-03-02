@@ -11,6 +11,7 @@ import { formatDate, formatMoney, formatNumber, formatTime } from "../../../util
 import CreateOrderModal from "../CreateOrderModal/CreateOrderModal";
 import ReplaceOrderModal from "../ReplaceOrderModal/ReplaceOrderModal";
 import ConfirmDialog from "../ConfirmDialog/ConfirmDialog";
+import { useNavigate } from "react-router-dom";
 
 function statusBadgeClass(status) {
   const s = String(status || "").toUpperCase();
@@ -57,6 +58,7 @@ function isReplaceable(status) {
 }
 
 const OrdersTable = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -84,7 +86,7 @@ const OrdersTable = () => {
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
 
   const sortParam = useMemo(() => `${sortBy},${sortDir}`, [sortBy, sortDir]);
-
+  const goDetails = (id) => navigate(`/app/orders/${id}`);
   const load = async () => {
     try {
       setLoading(true);
@@ -309,7 +311,17 @@ const OrdersTable = () => {
               </tr>
             ) : (
               filteredRows.map((r) => (
-                <tr key={r.id}>
+                <tr
+                  key={r.id}
+                  className="clickRow"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => goDetails(r.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") goDetails(r.id);
+                  }}
+                  title="Open order details"
+                >
                   <td>
                     {r.createdAt ? `${formatDate(r.createdAt)} ${formatTime(r.createdAt)}` : "-"}
                   </td>
@@ -345,7 +357,10 @@ const OrdersTable = () => {
                     <button
                       className="ordersBtn ordersBtn--secondary ordersBtn--sm"
                       disabled={!isReplaceable(r.status)}
-                      onClick={() => setReplaceTarget(r)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setReplaceTarget(r);
+                      }}
                     >
                       Replace
                     </button>
@@ -353,7 +368,10 @@ const OrdersTable = () => {
                     <button
                       className="ordersBtn ordersBtn--danger ordersBtn--sm"
                       disabled={!isCancellable(r.status)}
-                      onClick={() => setCancelTarget(r)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCancelTarget(r);
+                      }}
                     >
                       Cancel
                     </button>

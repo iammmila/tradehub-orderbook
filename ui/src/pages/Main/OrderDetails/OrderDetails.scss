@@ -1,0 +1,161 @@
+// Variables - High-end Dark Theme
+$bg-main: #0b0e14;
+$glass-bg: rgba(23, 28, 36, 0.7);
+$glass-border: rgba(61, 223, 255, 0.552);
+$accent-glow: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+$text-dim: #94a3b8;
+$text-bright: #ffffff;
+
+// Status Colors
+$color-buy: #00ffaa;
+$color-sell: #ff4d4d;
+$color-gold: #ffc107;
+
+.orderDetails {
+  min-height: 100vh;
+  background-color: $bg-main;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(79, 172, 254, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.05) 0%, transparent 40%);
+  padding: 50px 20px;
+  font-family: 'Inter', -apple-system, sans-serif;
+&-container{
+    margin: 0 auto;
+    width: 78%;
+}
+  // The Main Container
+  .tableCard { // Assuming TableCard renders a container with this class
+    background: $glass-bg;
+    margin: 0 auto;
+    backdrop-filter: blur(12px);
+    border: 1px solid $glass-border;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+
+    // Glowing accent line at the top
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: $accent-glow;
+    }
+  }
+
+  // Header Section
+  .tableCard__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    border-bottom: 1px solid $glass-border;
+    padding-bottom: 20px;
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0;
+      background: $accent-glow;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: $text-dim;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+  }
+
+  // The Data Grid
+  .kvGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); // 4 columns on desktop
+    gap: 20px;
+    
+    @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 600px) { grid-template-columns: 1fr; }
+  }
+
+  .kvRow {
+    position: relative;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .kvKey {
+      display: block;
+      color: $text-dim;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .kvVal {
+      display: block;
+      color: $text-bright;
+      font-size: 1.25rem;
+      font-weight: 600;
+      word-break: break-all;
+
+      &.mono {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.1rem;
+        color: #00f2fe;
+      }
+    }
+
+    // Highlighting specific fields
+    &[data-key="Side"] .kvVal {
+      color: $color-buy; // Default to buy
+      &.val-sell { color: $color-sell; }
+    }
+  }
+
+  // Status Pill
+  .pill--status {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    color: $glass-border;
+    border: 1px solid $glass-border;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+  }
+
+  // Navigation Button
+  .ordersBtn--secondary {
+    background: transparent;
+    color: $text-dim;
+    border: 1px solid $glass-border;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: $text-bright;
+      border-color: $text-bright;
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+}
