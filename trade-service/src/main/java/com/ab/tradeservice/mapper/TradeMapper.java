@@ -18,6 +18,7 @@ public final class TradeMapper {
                 .sellOrderId(t.getSellOrderId())
                 .buyerUserId(t.getBuyerUserId())
                 .sellerUserId(t.getSellerUserId())
+                .exchangeCode(t.getExchangeCode())
                 .createdAt(t.getCreatedAt())
                 .build();
     }

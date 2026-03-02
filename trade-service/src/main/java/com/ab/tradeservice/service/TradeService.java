@@ -28,9 +28,12 @@ public class TradeService {
                 .sellOrderId(req.getSellOrderId())
                 .buyerUserId(req.getBuyerUserId())
                 .sellerUserId(req.getSellerUserId())
+                .exchangeCode(req.getExchangeCode() == null ? null : req.getExchangeCode().trim().toUpperCase())
                 .createdAt(req.getCreatedAt() != null ? req.getCreatedAt() : LocalDateTime.now())
                 .build();
-
+        if (trade.getExchangeCode() == null || trade.getExchangeCode().isBlank()) {
+            throw new IllegalArgumentException("exchangeCode is required to create trade");
+        }
         tradeRepository.save(trade);
     }
 

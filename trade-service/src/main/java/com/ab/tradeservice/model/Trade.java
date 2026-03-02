@@ -41,6 +41,9 @@ public class Trade {
     @Column(name = "seller_user_id", nullable = false)
     private Long sellerUserId;
 
+    @Column(name = "exchange_code", nullable = false, length = 10)
+    private String exchangeCode;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 }

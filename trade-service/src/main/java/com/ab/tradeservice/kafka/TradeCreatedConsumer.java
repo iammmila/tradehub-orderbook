@@ -20,12 +20,13 @@ public class TradeCreatedConsumer {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void onTradeCreated(TradeCreatedEvent event) {
-        log.info("KAFKA RECEIVED eventId={} instrument={} buyOrderId={} sellOrderId={} qty={} price={}",
+        log.info("KAFKA RECEIVED eventId={} instrument={} buyOrderId={} sellOrderId={} qty={} exchangeCode={} price={}",
                 event.eventId(),
                 event.instrument(),
                 event.buyOrderId(),
                 event.sellOrderId(),
                 event.quantity(),
+                event.exchangeCode(),
                 event.price());
 
         tradeService.createTrade(CreateTradeRequest.builder()
@@ -36,6 +37,7 @@ public class TradeCreatedConsumer {
                 .sellOrderId(event.sellOrderId())
                 .buyerUserId(event.buyerUserId())
                 .sellerUserId(event.sellerUserId())
+                .exchangeCode(event.exchangeCode())
                 .createdAt(event.createdAt())
                 .build());
     }

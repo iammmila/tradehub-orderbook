@@ -24,5 +24,7 @@ public class TradeResponse {
     private Long buyerUserId;
     private Long sellerUserId;
 
+    private String exchangeCode;
+
     private LocalDateTime createdAt;
 }

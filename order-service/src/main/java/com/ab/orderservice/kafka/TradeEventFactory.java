@@ -22,6 +22,7 @@ public class TradeEventFactory {
                 sell.getId(),
                 buy.getUserId(),
                 sell.getUserId(),
+                buy.getExchangeCode(),
                 now
         );
     }

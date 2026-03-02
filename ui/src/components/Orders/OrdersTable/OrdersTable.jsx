@@ -12,50 +12,8 @@ import CreateOrderModal from "../CreateOrderModal/CreateOrderModal";
 import ReplaceOrderModal from "../ReplaceOrderModal/ReplaceOrderModal";
 import ConfirmDialog from "../ConfirmDialog/ConfirmDialog";
 import { useNavigate } from "react-router-dom";
-
-function statusBadgeClass(status) {
-  const s = String(status || "").toUpperCase();
-  if (s === "FILLED") return "badge badge--filled";
-  if (s === "CANCELLED") return "badge badge--cancelled";
-  if (s === "PARTIALLY_FILLED") return "badge badge--partial";
-  return "badge badge--new";
-}
-function exchangeBadgeClass(exchangeCode) {
-  const s = String(exchangeCode || "").toUpperCase();
-  if (s === "XLON") return "badge badge--partial";
-  if (s === "XNAS") return "badge badge--cancelled";
-  if (s === "XTKS") return "badge badge--filled";
-  return "badge badge--new";
-}
-function routingBadgeClass(mode) {
-  const m = String(mode || "").toUpperCase();
-  if (m === "AUTO") return "badge badge--auto";
-  if (m === "MANUAL") return "badge badge--manual";
-  return "badge";
-}
-
-function routedByLabel(value) {
-  const v = String(value || "").toUpperCase();
-  if (v === "SOR") return "SOR";
-  if (v === "USER") return "USER";
-  return v || "-";
-}
-
-function shortText(s, max = 34) {
-  const str = String(s || "");
-  if (!str) return "-";
-  if (str.length <= max) return str;
-  return str.slice(0, max - 1) + "…";
-}
-function isCancellable(status) {
-  const s = String(status || "").toUpperCase();
-  return s === "NEW";
-}
-
-function isReplaceable(status) {
-  const s = String(status || "").toUpperCase();
-  return s === "NEW";
-}
+import OrderRow from "./OrderRow/OrderRow"
+const COLS_COUNT = 15;
 
 const OrdersTable = () => {
   const navigate = useNavigate();
@@ -86,7 +44,9 @@ const OrdersTable = () => {
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
 
   const sortParam = useMemo(() => `${sortBy},${sortDir}`, [sortBy, sortDir]);
+
   const goDetails = (id) => navigate(`/app/orders/${id}`);
+
   const load = async () => {
     try {
       setLoading(true);
@@ -151,6 +111,7 @@ const OrdersTable = () => {
     setInstrument("");
     setSide("");
     setStatus("");
+    setRoutingMode("");
     setSortBy("createdAt");
     setSortDir("desc");
     setPage(0);
@@ -269,116 +230,60 @@ const OrdersTable = () => {
         </div>
       )}
 
-      <div className="table-wrap">
-        <table className="table">
+      <div className="ordersTable__tableWrap">
+        <table className="table ordersTable__table">
           <thead>
             <tr>
-              <th onClick={() => toggleSort("createdAt")} className="thSortable">
+              <th onClick={() => toggleSort("createdAt")} className="thSortable colTime">
                 Time {sortBy === "createdAt" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => toggleSort("instrument")} className="thSortable">
+              <th onClick={() => toggleSort("instrument")} className="thSortable colInstrument">
                 Instrument {sortBy === "instrument" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th>Side</th>
-              <th onClick={() => toggleSort("price")} className="thSortable">
+              <th className="colSide">Side</th>
+
+              <th className="thSortable colPrice" onClick={() => toggleSort("price")}>
                 Price {sortBy === "price" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th onClick={() => toggleSort("quantity")} className="thSortable">
+
+              <th className="thSortable colQty" onClick={() => toggleSort("quantity")}>
                 Quantity {sortBy === "quantity" ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </th>
-              <th>Remaining</th>
-              <th>Exchange</th>
-              <th>Status</th>
-              <th>Routing</th>
-              <th>By</th>
-              <th>Reason</th>
-              <th className="thActions">Actions</th>
+
+              <th className="colRemain">Remaining</th>
+              <th className="colType">Type</th>
+              <th className="colMinExec">MinExec</th>
+              <th className="colExchange">Exchange</th>
+              <th className="colStatus">Status</th>
+              <th className="colRouting">Routing</th>
+              <th className="colBy">By</th>
+              <th className="colReason">Reason</th>
+              <th className="thActions colActions">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} className="table-empty">
+                <td colSpan={COLS_COUNT} className="table-empty">
                   Loading orders...
                 </td>
               </tr>
             ) : filteredRows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="table-empty">
+                  <td colSpan={COLS_COUNT} className="table-empty">
                   No orders found.
                 </td>
               </tr>
             ) : (
               filteredRows.map((r) => (
-                <tr
+                <OrderRow
                   key={r.id}
-                  className="clickRow"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => goDetails(r.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") goDetails(r.id);
-                  }}
-                  title="Open order details"
-                >
-                  <td>
-                    {r.createdAt ? `${formatDate(r.createdAt)} ${formatTime(r.createdAt)}` : "-"}
-                  </td>
-                  <td className="mono">{r.instrument || "-"}</td>
-                  <td className={String(r.side).toUpperCase() === "BUY" ? "sideBuy" : "sideSell"}>
-                    {String(r.side || "-").toUpperCase()}
-                  </td>
-                  <td className="mono">{r.price != null ? formatMoney(r.price) : "-"}</td>
-                  <td className="mono">{r.quantity != null ? formatNumber(r.quantity) : "-"}</td>
-                  <td className="mono">{r.remainingQuantity != null ? formatNumber(r.remainingQuantity) : "-"}</td>
-                  <td>
-                    <span className={exchangeBadgeClass(r.exchangeCode)}>
-                      {r.exchangeCode != null ? r.exchangeCode : "-"}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={statusBadgeClass(r.status)}>{r.status}</span>
-                  </td>
-                  <td>
-                    <span className={routingBadgeClass(r.routingMode)}>
-                      {String(r.routingMode || "-").toUpperCase()}
-                    </span>
-                  </td>
-
-                  <td className="muted">
-                    {routedByLabel(r.routedBy)}
-                  </td>
-
-                  <td className="reasonCell" title={r.routeReason || ""}>
-                    {shortText(r.routeReason, 42)}
-                  </td>
-                  <td className="actionsCell">
-                    <button
-                      className="ordersBtn ordersBtn--secondary ordersBtn--sm"
-                      disabled={!isReplaceable(r.status)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setReplaceTarget(r);
-                      }}
-                    >
-                      Replace
-                    </button>
-
-                    <button
-                      className="ordersBtn ordersBtn--danger ordersBtn--sm"
-                      disabled={!isCancellable(r.status)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCancelTarget(r);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
+                  r={r}
+                  onOpenDetails={goDetails}
+                  onReplace={setReplaceTarget}
+                  onCancel={setCancelTarget}
+                />)))}
           </tbody>
         </table>
       </div>

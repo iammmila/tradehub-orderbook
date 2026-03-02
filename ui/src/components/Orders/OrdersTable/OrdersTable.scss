@@ -3,6 +3,156 @@
 .thActions {
   width: 180px;
 }
+
+.ordersTable__tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 14px;
+
+  /* premium scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+
+  &::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+  }
+}
+
+.ordersTable__table {
+  width: 100%;
+  min-width: 1180px;
+  /* key: prevents squish; enables scroll when needed */
+  table-layout: fixed;
+  /* key: column widths will work */
+}
+
+/* make cells more compact */
+.ordersTable__table th,
+.ordersTable__table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+
+/* Column widths (tune freely) */
+.colTime {
+  width: 120px;
+}
+
+.colInstrument {
+  width: 80px;
+}
+
+.colSide {
+  width: 80px;
+}
+
+.colPrice {
+  width: 90px;
+}
+
+.colQty {
+  width: 75px;
+}
+
+.colRemain {
+  width: 80px;
+}
+
+.colType {
+  width: 150px;
+}
+
+/* MIN_EXECUTION_SIZE fits */
+.colMinExec {
+  width: 70px;
+}
+
+.colExchange {
+  width: 100px;
+}
+
+.colStatus {
+  width: 100px;
+}
+
+.colRouting {
+  width: 100px;
+}
+
+.colBy {
+  width: 70px;
+}
+
+.colReason {
+  width: 50px;
+}
+
+/* keep reason contained */
+.colActions {
+  width: 170px;
+}
+
+/* compact but usable */
+
+/* Reason: short + tooltip on hover (your approach but tighter) */
+.reasonCell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* actions: prevent wrapping */
+.actionsCell {
+  white-space: nowrap;
+}
+
+/* badges: stop them growing */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge--buy {
+  border-color: rgba(0, 200, 120, 0.35);
+}
+
+.badge--sell {
+  border-color: rgba(255, 80, 80, 0.35);
+}
+
+.badge--typeLimit {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.badge--typeMarket {
+  border-color: rgba(120, 180, 255, 0.35);
+}
+
+.badge--typeHidden {
+  border-color: rgba(200, 120, 255, 0.35);
+}
+
+.badge--typeMinExec {
+  border-color: rgba(255, 190, 80, 0.35);
+}
+
 .clickRow {
   cursor: pointer;
   transition: background 140ms ease;
@@ -16,6 +166,7 @@
     outline-offset: -2px;
   }
 }
+
 .badge--partial {
   color: rgba(255, 170, 0, 0.95);
   border-color: rgba(255, 170, 0, 0.22);

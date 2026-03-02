@@ -13,5 +13,6 @@ public record TradeCreatedEvent(
         Long sellOrderId,
         Long buyerUserId,
         Long sellerUserId,
+        String exchangeCode,
         LocalDateTime createdAt
 ) {}

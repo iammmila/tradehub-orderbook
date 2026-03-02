@@ -23,5 +23,8 @@ public class CreateTradeRequest {
 
     private Long buyerUserId;
     private Long sellerUserId;
+
+    private String exchangeCode;
+
     private LocalDateTime createdAt;
 }
