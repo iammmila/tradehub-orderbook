@@ -1,6 +1,10 @@
 package com.ab.authservice.service;
 
 import com.ab.authservice.config.TokenHasher;
+import com.ab.authservice.messaging.Channel;
+import com.ab.authservice.messaging.NotificationCommand;
+import com.ab.authservice.messaging.NotificationService;
+import com.ab.authservice.messaging.Template;
 import com.ab.authservice.model.PasswordResetToken;
 import com.ab.authservice.model.User;
 import com.ab.authservice.repository.PasswordResetTokenRepository;
@@ -14,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -24,8 +29,8 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final TokenHasher tokenHasher;
-    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     @Value("${app.frontend.reset-url}")
     private String resetUrl; // e.g. http://localhost:3000/reset-password?token=%s
@@ -54,7 +59,16 @@ public class PasswordResetService {
         passwordResetTokenRepository.save(prt);
 
         String link = resetUrl.formatted(URLEncoder.encode(rawToken, StandardCharsets.UTF_8));
-        emailService.sendResetPasswordEmail(user.getEmail(), link);
+        notificationService.send(
+                NotificationCommand.builder()
+                        .channel(Channel.EMAIL)
+                        .to(user.getEmail())
+                        .template(Template.PASSWORD_RESET)
+                        .subject("Reset your password")
+                        .variables(Map.of("resetLink", link))
+                        .locale("en")
+                        .build()
+        );
     }
 
     public void resetPassword(String rawToken, String newPassword) {

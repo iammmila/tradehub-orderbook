@@ -1,4 +1,4 @@
-$primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+$primary-gradient: linear-gradient(135deg, #6366f1 0%, #55f7a1 100%);
 $bg-dark: #0f172a;
 $card-bg: rgba(30, 41, 59, 0.7);
 $text-main: #f8fafc;
@@ -23,7 +23,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: absolute;
         width: 300px;
         height: 300px;
-        background: #6366f1;
+        background: #82f163;
         filter: blur(120px);
         opacity: 0.15;
         top: 10%;
@@ -41,32 +41,6 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         padding: 40px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         animation: fadeIn 0.6s ease-out;
-
-        .auth-divider {
-            width: 100%;
-            display: flex;
-            place-items: center;
-            margin: 14px 0;
-            position: relative;
-
-            span {
-                margin: 0 auto;
-                padding: 0 10px;
-                color: rgba(255, 255, 255, 0.65);
-                font-size: 12px;
-            }
-
-            &::before {
-                content: "";
-                position: absolute;
-                left: 0;
-                right: 0;
-                height: 1px;
-                background: rgba(255, 255, 255, 0.10);
-                top: 50%;
-                transform: translateY(-50%);
-            }
-        }
 
         .back-btn {
             position: absolute;
@@ -154,7 +128,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
                 &:focus {
                     outline: none;
-                    border-color: #6366f1;
+                    border-color: #63f18b;
                     background: rgba(15, 23, 42, 0.8);
                     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
                 }

@@ -17,6 +17,8 @@ import TradeRoot from "../pages/Main/TradeRoot/TradeRoot";
 import OAuth2Success from "../pages/Auth/OAuth2Success/OAuth2Success";
 import ForgotPassword from "../pages/Auth/ForgotPassword/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword/ResetPassword";
+import ForgotPasswordEmailSent from "../pages/Auth/ForgotPasswordEmailSent/ForgotPasswordEmailSent";
+import ResetPasswordSuccess from "../pages/Auth/ResetPasswordSuccess/ResetPasswordSuccess";
 export const ROUTES = [
   // PUBLIC
   {
@@ -80,8 +82,8 @@ export const ROUTES = [
   { path: "/oauth2/success", element: <OAuth2Success /> },
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/reset-password", element: <ResetPassword /> },
-  { path: "/forgot-password/sent", element: <ForgotPassword /> },
-  { path: "/reset-password/success", element: <ResetPassword /> },
+  { path: "/forgot-password/sent", element: <ForgotPasswordEmailSent /> },
+  { path: "/reset-password/success", element: <ResetPasswordSuccess /> },
   // fallback
   { path: "*", element: <Navigate to="/" replace /> },
 ];

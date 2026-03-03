@@ -107,7 +107,6 @@ function Register() {
         <GoogleButton text="Continue with Google" />
         
         <div className="auth-divider">
-          <span>or</span>
         </div>
 
         <div className="name-row">
