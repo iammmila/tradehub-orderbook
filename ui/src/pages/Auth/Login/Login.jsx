@@ -88,6 +88,9 @@ function Login() {
 
         <button type="submit" className="auth-btn">Sign In</button>
         {error && <p style={{ color: "red" }}>{error}</p>}
+        <div className="auth-row">
+          <Link className="auth-link" to="/forgot-password">Forgot password?</Link>
+        </div>
         <div className="auth-footer">
           <span>Don't have an account? <Link to="/register">Sign up</Link></span>
         </div>

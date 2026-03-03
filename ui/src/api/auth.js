@@ -17,6 +17,16 @@ export async function register(payload) {
   return res.data;
 }
 
+export async function forgotPassword(email) {
+  const res = await api.post("/v1/auth/forgot-password", { email });
+  return res.data;
+}
+
+export async function resetPassword(token, newPassword) {
+  const res = await api.post("/v1/auth/reset-password", { token, newPassword });
+  return res.data;
+}
+
 export const isAuthenticated = () => {
   return !!localStorage.getItem("token");
 };

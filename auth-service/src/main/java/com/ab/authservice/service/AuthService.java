@@ -1,8 +1,8 @@
 package com.ab.authservice.service;
 
-import com.ab.authservice.dto.AuthRequest;
-import com.ab.authservice.dto.AuthResponse;
-import com.ab.authservice.dto.IntrospectResponse;
+import com.ab.authservice.dto.auth.AuthRequest;
+import com.ab.authservice.dto.auth.AuthResponse;
+import com.ab.authservice.dto.auth.IntrospectResponse;
 import com.ab.authservice.dto.RegisterRequest;
 import com.ab.authservice.jwt.JwtService;
 import com.ab.authservice.model.Role;
