@@ -49,7 +49,7 @@ export function stripIds(input) {
 
 export function normalizeDto(n) {
   return {
-    // Clean title + message so UI never shows internal ids
+    id: n?.id ?? n?.notificationId ?? null,
     text: stripIds(n?.title),
     details: stripIds(n?.message),
 

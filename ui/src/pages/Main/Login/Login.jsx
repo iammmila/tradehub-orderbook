@@ -6,7 +6,7 @@ import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { MainContext } from '../../../context/ContextProvider';
 import { Helmet } from 'react-helmet';
 import { FiArrowLeft } from "react-icons/fi";
-
+import GoogleButton from "../../../components/GoogleButton/GoogleButton";
 function Login() {
   const { username, setUsername,
     password, setPassword,
@@ -53,6 +53,12 @@ function Login() {
         <h2>Welcome Back</h2>
         <p>Please enter your details</p>
 
+        <GoogleButton text="Continue with Google" />
+
+        <div className="auth-divider">
+          <span>or</span>
+        </div>
+        
         <div className="input-group">
           <input
             value={username}

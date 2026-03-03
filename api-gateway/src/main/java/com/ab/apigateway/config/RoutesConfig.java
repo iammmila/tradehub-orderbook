@@ -14,7 +14,9 @@ public class RoutesConfig {
                 .route("auth-all", r -> r.path(
                                 "/api/v1/auth/**",
                                 "/api/v1/users/**",
-                                "/api/v1/admin/**"
+                                "/api/v1/admin/**",
+                                "/oauth2/**", // OAUTH2
+                                "/login/oauth2/**" // OAUTH2
                         )
                         .uri("lb://AUTH-SERVICE"))
                 .route("orders-all", r -> r.path(

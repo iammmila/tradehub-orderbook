@@ -14,7 +14,7 @@ import OrderRoot from "../pages/Main/OrderRoot/OrderRoot";
 import OrderDetails from "../pages/Main/OrderDetails/OrderDetails";
 import TradeDetails from "../pages/Main/TradeDetails/TradeDetails";
 import TradeRoot from "../pages/Main/TradeRoot/TradeRoot";
-
+import OAuth2Success from "../pages/Main/OAuth2Success/OAuth2Success"
 export const ROUTES = [
   // PUBLIC
   {
@@ -75,6 +75,7 @@ export const ROUTES = [
   },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
+  { path: "/oauth2/success", element:<OAuth2Success/> },
   // fallback
   { path: "*", element: <Navigate to="/" replace /> },
 ];

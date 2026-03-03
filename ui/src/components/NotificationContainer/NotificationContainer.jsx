@@ -114,14 +114,17 @@ const NotificationContainer = () => {
     const handleNotificationClick = async (notif) => {
         setSelectedNotification(notif);
         setIsOpen(false);
-
+      
         if (notif.isRead) return;
 
         setNotifications((prev) =>
             prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
         );
         setUnreadCount((c) => (typeof c === "number" ? Math.max(0, c - 1) : c));
-
+        if (!notif?.id) {
+            setErrorMsg("Notification id missing (cannot mark as read).");
+            return;
+        }
         try {
             await markNotificationRead(notif.id);
         } catch (err) {

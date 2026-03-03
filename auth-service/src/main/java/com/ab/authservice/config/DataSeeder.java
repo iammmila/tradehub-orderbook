@@ -2,6 +2,7 @@ package com.ab.authservice.config;
 
 import com.ab.authservice.model.Role;
 import com.ab.authservice.model.User;
+import com.ab.authservice.model.enums.AuthProvider;
 import com.ab.authservice.repository.RoleRepository;
 import com.ab.authservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +58,8 @@ public class DataSeeder implements CommandLineRunner {
                             .email("admin@tradehub.com")
                             .password(passwordEncoder.encode("admin123"))
                             .role(adminRole)
+                            .provider(AuthProvider.LOCAL)
+                            .providerId(null)
                             .build());
                 });
     }
@@ -76,6 +79,8 @@ public class DataSeeder implements CommandLineRunner {
                             .email("user123@tradehub.com")
                             .password(passwordEncoder.encode("user123"))
                             .role(userRole)
+                            .provider(AuthProvider.LOCAL)
+                            .providerId(null)
                             .build());
                 });
     }

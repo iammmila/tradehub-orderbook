@@ -17,7 +17,7 @@ function App() {
     <>
       <NotificationsWsBridge
         token={token}
-        onNotification={handleNotification}
+        onNotification={(dto) => handleNotification(dto)}
       />
 
       <Toaster

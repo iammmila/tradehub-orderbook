@@ -7,6 +7,7 @@ import com.ab.authservice.dto.RegisterRequest;
 import com.ab.authservice.jwt.JwtService;
 import com.ab.authservice.model.Role;
 import com.ab.authservice.model.User;
+import com.ab.authservice.model.enums.AuthProvider;
 import com.ab.authservice.repository.RoleRepository;
 import com.ab.authservice.repository.UserRepository;
 import com.ab.authservice.userdetails.CustomUserDetailsService;
@@ -74,6 +75,8 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail().trim().toLowerCase())
+                .provider(AuthProvider.LOCAL)
+                .providerId(null)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(userRole)
                 .build();

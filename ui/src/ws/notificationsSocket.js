@@ -10,6 +10,7 @@ export function createNotificationsSocket({
   let client = null;
 
   function connect() {
+    if (client && (client.active || client.connected)) return;
     const token = getToken?.();
     if (!token) {
       onStatus?.("no-token");
@@ -17,9 +18,10 @@ export function createNotificationsSocket({
     }
     const WS_URL = `http://localhost:8080/ws?token=${encodeURIComponent("Bearer " + token)}`;
 
+    if (client && (client.active || client.connected)) return;
+
     client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
-      connectHeaders: {},
       reconnectDelay: 3000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,

@@ -23,6 +23,31 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         text-align: center;
 
+        .auth-divider {
+            width: 100%;
+            display: grid;
+            place-items: center;
+            margin: 14px 0;
+            position: relative;
+
+            span {
+                padding: 0 10px;
+                color: rgba(255, 255, 255, 0.65);
+                font-size: 12px;
+            }
+
+            &::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: rgba(255, 255, 255, 0.10);
+                top: 50%;
+                transform: translateY(-50%);
+            }
+        }
+
         .back-btn {
             position: absolute;
             top: 16px;

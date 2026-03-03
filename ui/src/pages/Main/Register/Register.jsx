@@ -7,6 +7,7 @@ import { MainContext } from '../../../context/ContextProvider';
 import { registerSchema } from "../../../schema/registerSchema";
 import { Helmet } from 'react-helmet';
 import { FiArrowLeft } from 'react-icons/fi';
+import GoogleButton from '../../../components/GoogleButton/GoogleButton';
 
 function Register() {
   const {
@@ -102,6 +103,12 @@ function Register() {
         </button>
         <h2>Create Account</h2>
         <p>Join us today!</p>
+       
+        <GoogleButton text="Continue with Google" />
+        
+        <div className="auth-divider">
+          <span>or</span>
+        </div>
 
         <div className="name-row">
           <input
