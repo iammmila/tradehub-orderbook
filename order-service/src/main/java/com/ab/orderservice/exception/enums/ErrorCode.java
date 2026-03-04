@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+    //USER
+    USER_NOT_VERIFIED("USER_NOT_VERIFIED", "User has not been verified yet"),
+
     // ORDER
     ORDER_NOT_FOUND("ORDER_NOT_FOUND", "Order not found"),
     ORDER_CANNOT_CANCEL("ORDER_CANNOT_CANCEL", "Only orders with status NEW can be cancelled"),

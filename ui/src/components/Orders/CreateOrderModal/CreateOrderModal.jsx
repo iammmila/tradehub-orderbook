@@ -182,7 +182,13 @@ const CreateOrderModal = ({ isOpen, onClose, onCreated }) => {
       onCreated?.();
       onClose?.();
     } catch (err) {
-      setApiError(err?.message || "Create order failed");
+      const data = err?.response?.data;
+      setApiError(
+        data?.message ||
+        data?.code ||
+        err?.message ||
+        "Create order failed"
+      );
     } finally {
       setBusy(false);
     }

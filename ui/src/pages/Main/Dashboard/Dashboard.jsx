@@ -30,7 +30,7 @@ const Dashboard = () => {
         <FillRateCard />
       </div>
       <div className="dashGrid">
-        <LiveOrdersBar speed={60} />
+        <LiveOrdersBar speed={10} />
       </div>
 
       {/* Row 2: Charts */}

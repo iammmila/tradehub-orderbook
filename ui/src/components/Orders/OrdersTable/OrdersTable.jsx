@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import TableCard from "../../Dashboard/Tables/TableCard/TableCard";
 import TableFilters from "../../Dashboard/Tables/TableFilters/TableFilters";
 import "../../Dashboard/Tables/TableBase.scss";
@@ -6,17 +6,20 @@ import "./OrdersTable.scss";
 import Select from "../../Dashboard/Tables/Select/Select";
 
 import { fetchOrdersPage, cancelOrder } from "../../../api/orders";
-import { formatDate, formatMoney, formatNumber, formatTime } from "../../../utils/formatter";
+import { formatDate, formatTime } from "../../../utils/formatter";
 
 import CreateOrderModal from "../CreateOrderModal/CreateOrderModal";
 import ReplaceOrderModal from "../ReplaceOrderModal/ReplaceOrderModal";
 import ConfirmDialog from "../ConfirmDialog/ConfirmDialog";
 import { useNavigate } from "react-router-dom";
 import OrderRow from "./OrderRow/OrderRow"
+import { MainContext } from "../../../context/ContextProvider";
 const COLS_COUNT = 15;
 
 const OrdersTable = () => {
   const navigate = useNavigate();
+  const { user } = useContext(MainContext);
+  const isUnverified = !!user && user.verified === false;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -271,8 +274,20 @@ const OrdersTable = () => {
               </tr>
             ) : filteredRows.length === 0 ? (
               <tr>
-                  <td colSpan={COLS_COUNT} className="table-empty">
-                  No orders found.
+                <td colSpan={COLS_COUNT} className="table-empty">
+                  {isUnverified ? (
+                    <div className="ordersEmptyState ordersEmptyState--warning">
+                      <div className="ordersEmptyState__title">Verify your email to create orders</div>
+                      <div className="ordersEmptyState__text">
+                        Your account is not verified yet. Please verify your email, then login again.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="ordersEmptyState">
+                      <div className="ordersEmptyState__title">No orders found</div>
+                      <div className="ordersEmptyState__text">Create your first order to see it here.</div>
+                    </div>
+                  )}
                 </td>
               </tr>
             ) : (

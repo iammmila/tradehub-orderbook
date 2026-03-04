@@ -18,7 +18,6 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserIdResolver userIdResolver;
 
     @Override
     protected void doFilterInternal(
@@ -41,24 +40,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             // 2) if not authenticated yet, build Authentication
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                Long userId = jwtService.extractUserId(token);
+                boolean verified = jwtService.extractVerified(token);
 
-                // 3) resolve userId from auth-service (forward same JWT)
-                Long userId;
-                try {
-                    userId = userIdResolver.resolveUserId(username, token);
-                } catch (Exception ex) {
-                    // If we have a JWT but cannot resolve userId -> treat as unauthorized
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"message\":\"Cannot validate user. Please login again.\"}");
-                    return;
-                }
-
-                AuthPrincipal principal = new AuthPrincipal(username, userId);
-
+                AuthPrincipal principal = new AuthPrincipal(username, userId, verified);
                 var auth = new UsernamePasswordAuthenticationToken(principal, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
+
         } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
@@ -74,3 +63,33 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
+//                try {
+//                    userId = userIdResolver.resolveUserId(username, token);
+//                } catch (Exception ex) {
+//                    // If we have a JWT but cannot resolve userId -> treat as unauthorized
+//                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//                    response.setContentType("application/json");
+//                    response.getWriter().write("{\"message\":\"Cannot validate user. Please login again.\"}");
+//                    return;
+//                }
+//
+//                AuthPrincipal principal = new AuthPrincipal(username, userId);
+//
+//                var auth = new UsernamePasswordAuthenticationToken(principal, null, List.of());
+//                SecurityContextHolder.getContext().setAuthentication(auth);
+//            }
+//        } catch (ExpiredJwtException e) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            response.setContentType("application/json");
+//            response.getWriter().write("{\"message\":\"JWT expired. Please login again.\"}");
+//            return;
+//        } catch (JwtException e) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            response.setContentType("application/json");
+//            response.getWriter().write("{\"message\":\"Invalid JWT.\"}");
+//            return;
+//        }
+//
+//        filterChain.doFilter(request, response);
+//    }
+//}

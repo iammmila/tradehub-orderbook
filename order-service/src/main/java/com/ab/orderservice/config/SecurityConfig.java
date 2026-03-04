@@ -2,7 +2,6 @@ package com.ab.orderservice.config;
 
 import com.ab.orderservice.security.JwtAuthFilter;
 import com.ab.orderservice.security.JwtService;
-import com.ab.orderservice.security.UserIdResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,12 +17,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final JwtService jwtService;
-    private final UserIdResolver userIdResolver;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        JwtAuthFilter jwtFilter = new JwtAuthFilter(jwtService, userIdResolver);
+        JwtAuthFilter jwtFilter = new JwtAuthFilter(jwtService);
 
         return http
                 .csrf(csrf -> csrf.disable())
@@ -31,6 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // allow health checks if you want
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/api/v1/orders/**").authenticated()
                         // everything else requires JWT
                         .anyRequest().authenticated()
                 )

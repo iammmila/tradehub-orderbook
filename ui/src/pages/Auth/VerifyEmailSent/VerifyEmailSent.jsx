@@ -16,7 +16,7 @@ const VerifyEmailSent = () => {
     const [loading, setLoading] = useState(false);
     const goBack = () => {
         if (window.history.length > 1) navigate(-1);
-        else navigate("/app/dashboard", { replace: true });
+        else navigate("/app/dashboard", { replace: true }); // or "/login"
     };
     const onResend = async () => {
         const e = email.trim();
@@ -33,7 +33,7 @@ const VerifyEmailSent = () => {
             ]);
             toast.success("If the email exists, we sent a verification link.");
         } catch (err) {
-            await minDelay;
+            await minDelay; 
             toast.success("If the email exists, we sent a verification link.");
         } finally {
             setLoading(false);
@@ -79,7 +79,7 @@ const VerifyEmailSent = () => {
                     <button className="auth-btn" onClick={onResend} disabled={loading}>
                         {loading ? "Sending..." : "Send verification email"}
                     </button>
-                    <button className="auth-btn" onClick={() => navigate("/app/dashboard")} disabled={loading}>
+                    <button className="auth-btn" onClick={()=>navigate("/app/dashboard")} disabled={loading}>
                         Dashboard
                     </button>
                 </div>

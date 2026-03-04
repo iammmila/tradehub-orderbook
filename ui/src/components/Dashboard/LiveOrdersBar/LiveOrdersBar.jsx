@@ -5,7 +5,7 @@ import { useWsStatus } from "../../../context/WsStatusContext";
 import { fetchOrdersPage } from "../../../api/orders";
 
 const ALLOWED = new Set(["NEW", "PARTIALLY_FILLED"]);
-const LiveOrdersBar = ({ speed = 26, pauseOnHover = true, className = "" }) => {
+const LiveOrdersBar = ({ speed = 10, pauseOnHover = true, className = "" }) => {
     const { status } = useWsStatus();
     const connected = status === "connected";
     const [orders, setOrders] = useState([]);

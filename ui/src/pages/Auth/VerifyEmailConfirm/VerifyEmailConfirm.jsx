@@ -60,8 +60,8 @@ const VerifyEmailConfirm = () => {
                         <p className="auth-success">Your account is verified. You can continue.</p>
 
                         <div className="sent-actions">
-                            <Link className="auth-btn" to="/app/dashboard">
-                                Go to dashboard
+                            <Link className="auth-btn" to="/login">
+                                Login
                             </Link>
                         </div>
                     </>

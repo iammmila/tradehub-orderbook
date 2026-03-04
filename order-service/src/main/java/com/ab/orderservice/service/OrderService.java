@@ -18,6 +18,7 @@ import com.ab.orderservice.model.enums.*;
 import com.ab.orderservice.repository.OrderRepository;
 import com.ab.orderservice.repository.OrderSpecifications;
 import com.ab.orderservice.router.SmartOrderRouter;
+import com.ab.orderservice.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,15 @@ public class OrderService {
 
     @Transactional
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
+        if (!SecurityUser.verified()) {
+            throw new ForbiddenException(ErrorCode.USER_NOT_VERIFIED);
+        }
+
+        Long tokenUserId = SecurityUser.userId();
+        if (tokenUserId == null || !tokenUserId.equals(userId)) {
+            throw new ForbiddenException(ErrorCode.ACCESS_DENIED);
+        }
+
         OrderType type = request.getType() != null ? request.getType() : OrderType.LIMIT;
         boolean visible = type != OrderType.HIDDEN_LIMIT;
         String instrument = request.getInstrument().trim().toUpperCase();
