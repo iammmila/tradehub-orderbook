@@ -8,6 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Kafka consumer for TradeCreatedEvent.
+ * Usage:
+ * - Listens to "trade-created" topic and converts events into a TradeService command (CreateTradeRequest).
+ * - Keeps Kafka concerns (topics/deserialization/logging) separate from business logic (TradeService).
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -20,6 +26,7 @@ public class TradeCreatedConsumer {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void onTradeCreated(TradeCreatedEvent event) {
+        // structured logging makes production support easier (search by eventId/orderId).
         log.info("KAFKA RECEIVED eventId={} instrument={} buyOrderId={} sellOrderId={} qty={} exchangeCode={} price={}",
                 event.eventId(),
                 event.instrument(),
@@ -29,6 +36,7 @@ public class TradeCreatedConsumer {
                 event.exchangeCode(),
                 event.price());
 
+        //map event -> command DTO so the service layer stays transport-agnostic (Kafka/HTTP/etc.).
         tradeService.createTrade(CreateTradeRequest.builder()
                 .instrument(event.instrument())
                 .price(event.price())

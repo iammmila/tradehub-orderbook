@@ -8,10 +8,10 @@ import org.springframework.kafka.annotation.EnableKafka;
 
 import static org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO;
 
-@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
-@EnableKafka
+@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)  // avoid exposing Spring Page internals; serialize via DTO for stable API contracts
+@EnableKafka// required so @KafkaListener beans are detected/started
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients // enables Feign interfaces if this service calls other microservices
 public class TradeServiceApplication {
 
     public static void main(String[] args) {

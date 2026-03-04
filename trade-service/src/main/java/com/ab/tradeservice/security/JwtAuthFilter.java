@@ -14,6 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Stateless authentication filter that reads JWT from Authorization header.
+ * Sets AuthPrincipal into SecurityContext for downstream access control.
+ */
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -30,6 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         String token = jwtService.extractToken(authHeader);
 
+        // skip quickly when no token is present (public endpoints / unauthenticated calls)
         if (token == null || token.isBlank()) {
             filterChain.doFilter(request, response);
             return;
@@ -39,6 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String username = jwtService.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // userId is resolved once and stored in principal for later use (controllers/specifications)
                 Long userId = userIdResolver.resolveUserId(username, token);
 
                 AuthPrincipal principal = new AuthPrincipal(username, userId);
@@ -46,18 +52,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 var auth = new UsernamePasswordAuthenticationToken(
                         principal,
                         null,
-                        List.of()
+                        List.of() // no role-based authorities in this service (yet)
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
 
         } catch (ExpiredJwtException e) {
+            // explicit 401 helps the UI trigger re-login/refresh flow
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"JWT expired. Please login again.\"}");
             return;
         } catch (JwtException e) {
+            // invalid signature/malformed token -> treat as unauthenticated
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"Invalid JWT.\"}");

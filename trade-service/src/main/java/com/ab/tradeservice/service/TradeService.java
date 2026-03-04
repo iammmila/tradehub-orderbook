@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Business layer for creating and querying trades.
+ * Used by Kafka consumers and HTTP controllers to keep persistence and mapping logic centralized.
+ */
 @Service
 @RequiredArgsConstructor
 public class TradeService {
@@ -31,6 +35,7 @@ public class TradeService {
                 .exchangeCode(req.getExchangeCode() == null ? null : req.getExchangeCode().trim().toUpperCase())
                 .createdAt(req.getCreatedAt() != null ? req.getCreatedAt() : LocalDateTime.now())
                 .build();
+        // fail fast: exchangeCode is part of the trade identity/routing context
         if (trade.getExchangeCode() == null || trade.getExchangeCode().isBlank()) {
             throw new IllegalArgumentException("exchangeCode is required to create trade");
         }
@@ -41,11 +46,11 @@ public class TradeService {
             Long userId,
             String instrument,
             Pageable pageable
-    ) {
+    ) { // one place to keep query rules consistent (user scope + optional instrument filter)
         var specification = TradeSpecifications.myTrades(userId, instrument);
         return tradeRepository
                 .findAll(specification, pageable)
-                .map(TradeMapper::toResponse);
+                .map(TradeMapper::toResponse); // isolate API shape from entity shape
     }
 
     public List<TradeResponse> getTrades(String instrument) {
@@ -53,6 +58,7 @@ public class TradeService {
                 ? null
                 : instrument.trim();
 
+        // null = no filter; keep behavior explicit and predictable
         if (inst == null) {
             return tradeRepository
                     .findAll()

@@ -11,6 +11,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Security configuration for Trade Service APIs.
+ * <p>
+ * Usage:
+ * - Enforces JWT authentication for all business endpoints.
+ * - Keeps the service stateless (no server-side sessions) which is the standard for microservices.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -21,14 +28,16 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                //stateless APIs typically disable CSRF because they don't rely on cookies for auth.
                 .csrf(csrf -> csrf.disable())
+                //JWT-based auth should not create HTTP sessions; every request must carry its token.
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**").permitAll()
-                        // allow swagger if you use it:
-                        // .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // JWT filter must run before UsernamePasswordAuthenticationFilter so Spring Security
+                // sees an authenticated principal early in the chain.
                 .addFilterBefore(new JwtAuthFilter(jwtService, userIdResolver), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
