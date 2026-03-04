@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@EnableAsync
+@EnableAsync // Enables @Async methods (runs them in a separate thread pool instead of blocking requests)
 public class AuthServiceApplication {
 
     public static void main(String[] args) {

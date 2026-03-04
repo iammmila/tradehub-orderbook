@@ -14,7 +14,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CustomOidcUserService extends OidcUserService {
-
+    // Creates/links a local User record when someone logs in with Google (OIDC).
+    // Returns a principal that contains both Google user info + local user id.
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
@@ -30,22 +31,24 @@ public class CustomOidcUserService extends OidcUserService {
             throw new RuntimeException("Email not found from OIDC provider");
         }
 
+        // Try to find existing user by (provider, providerId), fallback to email match
         User user = userRepository.findByProviderAndProviderId(provider, providerId)
                 .orElseGet(() -> userRepository.findByEmail(email).orElse(null));
 
+        // First-time Google login => create local user
         if (user == null) {
             Role userRole = roleRepository.findByName("ROLE_USER")
                     .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
 
             String firstName = oidcUser.getGivenName() != null ? oidcUser.getGivenName() : "OAuth";
-            String lastName  = oidcUser.getFamilyName() != null ? oidcUser.getFamilyName() : "User";
+            String lastName = oidcUser.getFamilyName() != null ? oidcUser.getFamilyName() : "User";
 
             user = User.builder()
-                    .username(email.split("@")[0])
+                    .username(email.split("@")[0]) // consider making unique if collision happens
                     .email(email.toLowerCase())
                     .firstName(firstName)
                     .lastName(lastName)
-                    .password(null)
+                    .password(null) // OAuth users don't have local password by default
                     .role(userRole)
                     .provider(provider)
                     .providerId(providerId)

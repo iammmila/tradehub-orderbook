@@ -29,6 +29,8 @@ public class DataSeeder implements CommandLineRunner {
         seedNormalUser();
     }
 
+    // Create ROLE_USER if missing
+    // Create ROLE_ADMIN if missing
     private void seedRoles() {
         roleRepository.findByName("ROLE_USER")
                 .orElseGet(() -> {

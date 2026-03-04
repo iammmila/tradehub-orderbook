@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class EmailSender implements NotificationSender {
-
+    // Sends EMAIL notifications using EmailService (SMTP + templates).
     private final EmailService emailService;
 
-    @Override
+    @Override // Declares that this sender handles the EMAIL channel
     public Channel channel() {
         return Channel.EMAIL;
     }
@@ -18,6 +18,7 @@ public class EmailSender implements NotificationSender {
     @Override
     public SendResult send(NotificationCommand cmd) {
         try {
+            // Template decides which email to send (reset / verification).
             if (cmd.getTemplate() == null) {
                 return SendResult.fail("MISSING_TEMPLATE", "template is required");
             }
@@ -28,11 +29,13 @@ public class EmailSender implements NotificationSender {
             };
 
         } catch (Exception e) {
+            // Converts unexpected errors into a safe failure result.
             return SendResult.fail("EMAIL_SEND_FAILED", e.getMessage());
         }
     }
 
     private SendResult sendPasswordReset(NotificationCommand cmd) {
+        // Requires resetLink variable for password reset template.
         String resetLink = getVar(cmd, "resetLink");
         if (resetLink == null || resetLink.isBlank()) {
             return SendResult.fail("MISSING_VARIABLE", "resetLink is required for PASSWORD_RESET");
@@ -42,6 +45,7 @@ public class EmailSender implements NotificationSender {
     }
 
     private SendResult sendEmailVerification(NotificationCommand cmd) {
+        // Requires verifyLink variable for verification template.
         String verifyLink = getVar(cmd, "verifyLink");
         if (verifyLink == null || verifyLink.isBlank()) {
             return SendResult.fail("MISSING_VARIABLE", "verifyLink is required for EMAIL_VERIFICATION");
@@ -50,6 +54,7 @@ public class EmailSender implements NotificationSender {
         return SendResult.ok("smtp");
     }
 
+    // Reads a variable from cmd.variables map (converts to String).
     private String getVar(NotificationCommand cmd, String key) {
         if (cmd.getVariables() == null) return null;
         Object v = cmd.getVariables().get(key);

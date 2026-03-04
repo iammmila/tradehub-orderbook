@@ -11,9 +11,10 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-
+    // Spring injects all NotificationSender implementations here.
     private final List<NotificationSender> senders;
 
+    // Fast lookup: channel -> sender (built at startup).
     private Map<Channel, NotificationSender> registry;
 
     @PostConstruct
@@ -24,6 +25,7 @@ public class NotificationService {
         }
     }
 
+    // Dispatches a notification to the correct sender based on channel.
     public SendResult send(NotificationCommand cmd) {
         var sender = registry.get(cmd.getChannel());
         if (sender == null) {

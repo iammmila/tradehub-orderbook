@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationToken, Long> {
-
     Optional<EmailVerificationToken> findByTokenHash(String tokenHash);
 
     @Modifying

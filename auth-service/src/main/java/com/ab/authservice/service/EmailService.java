@@ -2,6 +2,7 @@ package com.ab.authservice.service;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -13,6 +14,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -22,7 +24,7 @@ public class EmailService {
     @Value("${app.mail.from}")
     private String from;
 
-    @Async
+    @Async // send email in background thread (doesn't block the HTTP request)
     public void sendResetPasswordEmail(String to, String resetLink) {
         try {
             Context ctx = new Context(Locale.ENGLISH);
@@ -44,11 +46,12 @@ public class EmailService {
 
             mailSender.send(msg);
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to send reset email", ex);
+            log.error("Failed to send reset email to {}", to, ex);
+//            throw new RuntimeException("Failed to send reset email", ex);
         }
     }
 
-    @Async
+    @Async // send email in background thread
     public void sendEmailVerification(String to, String verifyLink) {
         try {
             Context ctx = new Context(Locale.ENGLISH);
@@ -70,7 +73,8 @@ public class EmailService {
 
             mailSender.send(msg);
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to send verification email", ex);
+            log.error("Failed to send verification email to {}", to, ex);
+//            throw new RuntimeException("Failed to send verification email", ex);
         }
     }
 }

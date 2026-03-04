@@ -9,10 +9,11 @@ import java.security.NoSuchAlgorithmException;
 
 @Component
 public class TokenHasher {
-    // Keep this secret in env var or secrets manager
+    // Secret "pepper" added to tokens before hashing
     @Value("${security.reset.pepper}")
     private String pepper;
 
+    // Hashes reset/verify tokens before storing in DB (so DB never contains raw tokens)
     public String sha256Hex(String rawToken) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
-
+    // After successful OAuth2 login, generate JWT for the local user and redirect frontend with token.
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
@@ -48,6 +48,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         String jwt = jwtService.generateToken(new CustomUserDetails(user));
 
+        // Redirect with token in URL fragment (#token=...), so it isn't sent to backend as a query param
         String url = FRONTEND_REDIRECT + "#token=" + URLEncoder.encode(jwt, StandardCharsets.UTF_8);
         response.sendRedirect(url);
     }

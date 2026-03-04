@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity // Enables @PreAuthorize on controllers/services
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -54,8 +54,9 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(customOidcUserService)   // for Google
                         )
-                        .successHandler(oAuth2LoginSuccessHandler)
+                        .successHandler(oAuth2LoginSuccessHandler)  // Creates JWT + redirects to frontend
                 )
+                // Validate JWT on every request before hitting controllers
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -64,7 +65,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config)
-            throws Exception {
+            throws Exception {  // Exposes AuthenticationManager for login service (username/password authentication)
         return config.getAuthenticationManager();
     }
 }

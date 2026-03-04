@@ -19,6 +19,16 @@ public enum ErrorCode {
     ROLE_NOT_FOUND("ROLE_NOT_FOUND", "Role not found"),
     ROLE_ALREADY_EXISTS("ROLE_ALREADY_EXISTS", "Role already exists"),
 
+    // PASSWORD RESET
+    RESET_TOKEN_INVALID("RESET_TOKEN_INVALID", "Invalid reset token"),
+    RESET_TOKEN_USED("RESET_TOKEN_USED", "Reset token already used"),
+    RESET_TOKEN_EXPIRED("RESET_TOKEN_EXPIRED", "Reset token expired"),
+
+    //VERIFY EMAIL
+    VERIFY_TOKEN_INVALID("VERIFY_TOKEN_INVALID", "Invalid verify token"),
+    VERIFY_TOKEN_USED("VERIFY_TOKEN_USED", "Verify token already used"),
+    VERIFY_TOKEN_EXPIRED("VERIFY_TOKEN_EXPIRED", "Verify token expired"),
+
     // VALIDATION
     VALIDATION_FAILED("VALIDATION_FAILED", "Validation failed"),
     USERNAME_EMPTY("USERNAME_EMPTY", "Username can not be empty"),

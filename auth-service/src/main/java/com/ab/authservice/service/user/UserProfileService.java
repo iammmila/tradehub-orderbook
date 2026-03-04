@@ -1,44 +1,21 @@
-package com.ab.authservice.service;
+package com.ab.authservice.service.user;
 
 import com.ab.authservice.dto.UpdateMeRequest;
-import com.ab.authservice.dto.user.ChangePasswordRequest;
 import com.ab.authservice.dto.user.UserResponse;
-import com.ab.authservice.model.User;
-import com.ab.authservice.repository.UserRepository;
 import com.ab.authservice.exception.BadRequestException;
 import com.ab.authservice.exception.NotFoundException;
 import com.ab.authservice.exception.enums.ErrorCode;
+import com.ab.authservice.mapper.UserMapper;
+import com.ab.authservice.model.User;
+import com.ab.authservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserProfileService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-
-    public UserResponse getMe(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-
-        return toResponse(user);
-    }
-
-    public List<UserResponse> getUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    public UserResponse getUserById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        return toResponse(user);
-    }
+    private final UserMapper userMapper;
 
     public UserResponse updateMe(String currentUsername, UpdateMeRequest req) {
         User user = userRepository.findByUsername(currentUsername)
@@ -95,36 +72,6 @@ public class UserService {
         }
 
         userRepository.save(user);
-        return toResponse(user);
-    }
-
-    public void changePassword(String username, ChangePasswordRequest req) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        String currentPassword = req.getCurrentPassword().trim();
-        String newPassword = req.getNewPassword().trim();
-
-        // current password must be correct
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            throw new BadRequestException(ErrorCode.USER_PASSWORD_INCORRECT);
-        }
-        //new password must be different from current password
-        if (currentPassword.equals(newPassword)) {
-            throw new BadRequestException(ErrorCode.USER_PASSWORD_SAME);
-        }
-
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-    }
-
-    private UserResponse toResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .isVerified(user.isVerified())
-                .build();
+        return userMapper.toResponse(user);
     }
 }

@@ -23,8 +23,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
+    // Reads JWT from Authorization header, validates it, and sets Spring Security authentication.
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Reads JWT from Authorization header, validates it, and sets Spring Security authentication.
         String path = request.getServletPath();
         return path.startsWith("/oauth2/")
                 || path.startsWith("/login/oauth2/")
@@ -35,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // Expect: Authorization: Bearer <jwt>
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -46,24 +49,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String username;
 
         try {
+            // Extract username (subject). Parsing also validates signature + expiry.
             username = jwtService.extractUsername(jwt);
         } catch (ExpiredJwtException e) {
+            // Expired token => user must login again
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"JWT expired. Please login again.\"}");
             return;
         } catch (JwtException e) {
+            // Invalid token (bad signature / malformed / etc.)
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"Invalid JWT.\"}");
             return;
         }
 
+        // If not already authenticated, create SecurityContext authentication
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            System.out.println("User authenticated: " + username + " with roles: " + userDetails.getAuthorities());
-
+            // Create authenticated token for Spring Security
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()
             );
