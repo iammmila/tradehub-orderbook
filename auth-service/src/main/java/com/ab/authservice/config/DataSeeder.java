@@ -60,6 +60,7 @@ public class DataSeeder implements CommandLineRunner {
                             .role(adminRole)
                             .provider(AuthProvider.LOCAL)
                             .providerId(null)
+                            .verified(true)
                             .build());
                 });
     }
@@ -81,6 +82,7 @@ public class DataSeeder implements CommandLineRunner {
                             .role(userRole)
                             .provider(AuthProvider.LOCAL)
                             .providerId(null)
+                            .verified(true)
                             .build());
                 });
     }

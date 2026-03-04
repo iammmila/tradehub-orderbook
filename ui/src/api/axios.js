@@ -6,7 +6,6 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-
   const url = config.url || "";
   const isAuthRoute =
     url.includes("/v1/auth/login") || url.includes("/v1/auth/register");

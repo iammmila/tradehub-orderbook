@@ -44,6 +44,8 @@ public class User {
     @Column(nullable = true)
     private String password;
 
+    private boolean verified;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;

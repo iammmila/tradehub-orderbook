@@ -47,4 +47,30 @@ public class EmailService {
             throw new RuntimeException("Failed to send reset email", ex);
         }
     }
+
+    @Async
+    public void sendEmailVerification(String to, String verifyLink) {
+        try {
+            Context ctx = new Context(Locale.ENGLISH);
+            ctx.setVariable("verifyLink", verifyLink);
+
+            String html = templateEngine.process("email-verification", ctx);
+
+            MimeMessage msg = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    msg,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED,
+                    StandardCharsets.UTF_8.name()
+            );
+
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject("Verify your email");
+            helper.setText(html, true);
+
+            mailSender.send(msg);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to send verification email", ex);
+        }
+    }
 }

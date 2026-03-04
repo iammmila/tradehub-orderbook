@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import UserMenu from '../UserMenu/UserMenu';
 import { MainContext } from '../../context/ContextProvider';
 import NotificationContainer from '../NotificationContainer/NotificationContainer';
+import VerifyBadge from "../../components/VerifyBadge/VerifyBadge"
 
 function Navbar() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function Navbar() {
   // 1. Determine login status
   const isLoggedIn = !!localStorage.getItem("token");
   const isLanding = location.pathname === "/";
+  const isUnverified = isLoggedIn && user && user.verified === false;
 
   // 2. Define Public vs Private sections
   const sectionsPublic = useMemo(
@@ -134,7 +136,8 @@ function Navbar() {
             </>
           ) : (
             user && (
-              <>
+                <>
+                  {isUnverified && <VerifyBadge />}
                 <NotificationContainer />
                 <UserMenu />
               </>

@@ -27,6 +27,16 @@ export async function resetPassword(token, newPassword) {
   return res.data;
 }
 
+export async function resendVerifyEmail(email) {
+  const res = await api.post("/v1/auth/verify-email/request", { email });
+  return res.data;
+}
+
+export async function confirmVerifyEmail(token) {
+  const res = await api.post("/v1/auth/verify-email/confirm", { token });
+  return res.data;
+}
+
 export const isAuthenticated = () => {
   return !!localStorage.getItem("token");
 };

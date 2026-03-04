@@ -124,6 +124,7 @@ public class UserService {
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .isVerified(user.isVerified())
                 .build();
     }
 }

@@ -1,0 +1,29 @@
+.verify-badge {
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    border-radius: 999px;
+
+    background: rgba(255, 196, 0, 0.12);
+    border: 1px solid rgba(255, 196, 0, 0.28);
+    color: rgba(255, 255, 255, 0.92);
+
+    cursor: pointer;
+    transition: 160ms ease;
+
+    &:hover {
+        background: rgba(255, 196, 0, 0.18);
+        border-color: rgba(255, 196, 0, 0.42);
+        transform: translateY(-1px);
+    }
+
+    .verify-badge__icon {
+        font-size: 18px;
+    }
+
+    .verify-badge__text {
+        font-size: 13px;
+    }
+}

@@ -19,6 +19,8 @@ import ForgotPassword from "../pages/Auth/ForgotPassword/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword/ResetPassword";
 import ForgotPasswordEmailSent from "../pages/Auth/ForgotPasswordEmailSent/ForgotPasswordEmailSent";
 import ResetPasswordSuccess from "../pages/Auth/ResetPasswordSuccess/ResetPasswordSuccess";
+import VerifyEmailSent from "../pages/Auth/VerifyEmailSent/VerifyEmailSent";
+import VerifyEmailConfirm from "../pages/Auth/VerifyEmailConfirm/VerifyEmailConfirm";
 export const ROUTES = [
   // PUBLIC
   {
@@ -84,6 +86,8 @@ export const ROUTES = [
   { path: "/reset-password", element: <ResetPassword /> },
   { path: "/forgot-password/sent", element: <ForgotPasswordEmailSent /> },
   { path: "/reset-password/success", element: <ResetPasswordSuccess /> },
+  { path: "verify-email/sent", element: <VerifyEmailSent /> },
+  { path: "verify-email", element: <VerifyEmailConfirm /> },
   // fallback
   { path: "*", element: <Navigate to="/" replace /> },
 ];
