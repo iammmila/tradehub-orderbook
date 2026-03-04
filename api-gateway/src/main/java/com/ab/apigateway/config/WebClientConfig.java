@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     @Bean
-    @LoadBalanced
+    @LoadBalanced// enables calling services by name (Eureka) like http://auth-service/...
     public WebClient.Builder loadBalancedWebClientBuilder() {
         return WebClient.builder();
     }

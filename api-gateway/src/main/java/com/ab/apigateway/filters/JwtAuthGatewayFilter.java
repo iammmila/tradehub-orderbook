@@ -15,13 +15,18 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+/**
+ * Global Gateway filter:
+ * - Requires JWT for protected routes
+ * - Validates token via auth-service (/introspect)
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthGatewayFilter implements GlobalFilter {
 
     private final WebClient.Builder webClientBuilder;
 
-    // Paths that should NOT require auth
+    // Routes that are public (no JWT required)
     private boolean isPublicPath(String path) {
         return path.startsWith("/api/v1/auth/")
                 || path.startsWith("/actuator/")
@@ -45,13 +50,14 @@ public class JwtAuthGatewayFilter implements GlobalFilter {
             return chain.filter(exchange);
         }
 
+        // Missing/invalid Authorization header => reject
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        // Call auth-service introspection
+        // Introspect: auth-service checks token validity + returns userId/roles
         return webClientBuilder.build()
                 .get()
                 .uri("http://auth-service/api/v1/auth/introspect")
@@ -76,12 +82,13 @@ public class JwtAuthGatewayFilter implements GlobalFilter {
                     return chain.filter(exchange.mutate().request(mutatedRequest).build());
                 })
                 .onErrorResume(ex -> {
-                    // token invalid, auth-service down, parsing error, etc.
+                    // auth-service unavailable OR token invalid => reject
                     exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                     return exchange.getResponse().setComplete();
                 });
     }
 
+    // Helper: store roles in a single comma-separated header
     private String joinRoles(List<String> roles) {
         if (roles == null || roles.isEmpty()) return "";
         return String.join(",", roles);

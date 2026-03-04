@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Response returned by auth-service /introspect.
+ * Used by gateway to pass user context to other services.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
