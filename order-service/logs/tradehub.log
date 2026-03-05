@@ -142,3 +142,14 @@ This generated password is for development use only. Your security configuration
 	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
 
 2026-03-06T00:02:38.095+01:00  INFO 14328 --- [order-service] [main] c.a.o.bdd.CucumberSpringConfig           : Started CucumberSpringConfig in 5.114 seconds (process running for 6.786)
+2026-03-06T00:05:23.474+01:00  WARN 10136 --- [order-service] [http-nio-8081-exec-7] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+2026-03-06T00:06:12.572+01:00  INFO 10136 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-06T00:06:50.747+01:00  INFO 10136 --- [order-service] [http-nio-8081-exec-7] c.a.o.router.SmartOrderRouter            : AUTO_ROUTE instrument=123 side=SELL quantity=12 chosen=XTKS reason=TAKER_VWAP: fill=11 takerFeeBps=4 vwap=99.00000000 touch=99.0000 top3=1) XLON fill=0 eff=null vwap=null | 2) XNAS fill=0 eff=null vwap=null | 3) XTKS fill=11 eff=98.9604000000000000 vwap=99.00000000 | 
+2026-03-06T00:06:50.772+01:00  INFO 10136 --- [order-service] [kafka-producer-network-thread | order-service-producer-1] c.a.o.kafka.OrderEventsProducer          : KAFKA SENT success. topic=orders.events, partition=1, offset=90, key=122, eventClass=OrderCreatedEvent
+2026-03-06T00:07:30.318+01:00  INFO 10136 --- [order-service] [http-nio-8081-exec-6] c.a.o.router.SmartOrderRouter            : AUTO_ROUTE instrument=TST1 side=BUY quantity=2 chosen=XNAS reason=TAKER_VWAP: fill=2 takerFeeBps=3 vwap=111.00000000 touch=111.0000 top3=1) XLON fill=0 eff=1111.11110000 vwap=null | 2) XNAS fill=2 eff=111.0333000000000000 vwap=111.00000000 | 3) XTKS fill=0 eff=1111.22220000 vwap=null | 
+2026-03-06T00:07:30.345+01:00  INFO 10136 --- [order-service] [kafka-producer-network-thread | order-service-producer-1] c.a.o.kafka.OrderEventsProducer          : KAFKA SENT success. topic=orders.events, partition=2, offset=97, key=123, eventClass=OrderCreatedEvent
+2026-03-06T00:11:12.578+01:00  INFO 10136 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-06T00:16:12.595+01:00  INFO 10136 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
