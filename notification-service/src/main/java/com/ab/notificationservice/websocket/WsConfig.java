@@ -8,18 +8,25 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+/**
+ * Usage:
+ * - WebSocket/STOMP configuration for live notification delivery.
+ * - Clients connect to /ws and subscribe to /user/queue/notifications.
+ * - Handshake interceptor extracts JWT and assigns Principal name = userId.
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WsConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${app.ws.allowed-origins}")
     private String allowedOrigins;
+
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
     private final UserIdHandshakeHandler userIdHandshakeHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws")
+        registry.addEndpoint("/ws")   // SockJS helps when browser/network blocks native websockets
                 .setAllowedOrigins(allowedOrigins)
                 .addInterceptors(jwtHandshakeInterceptor)
                 .setHandshakeHandler(userIdHandshakeHandler)
@@ -27,7 +34,7 @@ public class WsConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
+    public void configureMessageBroker(MessageBrokerRegistry registry) {// Simple in-memory broker is enough for dev/single instance
         registry.enableSimpleBroker("/queue");
         registry.setUserDestinationPrefix("/user");
         registry.setApplicationDestinationPrefixes("/app");

@@ -11,6 +11,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Usage:
+ * - Spring Security configuration for the notification-service API.
+ * - Stateless JWT authentication via a custom filter.
+ * - Allows actuator and websocket paths without auth (WS auth can be added later).
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {

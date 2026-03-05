@@ -50,4 +50,32 @@ public class CreateOrderRequest {
         // For all non-market types, require positive price
         return price != null && price.compareTo(BigDecimal.ZERO) > 0;
     }
+    // MARKET must not send price
+    @AssertTrue(message = "price must be omitted (null) for MARKET orders")
+    public boolean isMarketPriceAbsent() {
+        if (type == null) return true;
+        if (type != OrderType.MARKET) return true;
+        return price == null;
+    }
+
+    // minExecSize allowed only when type == MIN_EXECUTION_SIZE
+    @AssertTrue(message = "minExecSize is allowed only for MIN_EXECUTION_SIZE orders")
+    public boolean isMinExecSizeAllowedOnlyForMinExecOrders() {
+        if (type == null) return true;
+        if (type == OrderType.MIN_EXECUTION_SIZE) return true;
+        return minExecSize == null;
+    }
+
+    // For MIN_EXECUTION_SIZE, minExecSize is required and must be <= quantity
+    @AssertTrue(message = "minExecSize must be > 0 and <= quantity for MIN_EXECUTION_SIZE orders")
+    public boolean isMinExecSizeValidWhenRequired() {
+        if (type == null) return true;
+        if (type != OrderType.MIN_EXECUTION_SIZE) return true;
+
+        if (minExecSize == null) return false;
+        if (minExecSize <= 0) return false;
+
+        if (quantity == null) return true; // quantity validation covers null
+        return minExecSize <= quantity;
+    }
 }

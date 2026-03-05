@@ -1,12 +1,144 @@
-2026-03-05T00:01:30.049+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:06:30.080+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:11:30.086+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:16:30.093+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:21:30.106+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:26:30.108+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:31:30.110+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:36:30.123+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:41:30.124+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:46:30.128+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:51:30.130+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
-2026-03-05T00:56:30.131+01:00  INFO 16540 --- [order-service] [AsyncResolver-bootstrap-executor-%d] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-06T00:00:08.016+01:00  INFO 32576 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1772751608016, current=DOWN, previous=UP]
+2026-03-06T00:00:08.020+01:00  INFO 32576 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081: registering service...
+2026-03-06T00:00:08.025+01:00  INFO 32576 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081 - registration status: 204
+2026-03-06T00:00:08.058+01:00  INFO 32576 --- [order-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-03-06T00:00:08.059+01:00  INFO 32576 --- [order-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-03-06T00:00:08.060+01:00  INFO 32576 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Shutting down DiscoveryClient ...
+2026-03-06T00:00:11.061+01:00  INFO 32576 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Unregistering ...
+2026-03-06T00:00:11.066+01:00  INFO 32576 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081 - deregister  status: 200
+2026-03-06T00:00:11.068+01:00  INFO 32576 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Completed shut down of DiscoveryClient
+2026-03-06T00:00:13.634+01:00  INFO 7500 --- [order-service] [main] c.a.o.OrderServiceApplication            : Starting OrderServiceApplication using Java 25.0.1 with PID 7500 (C:\Users\User\Desktop\tradehub-orderbook\order-service\target\classes started by User in C:\Users\User\Desktop\tradehub-orderbook\order-service)
+2026-03-06T00:00:13.635+01:00 DEBUG 7500 --- [order-service] [main] c.a.o.OrderServiceApplication            : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-06T00:00:13.635+01:00  INFO 7500 --- [order-service] [main] c.a.o.OrderServiceApplication            : The following 1 profile is active: "dev"
+2026-03-06T00:00:14.768+01:00  INFO 7500 --- [order-service] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-06T00:00:14.768+01:00  INFO 7500 --- [order-service] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-06T00:00:15.008+01:00  INFO 7500 --- [order-service] [main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-03-06T00:00:15.042+01:00  INFO 7500 --- [order-service] [main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-03-06T00:00:15.332+01:00  INFO 7500 --- [order-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-06T00:00:15.427+01:00  INFO 7500 --- [order-service] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@53cb9b1
+2026-03-06T00:00:15.428+01:00  INFO 7500 --- [order-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-06T00:00:15.448+01:00  WARN 7500 --- [order-service] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-06T00:00:15.469+01:00  INFO 7500 --- [order-service] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/order_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.1
+	Default catalog/schema: order_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-06T00:00:16.033+01:00  INFO 7500 --- [order-service] [main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-06T00:00:16.330+01:00  WARN 7500 --- [order-service] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-06T00:00:16.396+01:00  WARN 7500 --- [order-service] [main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 2acd380a-7702-4c54-8587-ac5167c507f0
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-03-06T00:00:16.912+01:00  WARN 7500 --- [order-service] [main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-03-06T00:00:16.989+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-03-06T00:00:16.991+01:00  INFO 7500 --- [order-service] [main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-06T00:00:16.995+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-06T00:00:16.995+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-06T00:00:16.997+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-06T00:00:16.997+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-06T00:00:16.997+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-06T00:00:16.997+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-03-06T00:00:16.997+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-06T00:00:17.219+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-06T00:00:17.221+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+2026-03-06T00:00:17.222+01:00  INFO 7500 --- [order-service] [main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-03-06T00:00:17.223+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1772751617223 with initial instances count: 5
+2026-03-06T00:00:17.226+01:00  INFO 7500 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1772751617225, current=UP, previous=STARTING]
+2026-03-06T00:00:17.227+01:00  INFO 7500 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081: registering service...
+2026-03-06T00:00:17.251+01:00  INFO 7500 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081 - registration status: 204
+2026-03-06T00:00:17.252+01:00  INFO 7500 --- [order-service] [main] c.a.o.OrderServiceApplication            : Started OrderServiceApplication in 3.909 seconds (process running for 4.359)
+2026-03-06T00:00:17.503+01:00  INFO 7500 --- [order-service] [main] com.ab.orderservice.config.DataSeeder    : Orders already exist. Skipping OrderDataSeeder.
+2026-03-06T00:00:25.156+01:00  INFO 7500 --- [order-service] [http-nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-06T00:00:29.722+01:00  INFO 7500 --- [order-service] [http-nio-8081-exec-2] c.a.o.router.SmartOrderRouter            : AUTO_ROUTE instrument=BTS12 side=SELL quantity=10 chosen=XLON reason=TAKER_VWAP: fill=10 takerFeeBps=2 vwap=10.80000000 touch=10.8000 top3=1) XLON fill=10 eff=10.7978400000000000 vwap=10.80000000 | 2) XNAS fill=0 eff=null vwap=null | 3) XTKS fill=0 eff=null vwap=null | 
+2026-03-06T00:00:30.367+01:00  INFO 7500 --- [order-service] [kafka-producer-network-thread | order-service-producer-1] c.a.o.kafka.OrderEventsProducer          : KAFKA SENT success. topic=orders.events, partition=0, offset=117, key=119, eventClass=OrderCreatedEvent
+2026-03-06T00:01:04.375+01:00  INFO 7500 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1772751664375, current=DOWN, previous=UP]
+2026-03-06T00:01:04.375+01:00  INFO 7500 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081: registering service...
+2026-03-06T00:01:04.379+01:00  INFO 7500 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081 - registration status: 204
+2026-03-06T00:01:04.412+01:00  INFO 7500 --- [order-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-03-06T00:01:04.414+01:00  INFO 7500 --- [order-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-03-06T00:01:04.414+01:00  INFO 7500 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Shutting down DiscoveryClient ...
+2026-03-06T00:01:07.424+01:00  INFO 7500 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Unregistering ...
+2026-03-06T00:01:07.441+01:00  INFO 7500 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081 - deregister  status: 200
+2026-03-06T00:01:07.442+01:00  INFO 7500 --- [order-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Completed shut down of DiscoveryClient
+2026-03-06T00:01:08.845+01:00  INFO 10136 --- [order-service] [main] c.a.o.OrderServiceApplication            : Starting OrderServiceApplication using Java 25.0.1 with PID 10136 (C:\Users\User\Desktop\tradehub-orderbook\order-service\target\classes started by User in C:\Users\User\Desktop\tradehub-orderbook\order-service)
+2026-03-06T00:01:08.846+01:00 DEBUG 10136 --- [order-service] [main] c.a.o.OrderServiceApplication            : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-06T00:01:08.846+01:00  INFO 10136 --- [order-service] [main] c.a.o.OrderServiceApplication            : The following 1 profile is active: "dev"
+2026-03-06T00:01:10.190+01:00  INFO 10136 --- [order-service] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-06T00:01:10.190+01:00  INFO 10136 --- [order-service] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-06T00:01:10.460+01:00  INFO 10136 --- [order-service] [main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-03-06T00:01:10.495+01:00  INFO 10136 --- [order-service] [main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-03-06T00:01:10.825+01:00  INFO 10136 --- [order-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-06T00:01:10.929+01:00  INFO 10136 --- [order-service] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@40625ac6
+2026-03-06T00:01:10.931+01:00  INFO 10136 --- [order-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-06T00:01:10.950+01:00  WARN 10136 --- [order-service] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-06T00:01:10.966+01:00  INFO 10136 --- [order-service] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/order_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.1
+	Default catalog/schema: order_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-06T00:01:11.563+01:00  INFO 10136 --- [order-service] [main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-06T00:01:11.873+01:00  WARN 10136 --- [order-service] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-06T00:01:11.944+01:00  WARN 10136 --- [order-service] [main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 5d0303a5-1036-4ec1-aa94-7bc52a274d75
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-03-06T00:01:12.482+01:00  WARN 10136 --- [order-service] [main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-03-06T00:01:12.557+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-03-06T00:01:12.560+01:00  INFO 10136 --- [order-service] [main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-03-06T00:01:12.567+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-03-06T00:01:12.567+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-03-06T00:01:12.567+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-03-06T00:01:12.567+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-03-06T00:01:12.567+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-03-06T00:01:12.567+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-03-06T00:01:12.567+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-03-06T00:01:12.783+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-03-06T00:01:12.784+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+2026-03-06T00:01:12.786+01:00  INFO 10136 --- [order-service] [main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-03-06T00:01:12.787+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1772751672786 with initial instances count: 4
+2026-03-06T00:01:12.790+01:00  INFO 10136 --- [order-service] [main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1772751672790, current=UP, previous=STARTING]
+2026-03-06T00:01:12.791+01:00  INFO 10136 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081: registering service...
+2026-03-06T00:01:12.814+01:00  INFO 10136 --- [order-service] [DiscoveryClient-InstanceInfoReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_ORDER-SERVICE/MalahatPC.mshome.net:order-service:8081 - registration status: 204
+2026-03-06T00:01:12.819+01:00  INFO 10136 --- [order-service] [main] c.a.o.OrderServiceApplication            : Started OrderServiceApplication in 4.358 seconds (process running for 4.831)
+2026-03-06T00:01:13.077+01:00  INFO 10136 --- [order-service] [main] com.ab.orderservice.config.DataSeeder    : Orders already exist. Skipping OrderDataSeeder.
+2026-03-06T00:01:16.870+01:00  INFO 10136 --- [order-service] [http-nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-06T00:01:17.240+01:00  INFO 10136 --- [order-service] [http-nio-8081-exec-1] c.a.o.router.SmartOrderRouter            : AUTO_ROUTE instrument=BTS122 side=SELL quantity=101 chosen=XLON reason=TAKER_VWAP: fill=0 takerFeeBps=2 vwap=null touch=null top3=1) XLON fill=0 eff=null vwap=null | 2) XNAS fill=0 eff=null vwap=null | 3) XTKS fill=0 eff=null vwap=null | 
+2026-03-06T00:01:17.817+01:00  INFO 10136 --- [order-service] [kafka-producer-network-thread | order-service-producer-1] c.a.o.kafka.OrderEventsProducer          : KAFKA SENT success. topic=orders.events, partition=1, offset=88, key=120, eventClass=OrderCreatedEvent
+2026-03-06T00:01:51.711+01:00  INFO 10136 --- [order-service] [http-nio-8081-exec-5] c.a.o.router.SmartOrderRouter            : AUTO_ROUTE instrument=BTS122 side=SELL quantity=101 chosen=XLON reason=TAKER_VWAP: fill=0 takerFeeBps=2 vwap=null touch=null top3=1) XLON fill=0 eff=null vwap=null | 2) XNAS fill=0 eff=null vwap=null | 3) XTKS fill=0 eff=null vwap=null | 
+2026-03-06T00:01:51.736+01:00  INFO 10136 --- [order-service] [kafka-producer-network-thread | order-service-producer-1] c.a.o.kafka.OrderEventsProducer          : KAFKA SENT success. topic=orders.events, partition=1, offset=89, key=121, eventClass=OrderCreatedEvent
+2026-03-06T00:02:30.734+01:00  INFO 11360 --- [order-service] [main] c.a.o.api.OrderControllerTest            : Starting OrderControllerTest using Java 25.0.1 with PID 11360 (started by User in C:\Users\User\Desktop\tradehub-orderbook\order-service)
+2026-03-06T00:02:30.735+01:00 DEBUG 11360 --- [order-service] [main] c.a.o.api.OrderControllerTest            : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-06T00:02:30.735+01:00  INFO 11360 --- [order-service] [main] c.a.o.api.OrderControllerTest            : The following 1 profile is active: "dev"
+2026-03-06T00:02:32.372+01:00  WARN 11360 --- [order-service] [main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 0235d3a4-44aa-4c9c-ad2a-c78dea571f52
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-03-06T00:02:33.051+01:00  INFO 11360 --- [order-service] [main] c.a.o.api.OrderControllerTest            : Started OrderControllerTest in 2.677 seconds (process running for 4.115)
+2026-03-06T00:02:33.341+01:00  INFO 14328 --- [order-service] [main] c.a.o.bdd.CucumberSpringConfig           : Starting CucumberSpringConfig using Java 25.0.1 with PID 14328 (started by User in C:\Users\User\Desktop\tradehub-orderbook\order-service)
+2026-03-06T00:02:33.344+01:00 DEBUG 14328 --- [order-service] [main] c.a.o.bdd.CucumberSpringConfig           : Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-06T00:02:33.344+01:00  INFO 14328 --- [order-service] [main] c.a.o.bdd.CucumberSpringConfig           : The following 1 profile is active: "test"
+2026-03-06T00:02:33.658+01:00  WARN 11360 --- [order-service] [main] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+2026-03-06T00:02:38.095+01:00  INFO 14328 --- [order-service] [main] c.a.o.bdd.CucumberSpringConfig           : Started CucumberSpringConfig in 5.114 seconds (process running for 6.786)

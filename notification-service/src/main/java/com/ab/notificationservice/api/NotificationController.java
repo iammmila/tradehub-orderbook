@@ -10,6 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Usage:
+ * - REST endpoints for reading and updating notification state.
+ * - All endpoints require authentication and operate only on the authenticated user's data.
+ * - Designed for UI polling (list + unread count) and user actions (mark read / mark all read).
+ */
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
@@ -17,6 +23,10 @@ public class NotificationController {
 
     private final NotificationService service;
 
+    /**
+     * Lists notifications for the current user using pagination.
+     * The service layer must enforce user scoping (userId) to prevent data leakage.
+     */
     @GetMapping
     public ResponseEntity<Page<NotificationDto>> list(
             @AuthenticationPrincipal AuthPrincipal me,
@@ -27,11 +37,19 @@ public class NotificationController {
         return ResponseEntity.ok(p);
     }
 
+    /**
+     * Lightweight endpoint for UI badge/counter updates.
+     * Returns only a number to keep payload small and fast.
+     */
     @GetMapping("/unread-count")
     public ResponseEntity<Long> unreadCount(@AuthenticationPrincipal AuthPrincipal me) {
         return ResponseEntity.ok(service.unreadCount(me.userId()));
     }
 
+    /**
+     * Marks a single notification as read for the current user.
+     * Service should validate that the notification belongs to the same userId.
+     */
     @PostMapping("/{id}/read")
     public ResponseEntity<Void> markRead(
             @AuthenticationPrincipal AuthPrincipal me,
@@ -41,6 +59,10 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Marks all notifications as read for the current user.
+     * Useful for "Mark all as read" UI actions.
+     */
     @PostMapping("/read-all")
     public ResponseEntity<Void> markAllRead(@AuthenticationPrincipal AuthPrincipal me) {
         service.markAllRead(me.userId());

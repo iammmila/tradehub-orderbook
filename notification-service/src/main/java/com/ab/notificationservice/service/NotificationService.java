@@ -13,12 +13,21 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+/**
+ * Usage:
+ * - Application service for notification persistence and read-state updates.
+ * - Enforces user scoping rules (a user can only mark their own notifications as read).
+ * - Keeps validation and transactional boundaries centralized.
+ */
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-
     private final NotificationRepository notificationRepository;
 
+    /**
+     * Creates a notification with basic validation and default timestamps.
+     * Intended to be called from Kafka consumers and internal flows (not directly from controllers).
+     */
     @Transactional
     public Notification create(Notification entity) {
         if (entity.getUserId() == null) {
@@ -33,6 +42,10 @@ public class NotificationService {
         return notificationRepository.save(entity);
     }
 
+    /**
+     * Returns newest-first notifications for the given user.
+     * Read-only transaction improves performance and avoids accidental writes.
+     */
     @Transactional(readOnly = true)
     public Page<Notification> listForUser(Long userId, int page, int size) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(
@@ -41,16 +54,24 @@ public class NotificationService {
         );
     }
 
+    /**
+     * Efficient badge counter endpoint support.
+     * Uses a count query rather than fetching rows.
+     */
     @Transactional(readOnly = true)
     public long unreadCount(Long userId) {
         return notificationRepository.countByUserIdAndReadAtIsNull(userId);
     }
 
+    /**
+     * Marks a single notification as read with ownership enforcement.
+     * repeated calls do not change state once readAt is set.
+     */
     @Transactional
     public void markRead(Long userId, Long notificationId) {
         Notification n = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOTIFICATION_NOT_FOUND));
-
+        // Prevent reading/updating another user's notifications
         if (!n.getUserId().equals(userId)) {
             throw new ApiException(HttpStatus.FORBIDDEN, ErrorCode.ACCESS_DENIED);
         }
@@ -61,6 +82,10 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Bulk mark-as-read for the current user's latest notifications.
+     * Uses a bounded page to avoid loading an unbounded dataset into memory.
+     */
     @Transactional
     public int markAllRead(Long userId) {
         var page = notificationRepository.

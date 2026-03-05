@@ -6,7 +6,10 @@ import com.ab.orderservice.dto.ReplaceOrderRequest;
 import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
 import com.ab.orderservice.security.AuthPrincipal;
-import com.ab.orderservice.service.OrderService;
+import com.ab.orderservice.service.order.command.OrderCancelService;
+import com.ab.orderservice.service.order.command.OrderCreateService;
+import com.ab.orderservice.service.order.command.OrderReplaceService;
+import com.ab.orderservice.service.order.query.OrderQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,7 +25,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/orders")
 public class OrderController {
-    private final OrderService orderService;
+    private final OrderCancelService orderCancelService;
+    private final OrderCreateService orderCreateService;
+    private final OrderReplaceService orderReplaceService;
+    private final OrderQueryService orderQueryService;
 
     // get /api/v1/orders -> 200 ok
     @GetMapping
@@ -32,7 +38,7 @@ public class OrderController {
             @RequestParam(required = false) String instrument,
             @RequestParam(required = false) OrderStatus status
     ) {
-        return ResponseEntity.ok(orderService.getOrders(side, instrument, status));
+        return ResponseEntity.ok(orderQueryService.list(side, instrument, status));
     }
 
     // GET /api/v1/orders/my -> 200 OK
@@ -48,7 +54,7 @@ public class OrderController {
             Pageable pageable
     ) {
         return ResponseEntity.ok(
-                orderService.getOrdersByUserPaged(me.userId(), side, instrument, status, pageable));
+                orderQueryService.listByUserPaged(me.userId(), side, instrument, status, pageable));
     }
 
     // delete /api/v1/orders/orderid -> 200 OK
@@ -58,7 +64,7 @@ public class OrderController {
             @PathVariable Long orderId
     ) {
         boolean isAdmin = false;
-        return ResponseEntity.ok(orderService.cancelOrder(orderId, me.userId(), isAdmin));
+        return ResponseEntity.ok(orderCancelService.cancel(orderId, me.userId(), isAdmin));
     }
 
     // PATCH /api/v1/orders/{orderId} -> 200 OK
@@ -69,7 +75,7 @@ public class OrderController {
             @Valid @RequestBody ReplaceOrderRequest request
     ) {
         boolean isAdmin = false;
-        return ResponseEntity.ok(orderService.replaceOrder(orderId, me.userId(), isAdmin, request));
+        return ResponseEntity.ok(orderReplaceService.replace(orderId, me.userId(), isAdmin, request));
     }
 
     @GetMapping("/{orderId}")
@@ -78,7 +84,7 @@ public class OrderController {
             @PathVariable Long orderId
     ) {
         boolean isAdmin = false;
-        return ResponseEntity.ok(orderService.getOrderById(orderId, me.userId(), isAdmin));
+        return ResponseEntity.ok(orderQueryService.getById(orderId, me.userId(), isAdmin));
     }
 
     // post /api/v1/orders -> 201
@@ -87,7 +93,7 @@ public class OrderController {
             @AuthenticationPrincipal AuthPrincipal me,
             @Valid @RequestBody CreateOrderRequest request
     ) {
-        OrderResponse created = orderService.createOrder(me.userId(), request);
+        OrderResponse created = orderCreateService.create(me.userId(), request);
         URI location = URI.create("/api/v1/orders/" + created.getId());
         return ResponseEntity.created(location).body(created);
     }

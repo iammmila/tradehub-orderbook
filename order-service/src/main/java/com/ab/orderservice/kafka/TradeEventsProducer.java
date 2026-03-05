@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Publishes trade domain events to Kafka so other services can react (notifications, analytics, etc.).
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

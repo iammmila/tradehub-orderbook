@@ -8,6 +8,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Builds trade events from matching results.
+ * Keeps event payload creation consistent in one place.
+ */
 @Component
 public class TradeEventFactory {
 

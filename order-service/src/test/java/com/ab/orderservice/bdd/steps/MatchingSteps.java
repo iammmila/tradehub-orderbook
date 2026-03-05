@@ -1,11 +1,13 @@
 package com.ab.orderservice.bdd.steps;
 
 import com.ab.orderservice.kafka.TradeEventsProducer;
+import com.ab.orderservice.kafka.event.TradeCreatedEvent;
 import com.ab.orderservice.model.Order;
 import com.ab.orderservice.model.enums.*;
 import com.ab.orderservice.repository.OrderRepository;
 import com.ab.orderservice.service.MatchingService;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -82,36 +84,46 @@ public class MatchingSteps {
      */
     private Order incomingOrder;
 
+    @Before
+    public void resetMocks() {
+        // Helps if add multiple scenarios later
+        reset(tradeEventsProducer);
+    }
+
     @Given("the following resting orders exist in the book:")
     public void existingOrders(DataTable table) {
         List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+
         transactionTemplate.execute(tx -> {
-            // Convert table rows to real Order entities and persist them
             List<Order> restingOrders = rows.stream().map(r -> {
                 Order o = new Order();
+
                 Long id = parseLongOrNull(r.get("id"));
+                if (id != null) o.setId(id); // remove if @GeneratedValue disallows it
+
                 o.setSide(OrderSide.valueOf(req(r, "side")));
+
                 long qty = Long.parseLong(req(r, "quantity"));
                 o.setQuantity(qty);
                 o.setRemainingQuantity(qty);
-                o.setRoutingMode(RoutingMode.MANUAL);
-                o.setRoutedBy(RoutedBy.USER);
+
                 o.setPrice(new BigDecimal(req(r, "price")));
                 o.setInstrument(req(r, "instrument"));
                 o.setUserId(Long.parseLong(req(r, "userId")));
                 o.setStatus(OrderStatus.valueOf(req(r, "status")));
+
                 o.setExchangeCode(req(r, "exchangeCode"));
                 o.setType(OrderType.valueOf(req(r, "type")));
                 o.setVisible(o.getType() != OrderType.HIDDEN_LIMIT);
-                // If your Order uses @GeneratedValue and refuses manual IDs, comment this out:
-                if (id != null) o.setId(id);
+
+                o.setRoutingMode(RoutingMode.MANUAL);
+                o.setRoutedBy(RoutedBy.USER);
                 o.setCreatedAt(LocalDateTime.now());
+
                 return o;
             }).toList();
 
             orderRepository.saveAll(restingOrders);
-
-            // flush is OK now because we are inside a tx
             entityManager.flush();
             return null;
         });
@@ -123,32 +135,34 @@ public class MatchingSteps {
     public void buyOrderArrives(DataTable table) {
         Map<String, String> r = table.asMaps(String.class, String.class).get(0);
 
-        incomingOrder = new Order();
+        Order o = new Order();
 
         Long id = parseLongOrNull(r.get("id"));
-        // If @GeneratedValue disallows this, remove it:
-        if (id != null) incomingOrder.setId(id);
+        if (id != null) o.setId(id); // remove if @GeneratedValue disallows it
 
-        incomingOrder.setSide(OrderSide.valueOf(req(r, "side")));
+        o.setSide(OrderSide.valueOf(req(r, "side")));
+
         long qty = Long.parseLong(req(r, "quantity"));
-        incomingOrder.setQuantity(qty);
-        incomingOrder.setRemainingQuantity(qty);
+        o.setQuantity(qty);
+        o.setRemainingQuantity(qty);
 
-        incomingOrder.setPrice(new BigDecimal(req(r, "price")));
-        incomingOrder.setInstrument(req(r, "instrument"));
-        incomingOrder.setUserId(Long.parseLong(req(r, "userId")));
-        incomingOrder.setStatus(OrderStatus.valueOf(req(r, "status")));
+        o.setPrice(new BigDecimal(req(r, "price")));
+        o.setInstrument(req(r, "instrument"));
+        o.setUserId(Long.parseLong(req(r, "userId")));
+        o.setStatus(OrderStatus.valueOf(req(r, "status")));
 
-        incomingOrder.setExchangeCode(req(r, "exchangeCode"));
-        incomingOrder.setType(OrderType.valueOf(req(r, "type")));
-        incomingOrder.setCreatedAt(LocalDateTime.now());
-        incomingOrder.setRoutingMode(RoutingMode.MANUAL);
-        incomingOrder.setRoutedBy(RoutedBy.USER);
-        incomingOrder.setVisible(incomingOrder.getType() != OrderType.HIDDEN_LIMIT);
-        Order captured = incomingOrder;
-        transactionTemplate.execute(status -> {
-            incomingOrder = orderRepository.save(incomingOrder);
+        o.setExchangeCode(req(r, "exchangeCode"));
+        o.setType(OrderType.valueOf(req(r, "type")));
+        o.setVisible(o.getType() != OrderType.HIDDEN_LIMIT);
+
+        o.setRoutingMode(RoutingMode.MANUAL);
+        o.setRoutedBy(RoutedBy.USER);
+        o.setCreatedAt(LocalDateTime.now());
+
+        transactionTemplate.execute(tx -> {
+            incomingOrder = orderRepository.save(o);
             matchingService.match(incomingOrder);
+            entityManager.flush();
             return null;
         });
 
@@ -159,7 +173,7 @@ public class MatchingSteps {
     public void verifyIncomingOrder(String expectedStatus, int expectedRemaining) {
         Order buy = orderRepository.findById(incomingOrder.getId()).orElseThrow();
         assertEquals(OrderStatus.valueOf(expectedStatus), buy.getStatus());
-        assertEquals(expectedRemaining, buy.getRemainingQuantity());
+        assertEquals((long) expectedRemaining, buy.getRemainingQuantity());
     }
 
     @Then("the SELL order {int} should be {string} with {int} remaining quantity")
@@ -169,22 +183,18 @@ public class MatchingSteps {
                 .orElseThrow(() -> new AssertionError("SELL order not found: " + sellOrderId));
 
         assertEquals(OrderStatus.valueOf(expectedStatus), sell.getStatus());
-        assertEquals((long) expectedRemaining, sell.getRemainingQuantity().longValue());
+        assertEquals((long) expectedRemaining, sell.getRemainingQuantity());
     }
 
     @Then("a trade event should be published for {int} shares at {double}")
     public void verifyKafka(int qty, double price) {
-        /**
-         * This verifies the SIDE EFFECT:
-         * MatchingService should publish an event when a match happens.
-         *
-         * Because TradeEventsProducer is mocked (via @MockitoBean in config),
-         * this verify does not send Kafka; it only checks that publish(...) was called
-         * with correct event data.
-         */
+        // In MatchingEventPublisher:
+        // tradeEventsProducer.publish(String.valueOf(buy.getId()), event)
+        String expectedKey = String.valueOf(incomingOrder.getId()); // scenario BUY is incoming
+
         verify(tradeEventsProducer, times(1)).publish(
-                anyString(),// key can be any (often order id or trade id)
-                argThat(event ->
+                eq(expectedKey),
+                argThat((TradeCreatedEvent event) ->
                         event != null
                                 && event.quantity() == qty
                                 && event.price().compareTo(BigDecimal.valueOf(price)) == 0

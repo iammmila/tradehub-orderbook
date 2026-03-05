@@ -15,6 +15,12 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * Usage:
+ * - Validates JWT during WebSocket handshake.
+ * - Resolves userId and stores it as wsUserId for UserIdHandshakeHandler.
+ * - Rejects handshake if token is missing/invalid.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -26,9 +32,9 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
-
+        // Token passed via query param: /ws?token=Bearer%20...
         URI uri = request.getURI();
-        String query = uri.getQuery(); // token=...
+        String query = uri.getQuery();
 
         String token = null;
         if (query != null) {
@@ -39,13 +45,13 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 }
             }
         }
-
+        // Supports plain token or "Bearer <token>"
         token = jwtService.extractToken(token); // supports "Bearer ..."
         if (token == null || token.isBlank()) {
             log.warn("WS handshake rejected: missing token");
             return false;
         }
-
+        // Username extracted from JWT; userId is resolved via auth-service / internal mapping
         String username = jwtService.extractUsername(token);
         Long userId = userIdResolver.resolveUserId(username, token);
 

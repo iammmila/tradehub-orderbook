@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 public class RoutingController {
     private final SmartOrderRouter router;
 
+    // Returns best single venue decision for the given params (used by UI “preview”).
     @GetMapping("/quote")
     public ResponseEntity<RouteDecision> quote(
             @RequestParam String instrument,
@@ -32,6 +33,7 @@ public class RoutingController {
         return ResponseEntity.ok(decision);
     }
 
+    // Returns a full routing plan (e.g. multi-venue split), mainly for debugging/explainability.
     @GetMapping("/plan")
     public ResponseEntity<RoutePlanResponse> plan(
             @RequestParam String instrument,

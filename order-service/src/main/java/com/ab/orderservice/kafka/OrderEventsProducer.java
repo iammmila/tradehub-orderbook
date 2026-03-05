@@ -5,6 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * Generic producer for all order events (created/cancelled/replaced/filled...).
+ * Logs send result to help debugging Kafka connectivity and delivery issues.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

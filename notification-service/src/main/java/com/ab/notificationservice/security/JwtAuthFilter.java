@@ -14,6 +14,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Usage:
+ * - Reads JWT from Authorization header for every HTTP request.
+ * - Builds an AuthPrincipal (username + userId) and stores it in the SecurityContext.
+ * - If JWT is invalid/expired, returns 401 and stops the request chain.
+ */
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -30,6 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         String token = jwtService.extractToken(authHeader);
 
+        // No token means "anonymous" here; security rules will decide access.
         if (token == null || token.isBlank()) {
             filterChain.doFilter(request, response);
             return;
@@ -45,7 +52,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 // 3) resolve userId by calling auth-service/gateway (FORWARD SAME JWT)
                 Long userId = userIdResolver.resolveUserId(username, token);
 
-                // 4) set principal
+                // 4) Principal used by controllers via @AuthenticationPrincipal
                 AuthPrincipal principal = new AuthPrincipal(username, userId);
 
                 var auth = new UsernamePasswordAuthenticationToken(

@@ -8,6 +8,11 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import java.security.Principal;
 import java.util.Map;
 
+/**
+ * Usage:
+ * - Converts wsUserId attribute from the handshake into the STOMP Principal.
+ * - This enables convertAndSendToUser(userId, ...) routing.
+ */
 @Component
 public class UserIdHandshakeHandler extends DefaultHandshakeHandler {
     @Override

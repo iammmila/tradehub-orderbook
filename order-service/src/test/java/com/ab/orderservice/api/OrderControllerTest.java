@@ -6,7 +6,10 @@ import com.ab.orderservice.model.enums.OrderSide;
 import com.ab.orderservice.model.enums.OrderStatus;
 import com.ab.orderservice.model.enums.OrderType;
 import com.ab.orderservice.security.AuthPrincipal;
-import com.ab.orderservice.service.OrderService;
+import com.ab.orderservice.service.order.command.OrderCancelService;
+import com.ab.orderservice.service.order.command.OrderCreateService;
+import com.ab.orderservice.service.order.command.OrderReplaceService;
+import com.ab.orderservice.service.order.query.OrderQueryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,7 +52,13 @@ public class OrderControllerTest {
     // ObjectMapper: easiest way to serialize DTOs to JSON (same as runtime).
 
     @MockitoBean
-    private OrderService orderService;
+    private OrderCancelService orderCancelService;
+    @MockitoBean
+    private OrderCreateService orderCreateService;
+    @MockitoBean
+    private OrderReplaceService orderReplaceService;
+    @MockitoBean
+    private OrderQueryService orderQueryService;
 
     @TestConfiguration
     static class TestSecurityConfig {
@@ -87,15 +96,14 @@ public class OrderControllerTest {
      * Creates an Authentication that mimics what JWT normally gives you:
      * - principal = AuthPrincipal(username, userId)
      * - authorities = ROLE_USER / ROLE_ADMIN etc
-     * <p>
      * Note: your controller currently does NOT use roles (it hardcodes isAdmin=false),
      * but we keep roles here because you will likely add admin logic later.
      */
-    private UsernamePasswordAuthenticationToken auth(long userId, String username, String... roles) {
+    private UsernamePasswordAuthenticationToken auth(long userId, String username, boolean verified, String... roles) {
         var authorities = java.util.Arrays.stream(roles)
                 .map(SimpleGrantedAuthority::new)
                 .toList();
-        var principal = new AuthPrincipal(username, userId);
+        var principal = new AuthPrincipal(username, userId, verified);
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 
@@ -105,34 +113,34 @@ public class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders"))
                 .andExpect(status().isUnauthorized());
 
-        verify(orderService, never()).getOrders(any(), any(), any());
+        verify(orderQueryService, never()).list(any(), any(), any());
     }
 
     @Test
     void getOrders_shouldReturn200_andCallServiceWithFilters() throws Exception {
-        when(orderService.getOrders(any(), any(), any()))
+        when(orderQueryService.list(any(), any(), any()))
                 .thenReturn(List.of(sampleResponse(1L)));
 
         mockMvc.perform(get("/api/v1/orders")
-                        .with(authentication(auth(10L, "user", "ROLE_USER")))
+                        .with(authentication(auth(10L, "user", true, "ROLE_USER")))
                         .param("side", "BUY")
                         .param("instrument", "AAPL")
                         .param("status", "NEW"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
-        verify(orderService).getOrders(OrderSide.BUY, "AAPL", OrderStatus.NEW);
+        verify(orderQueryService).list(OrderSide.BUY, "AAPL", OrderStatus.NEW);
     }
 
     @Test
     void getOrders_shouldAllowMissingFilters() throws Exception {
-        when(orderService.getOrders(null, null, null)).thenReturn(List.of());
+        when(orderQueryService.list(null, null, null)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/v1/orders")
-                        .with(authentication(auth(10L, "user", "ROLE_USER"))))
+                        .with(authentication(auth(10L, "user", true, "ROLE_USER"))))
                 .andExpect(status().isOk());
 
-        verify(orderService).getOrders(null, null, null);
+        verify(orderQueryService).list(null, null, null);
     }
 
     // GET /api/v1/orders/my
@@ -141,7 +149,7 @@ public class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders/my"))
                 .andExpect(status().isUnauthorized());
 
-        verify(orderService, never()).getOrdersByUserPaged(anyLong(), any(), any(), any(), any());
+        verify(orderQueryService, never()).listByUserPaged(anyLong(), any(), any(), any(), any());
     }
 
     @Test
@@ -152,11 +160,11 @@ public class OrderControllerTest {
                 1
         );
 
-        when(orderService.getOrdersByUserPaged(eq(10L), eq(OrderSide.BUY), eq("AAPL"), eq(OrderStatus.NEW), any(Pageable.class)))
+        when(orderQueryService.listByUserPaged(eq(10L), eq(OrderSide.BUY), eq("AAPL"), eq(OrderStatus.NEW), any(Pageable.class)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/api/v1/orders/my")
-                        .with(authentication(auth(10L, "user", "ROLE_USER")))
+                        .with(authentication(auth(10L, "user", true, "ROLE_USER")))
                         .param("side", "BUY")
                         .param("instrument", "AAPL")
                         .param("status", "NEW")
@@ -167,7 +175,7 @@ public class OrderControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray());
 
-        verify(orderService).getOrdersByUserPaged(eq(10L), eq(OrderSide.BUY), eq("AAPL"), eq(OrderStatus.NEW), any(Pageable.class));
+        verify(orderQueryService).listByUserPaged(eq(10L), eq(OrderSide.BUY), eq("AAPL"), eq(OrderStatus.NEW), any(Pageable.class));
     }
 
     // POST /api/v1/orders
@@ -186,7 +194,7 @@ public class OrderControllerTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnauthorized());
 
-        verify(orderService, never()).createOrder(anyLong(), any());
+        verify(orderCreateService, never()).create(anyLong(), any());
     }
 
     @Test
@@ -199,11 +207,11 @@ public class OrderControllerTest {
                 .quantity(100L)
                 .build();
 
-        when(orderService.createOrder(eq(10L), any(CreateOrderRequest.class)))
+        when(orderCreateService.create(eq(10L), any(CreateOrderRequest.class)))
                 .thenReturn(sampleResponse(55L));
 
         mockMvc.perform(post("/api/v1/orders")
-                        .with(authentication(auth(10L, "user", "ROLE_USER")))
+                        .with(authentication(auth(10L, "user", true, "ROLE_USER")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -213,7 +221,7 @@ public class OrderControllerTest {
 
         // Verify service called with correct userId and request values
         ArgumentCaptor<CreateOrderRequest> captor = ArgumentCaptor.forClass(CreateOrderRequest.class);
-        verify(orderService).createOrder(eq(10L), captor.capture());
+        verify(orderCreateService).create(eq(10L), captor.capture());
         assertThat(captor.getValue().getInstrument()).isEqualTo("AAPL");
     }
 
@@ -227,12 +235,12 @@ public class OrderControllerTest {
                 .build();
 
         mockMvc.perform(post("/api/v1/orders")
-                        .with(authentication(auth(10L, "user", "ROLE_USER")))
+                        .with(authentication(auth(10L, "user", true, "ROLE_USER")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
 
-        verify(orderService, never()).createOrder(anyLong(), any());
+        verify(orderCreateService, never()).create(anyLong(), any());
     }
 
     // DELETE /api/v1/orders/{orderId}
@@ -241,18 +249,18 @@ public class OrderControllerTest {
         mockMvc.perform(delete("/api/v1/orders/99"))
                 .andExpect(status().isUnauthorized());
 
-        verify(orderService, never()).cancelOrder(anyLong(), anyLong(), anyBoolean());
+        verify(orderCancelService, never()).cancel(anyLong(), anyLong(), anyBoolean());
     }
 
     @Test
     void cancelOrder_shouldCallService_withIsAdminFalse() throws Exception {
-        when(orderService.cancelOrder(eq(99L), eq(10L), eq(false)))
+        when(orderCancelService.cancel(eq(99L), eq(10L), eq(false)))
                 .thenReturn(sampleResponse(99L));
 
         mockMvc.perform(delete("/api/v1/orders/99")
-                        .with(authentication(auth(10L, "user", "ROLE_USER"))))
+                        .with(authentication(auth(10L, "user", true, "ROLE_USER"))))
                 .andExpect(status().isOk());
 
-        verify(orderService).cancelOrder(99L, 10L, false);
+        verify(orderCancelService).cancel(99L, 10L, false);
     }
 }

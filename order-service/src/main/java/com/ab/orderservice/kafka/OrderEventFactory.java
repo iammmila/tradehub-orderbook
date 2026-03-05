@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Creates Kafka events for order lifecycle changes.
+ * Keeps event fields consistent across services.
+ */
 @Component
 public class OrderEventFactory {
 
@@ -55,7 +59,7 @@ public class OrderEventFactory {
     }
 
     public OrderFilledEvent filled(Order o) {
-        long totalFilled = o.getQuantity(); // because remaining is 0 when filled
+        long totalFilled = o.getQuantity() - o.getRemainingQuantity(); 
         return new OrderFilledEvent(
                 newId(), Instant.now(),
                 o.getId(), o.getUserId(), o.getInstrument(),

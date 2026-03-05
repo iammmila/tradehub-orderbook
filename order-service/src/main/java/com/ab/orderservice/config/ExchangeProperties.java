@@ -13,7 +13,7 @@ import java.util.List;
 public class ExchangeProperties {
 
     private Exchange exchange = new Exchange();
-
+    // Supported exchange codes from config (optional if ExchangeRegistry is dynamic).
     private List<String> exchanges = new ArrayList<>();
 
     @Data

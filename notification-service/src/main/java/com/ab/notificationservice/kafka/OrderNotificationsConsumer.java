@@ -14,6 +14,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Component;
 
+/**
+ * Usage:
+ * - Single Kafka listener for multiple order-related event types using @KafkaHandler dispatch.
+ * - Converts domain events into persisted notifications and pushes them via WebSocket.
+ * - Centralizes all order notification message formatting and delivery logic.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -93,6 +99,12 @@ public class OrderNotificationsConsumer {
         log.info("NOTIFICATION saved ORDER_FILLED eventId={} orderId={} userId={}", e.eventId(), e.orderId(), e.userId());
     }
 
+    /**
+     * Shared persistence + delivery flow:
+     * - Writes notification to DB first (durable history for UI).
+     * - Pushes the DTO to the user's WS destination for real-time updates.
+     * Transaction ensures notification write is consistent within this method boundary.
+     */
     @Transactional
     private void saveAndPush(Long userId, String type, String title, String message, String entityId) {
         Notification notif = service.create(Notification.builder()
@@ -103,6 +115,7 @@ public class OrderNotificationsConsumer {
                 .entityType("ORDER")
                 .entityId(entityId)
                 .build());
+        // Registry is used for diagnostics; delivery can still be attempted even if user is offline.
         var simpUser = simpUserRegistry.getUser(userId.toString());
         ws.convertAndSendToUser(
                 notif.getUserId().toString(),

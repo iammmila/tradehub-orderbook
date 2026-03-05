@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {
-
+    // Shared WebClient builder for internal service-to-service calls.
     @Bean
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder();

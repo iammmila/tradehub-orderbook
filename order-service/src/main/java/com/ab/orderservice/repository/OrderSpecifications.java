@@ -9,8 +9,15 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Reusable JPA Specifications for filtering Orders in repository queries.
+ * Keeps query-building logic out of services/controllers.
+ */
 public class OrderSpecifications {
-
+    /**
+     * Optional filters for searching orders (side, instrument, status).
+     * Any null/blank parameter is ignored.
+     */
     public static Specification<Order> withFilters(
             OrderSide side,
             String instrument,
@@ -39,6 +46,10 @@ public class OrderSpecifications {
         };
     }
 
+    /**
+     * Filters orders for a single user, plus optional side/instrument/status.
+     * Used for "my orders" endpoints.
+     */
     public static Specification<Order> byUserAndFilters(
             Long userId,
             OrderSide side,
