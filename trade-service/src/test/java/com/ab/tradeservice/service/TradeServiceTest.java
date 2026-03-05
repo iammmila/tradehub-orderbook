@@ -44,6 +44,7 @@ class TradeServiceTest {
                 .buyerUserId(10L)
                 .sellerUserId(20L)
                 .createdAt(provided)
+                .exchangeCode("xnas")
                 .build();
 
         when(tradeRepository.save(any(Trade.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -65,6 +66,9 @@ class TradeServiceTest {
 
         // Key assertion: createdAt preserved
         assertThat(saved.getCreatedAt()).isEqualTo(provided);
+        // Best practice: also assert normalization behavior
+        assertThat(saved.getExchangeCode()).isEqualTo("XNAS");
+
     }
 
     @Test
@@ -79,6 +83,7 @@ class TradeServiceTest {
                 .buyerUserId(10L)
                 .sellerUserId(20L)
                 .createdAt(null)
+                .exchangeCode("xlon")
                 .build();
 
         when(tradeRepository.save(any(Trade.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -90,6 +95,7 @@ class TradeServiceTest {
 
         Trade saved = captor.getValue();
         assertThat(saved.getCreatedAt()).isNotNull();
+        assertThat(saved.getExchangeCode()).isEqualTo("XLON");
     }
 
     @Test

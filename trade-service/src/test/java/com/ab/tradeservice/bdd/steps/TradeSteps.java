@@ -50,9 +50,10 @@ public class TradeSteps {
      * - Cucumber parses values from the feature file and passes them here.
      * - Build a CreateTradeRequest (DTO) and call the real service method.
      */
-    @When("I create a trade with instrument {string} price {double} quantity {int} buyOrderId {long} sellOrderId {long} buyerUserId {long} sellerUserId {long}")
+    @When("I create a trade with instrument {string} exchangeCode {string} price {double} quantity {int} buyOrderId {long} sellOrderId {long} buyerUserId {long} sellerUserId {long}")
     public void i_create_a_trade(
             String instrument,
+            String exchangeCode,
             double price,
             int quantity,
             long buyOrderId,
@@ -62,6 +63,7 @@ public class TradeSteps {
     ) {
         CreateTradeRequest req = new CreateTradeRequest();
         req.setInstrument(instrument);
+        req.setExchangeCode(exchangeCode);
         req.setPrice(BigDecimal.valueOf(price));
         req.setQuantity((long) quantity);
         req.setBuyOrderId(buyOrderId);
